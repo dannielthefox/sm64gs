@@ -1,0 +1,359 @@
+head	1.2;
+access;
+symbols
+	iQue_20031010:1.2
+	iQue_release_master_1_0:1.2
+	iQue_08_21_03:1.2
+	iQue_beta_1_0:1.2
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2002.12.19.23.42.40;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@added #if CHINA for menus items and pause screens
+@
+text
+@/***************************************************************************************************
+					Message Function For Ending & Opening
+
+						Programed by Iwamoto Daiki
+
+							April 22 1996
+****************************************************************************************************/
+#define VER2 1
+
+#if ENGLISH 
+static unsigned char endingdemo_00[] = { 0x16, 0x24, 0x35, 0x2c, 0x32, 0xf2, 0xff,};
+static unsigned char endingdemo_01[] = { 0x1d, 0x2b, 0x28, 0x9e, 0x33, 0x32, 0x3a, 0x28, 0x35, 0x9e, 0x32, 0x29, 0x9e, 0x37, 0x2b, 0x28, 0x9e, 0x1c, 0x37, 0x24, 0x35, 0x36, 0x9e, 0x2c, 0x36, 0x9e, 0x35, 0x28, 0x36, 0x37, 0x32, 0x35, 0x28, 0x27, 0x9e, 0x37, 0x32, 0x9e, 0x37, 0x2b, 0x28, 0x9e, 0x26, 0x24, 0x36, 0x37, 0x2f, 0x28, 0x3f, 0x3f, 0x3f, 0xff,};
+static unsigned char endingdemo_02[] = { 0x3f, 0x3f, 0x3f, 0x24, 0x31, 0x27, 0x9e, 0x2c, 0x37, 0x3e, 0x36, 0x9e, 0x24, 0x2f, 0x2f, 0x9e, 0x37, 0x2b, 0x24, 0x31, 0x2e, 0x36, 0x9e, 0x37, 0x32, 0x9e, 0x3c, 0x32, 0x38, 0xf2, 0xff,};
+static unsigned char endingdemo_03[] = { 0x1d, 0x2b, 0x24, 0x31, 0x2e, 0x9e, 0x3c, 0x32, 0x38, 0x6f, 0x9e, 0x16, 0x24, 0x35, 0x2c, 0x32, 0xf2, 0xff,};
+static unsigned char endingdemo_04[] = { 0x20, 0x28, 0x9e, 0x2b, 0x24, 0x39, 0x28, 0x9e, 0x37, 0x32, 0x9e, 0x27, 0x32, 0x9e, 0x36, 0x32, 0x30, 0x28, 0x37, 0x2b, 0x2c, 0x31, 0x2a, 0x9e, 0x36, 0x33, 0x28, 0x26, 0x2c, 0x24, 0x2f, 0x9e, 0x29, 0x32, 0x35, 0x9e, 0x3c, 0x32, 0x38, 0x3f, 0x3f, 0x3f, 0xff,};
+static unsigned char endingdemo_05[] = { 0x15, 0x2c, 0x36, 0x37, 0x28, 0x31, 0x6f, 0x9e, 0x28, 0x39, 0x28, 0x35, 0x3c, 0x25, 0x32, 0x27, 0x3c, 0x6f, 0xff,};
+static unsigned char endingdemo_06[] = { 0x2f, 0x28, 0x37, 0x3e, 0x36, 0x9e, 0x25, 0x24, 0x2e, 0x28, 0x9e, 0x24, 0x9e, 0x27, 0x28, 0x2f, 0x2c, 0x26, 0x2c, 0x32, 0x38, 0x36, 0x9e, 0x26, 0x24, 0x2e, 0x28, 0x3f, 0x3f, 0x3f, 0xff,};
+static unsigned char endingdemo_07[] = { 0x3f, 0x3f, 0x3f, 0x29, 0x32, 0x35, 0x9e, 0x16, 0x24, 0x35, 0x2c, 0x32, 0x3f, 0x3f, 0x3f, 0xff,};
+static unsigned char endingdemo_08[] = { 0x16, 0x24, 0x35, 0x2c, 0x32, 0xf2, 0xff,};
+#elif CHINA
+static unsigned char endingdemo_00[] = { 0xff, 0xff,};
+static unsigned char endingdemo_01[] = { 0xff, 0xff,};
+static unsigned char endingdemo_02[] = { 0xff, 0xff,};
+static unsigned char endingdemo_03[] = { 0xff, 0xff,};
+static unsigned char endingdemo_04[] = { 0xff, 0xff,};
+static unsigned char endingdemo_05[] = { 0xff, 0xff,};
+static unsigned char endingdemo_06[] = { 0xff, 0xff,};
+static unsigned char endingdemo_07[] = { 0xff, 0xff,};
+static unsigned char endingdemo_08[] = { 0xff, 0xff,};
+#else
+static unsigned char endingdemo_00[] = { 0x8e, 0x97, 0x74, 0xf2, 0xf2, 0xff,};
+static unsigned char endingdemo_01[] = { 0x44, 0x4b, 0x6a, 0x55, 0x7c, 0x7f, 0x9f, 0xf0, 0x45, 0x9e, 0x62, 0xf0, 0x53, 0xa1, 0x4f, 0x58, 0x57, 0xff,};
+static unsigned char endingdemo_02[] = { 0x5f, 0x6d, 0x54, 0x9e, 0x40, 0x54, 0x4f, 0x58, 0x44, 0x45, 0xf0, 0x48, 0xf0, 0x4f, 0x6b, 0xf2, 0xff,};
+static unsigned char endingdemo_03[] = { 0x40, 0x67, 0xf0, 0x45, 0x53, 0x42, 0x9e, 0x8e, 0x97, 0x74, 0xff,};
+static unsigned char endingdemo_04[] = { 0x54, 0x55, 0x45, 0x9e, 0x44, 0x69, 0x41, 0x6c, 0x4b, 0x54, 0x47, 0x50, 0xa2, 0xfc, 0xfc, 0xff,};
+static unsigned char endingdemo_05[] = { 0x4a, 0x40, 0x9e, 0x5f, 0x6d, 0x54, 0xff,};
+static unsigned char endingdemo_06[] = { 0x44, 0x41, 0x4b, 0x41, 0x78, 0x9f, 0x76, 0x6c, 0x9e, 0x63, 0x46, 0x5e, 0x4b, 0xa4, 0x42, 0xff,};
+static unsigned char endingdemo_07[] = { 0x8e, 0x97, 0x74, 0x58, 0x9e, 0x4f, 0x61, 0x55, 0xfc, 0xfc, 0xfc, 0xff,};
+static unsigned char endingdemo_08[] = { 0x8e, 0x97, 0x74, 0xf4, 0xff,};
+#endif
+
+#if ENGLISH || CHINA
+#define OPEDEMOTIME 230
+#else
+#define OPEDEMOTIME 230
+#endif
+
+static unsigned char *endingdemoPtr[] = {endingdemo_00,endingdemo_01,endingdemo_02,endingdemo_03,endingdemo_04,endingdemo_05,endingdemo_06,endingdemo_07,endingdemo_08,NULL};
+
+/*=================================================================================================
+
+								Ending Staff Roll Message
+===================================================================================================*/
+static unsigned short ending_alpha = 0;
+
+static short endingdemo_messageNo = -1;
+static short endingdemo_frameNum = -1;
+static short endingdemo_count = 0;
+static short endingdemo_posx;
+static short endingdemo_posy;
+
+/**************************************************************************************************
+					Clear Alpha
+***************************************************************************************************/
+extern void ClearEndingMessage()
+{
+	ending_alpha = 0;
+
+}
+/**************************************************************************************************
+					Begin Message
+***************************************************************************************************/
+extern void BeginEndingMessage()
+{
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,ending_alpha); 
+
+}
+
+/**************************************************************************************************
+					End Message
+***************************************************************************************************/
+extern void EndEndingMessage()
+{
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);
+
+	if (ending_alpha <250) ending_alpha += 25; 
+	else				   ending_alpha = 255; 
+}
+
+/**************************************************************************************************
+					End Message
+***************************************************************************************************/
+static unsigned char ConvAscii(unsigned char character)
+{
+
+	if (character >= 65 && character <= 90) { return(character - 55); }  //BigCharacter
+	if (character >= 97 && character <= 122){ return(character - 87); }  //SmallCharacter
+	if (character == 32) return(0x9e);
+	if (character == 46) return(0x24);
+
+	if (character == 51) return(0x03);		// 3
+	if (character == 52) return(0x04);		// 3
+	if (character == 54) return(0x06);		// 3
+
+	return(0x9e);
+
+}
+/**************************************************************************************************
+					End Message
+***************************************************************************************************/
+extern void EndingMessage(short posx,short posy,char* font)
+{
+	int counter = 0;
+	unsigned char str;
+	unsigned char s88font[100];
+
+	str = font[counter];
+	while (str != NULL) {
+		s88font[counter] = ConvAscii(str);
+		counter++;
+		str = font[counter];
+	}		
+	s88font[counter] = 0xff;
+	
+
+	DrawS88ColFont(posx,posy,s88font);
+
+}
+
+
+/*=================================================================================================
+
+								Ending Demo Message
+===================================================================================================*/
+
+/**************************************************************************************************
+					End Message
+***************************************************************************************************/
+extern void CallEndingDemoMessage(short posx,short posy,short messageNo,short frameNum)
+{
+	if (endingdemo_messageNo == -1) {
+		endingdemo_messageNo = messageNo;
+		endingdemo_frameNum = frameNum;
+		endingdemo_count = 0;
+		endingdemo_posx = posx;
+		endingdemo_posy = posy;
+		ending_alpha = 0; 
+	}
+	
+
+}
+
+/**************************************************************************************************
+					End Message
+***************************************************************************************************/
+extern void EndingDemoMessageEvent(void)
+{
+	short ce_posx;
+
+	if (endingdemo_messageNo == -1) {
+		return;
+	}
+
+	MakeSelectProjection();	
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,ending_alpha); 
+
+	ce_posx = CharCentering(endingdemo_posx,endingdemoPtr[endingdemo_messageNo],10);
+	Draw8bitFont(ce_posx,(240-endingdemo_posy),endingdemoPtr[endingdemo_messageNo]);
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+	
+
+	if (endingdemo_count < 5) ending_alpha += 50; 
+
+	if (endingdemo_count > endingdemo_frameNum+5) ending_alpha -= 50; 
+
+	if (endingdemo_count > endingdemo_frameNum+10) {
+		endingdemo_messageNo = -1;
+		ending_alpha = 0; 
+		endingdemo_count = 0;
+		return;
+	}
+
+	endingdemo_count++;
+}
+
+
+
+/*=================================================================================================
+
+							Opening Demo Message
+===================================================================================================*/
+#define OPENIGMESS 20
+
+extern Gfx gfx_peach_mail[];
+extern Gfx RCP_peach_sign[];
+/**************************************************************************************************
+					End Message
+***************************************************************************************************/
+extern void OpeningMessageEvent(void)
+{
+
+	Message** mlist  = (Message **)(SegmentToVirtual(Messagelist));
+	Message* message = (Message  *)(SegmentToVirtual(mlist[messageNo]));
+	unsigned char* stringPtr = (uchar *)(SegmentToVirtual(message->string));
+
+
+
+	iTranslate(PUSH, 97, 118 ,0);
+
+	gDPSetEnvColor(graphPtr++,255,255,255,ending_alpha); 
+	gSPDisplayList(graphPtr++, gfx_peach_mail);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,20,20,20,ending_alpha); 
+#if ENGLISH || CHINA
+	Draw8bitFont(38,142,stringPtr);
+#else
+	Draw8bitFont(53,136,stringPtr);
+#endif
+	gDPSetEnvColor(graphPtr++,255,255,255,255); 
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+#if VER2
+	gDPSetEnvColor(graphPtr++,200,80,120,ending_alpha); 
+	gSPDisplayList(graphPtr++, RCP_peach_sign);	
+#endif
+
+
+	if (endingdemo_count == 0) { ending_alpha = 0; }
+
+	if (endingdemo_count < 20) ending_alpha += 10; 
+
+	if (endingdemo_count > OPEDEMOTIME+20) ending_alpha -= 10; 
+
+	if (endingdemo_count > OPEDEMOTIME+(20*2)) {
+		endingdemo_messageNo = -1;
+		ending_alpha = 0; 
+		messageNo = -1;
+		endingdemo_count = 0;
+		return;
+	}
+
+	endingdemo_count++;
+
+
+}
+
+
+
+/*==================================================================================================*/
+/*			Cannon Event																		*/
+/*==================================================================================================*/
+extern void CannonSightEvent(void)
+{
+
+	iTranslate(PUSH, 160, 120,0);
+	gDPSetEnvColor(graphPtr++,50, 50, 50,180); 
+
+	iTranslate(PUSH, -20, -8,0);
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+	iTranslate(PUSH,      20,  8,0);
+	iRotate(NOPUSH,180,  0, 0,1);
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+	iTranslate(PUSH,      8,  -20,0);
+	iRotate(NOPUSH,90,  0, 0,1);
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+	iTranslate(PUSH,     -8,   20,0);
+	iRotate(NOPUSH,-90,  0, 0,1);
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+
+
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d10 1
+a10 1
+#if ENGLISH
+d20 10
+d42 1
+a42 1
+#if ENGLISH
+d223 1
+a223 1
+#if ENGLISH
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

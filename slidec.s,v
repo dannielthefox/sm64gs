@@ -1,0 +1,105 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/******************************
+ *        展開ルーチン        *
+ *         1995/04/05         *
+ * Programmed By Melody-Yoshi *
+ ******************************/
+/* この関数の使い方
+   void slidstart(unsigned char *,unsigned char *);
+   最初の引数は圧縮データの先頭アドレス(align 4)
+   次の引数は展開されるデータの先頭アドレス
+
+    example:
+		slidstart(pressdata,decdata);
+	pressdataを展開してdecdataに入れる。
+*/
+
+	.align	4
+
+	.text
+	.globl	slidec
+	.ent	slidec
+	.set	reorder
+/* ====== はじまるよん ====== [IN:R4=DATA OUT:R5=bz] */
+slidec:	lw	$24,4($4)	## R24=出力サイズ
+		lw	$7,8($4)	## R7=POL offset
+		lw	$25,12($4)	## R25=DEF offset
+		move	$6,$0		## flags=0
+		add	$24,$5
+		add	$7,$4		## R7=POL アドレス
+		add	$25,$4		## R25=DEF アドレス
+		add	$4,16
+/* ====== ＳＬＩ展開メイン ====== */
+slidemain2:	bne	$6,$0,codecheck2
+		lw	$8,($4)
+		li	$6,32
+		add	$4,4
+codecheck2:	slt	$9,$8,$0	## MSBチェック
+		beq	$9,$0,pressdata2
+		lb	$10,($25)
+		add	$25,1
+		sb	$10,($5)
+		add	$5,1
+		b	loopend2
+pressdata2:	lhu	$10,($7)
+		add	$7,2
+		srl	$11,$10,12
+		and	$10,0xfff
+		sub	$9,$5,$10
+		add	$11,3
+pressloop2:	lb	$10,-1($9)
+		sub	$11,1
+		add	$9,1
+		sb	$10,($5)
+		add	$5,1
+		bne	$11,$0,pressloop2
+loopend2:	sll	$8,1
+		sub	$6,1
+		bne	$5,$24,slidemain2
+		jr	$31
+	.end
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

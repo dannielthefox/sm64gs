@@ -1,0 +1,172 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*****************************************************************************************************
+				Ienemy Header File
+
+*******************************************************************************************************/
+#define FRAMENUM 30     // Game Frame Number
+
+extern unsigned long e_kombu[];	
+extern unsigned long e_kombu_one[];
+extern unsigned long e_slider_coin[];
+extern unsigned long e_move_coin[];
+extern unsigned long e_escape_coin[];
+extern unsigned long e_escape_coin2[];
+extern unsigned long e_newbom[];
+extern unsigned long e_bom_pusu[];
+extern unsigned long e_futa_bom[];
+extern unsigned long e_uzumaki[];	
+extern unsigned long e_fukidasi[];	
+extern unsigned long e_tatefuda[];	
+extern unsigned long e_kanban[];	
+extern unsigned long e_biribiri[];	
+extern unsigned long e_butterfly[];
+extern unsigned long e_bird[];
+extern unsigned long e_bird_egg[];
+extern unsigned long e_egg_smoke[];
+extern unsigned long e_rabbit[];
+extern unsigned long e_kame2[];
+extern unsigned long emode_kame_catch[];
+extern unsigned long emode_kame_drop[];
+extern unsigned long emode_kame_throw[];
+extern unsigned long emode_kame_next[];
+extern unsigned long e_item_buble[];
+extern unsigned long e_item_ripple[];
+extern unsigned long e_bombfire[];
+extern unsigned long e_bom_smoke[];
+extern unsigned long e_fire_bubble[];
+extern unsigned long e_otos[];
+extern unsigned long e_big_otos[];
+extern unsigned long e_big_otos2[];
+extern unsigned long e_ice_otos[];
+extern unsigned long e_big_ice_otos[];
+extern unsigned long e_ring[];
+extern unsigned long e_ring_parts[];
+extern unsigned long e_ring_dummy[];	
+extern unsigned long e_kirai[];
+extern unsigned long e_kopakirai_fire[];
+extern unsigned long e_kopakirai_smoke[];
+extern unsigned long e_V_star[];
+extern unsigned long e_V_starspark[];
+extern unsigned long e_V_stardust[];
+extern unsigned long e_motos_bridge1[];
+extern unsigned long e_motos_bridge_parts[];
+extern unsigned long e_dossun_bar[];
+extern unsigned long e_dossun_bar2[];
+extern unsigned long e_trans_bar[];
+extern unsigned long e_kuramochi[];
+extern unsigned long e_tripstar[];
+extern unsigned long e_rail_ironball[];	
+extern unsigned long e_gush_ironball[];	
+extern unsigned long e_ironball[];	
+extern unsigned long e_ironball_normal[];	
+extern unsigned long e_redbom[];	
+extern unsigned long e_falls[];	
+extern unsigned long e_shipoar[];	
+extern unsigned long e_py_pencil[];	
+extern unsigned long e_py_wall[];	
+extern unsigned long e_castle_flag[];	
+extern unsigned long e_snowrock_rail[];	
+extern unsigned long e_snowball_head[];	
+extern unsigned long e_itemhat_wing[];	
+extern unsigned long e_itemhat_metal[];	
+extern unsigned long e_itemhat_blow[];	
+extern unsigned long e_itemhat_erase[];	
+extern unsigned long e_new_kame[];	
+extern unsigned long e_ironball[];	
+extern unsigned long e_bom_cannon[];	
+extern unsigned long e_tripstar_getcoins[];	
+extern unsigned long e_enemy_star[];	
+extern unsigned long e_coin_appstar[];	
+extern unsigned long e_don_maruta[];	
+extern unsigned long e_fm_battan[];	
+extern unsigned long e_1up_kinoko[];	
+extern unsigned long e_1up_kinoko_slider[];	
+extern unsigned long e_1up_kinoko_stop[];	
+extern unsigned long e_1up_kinoko_set[];	
+extern unsigned long e_1up_kinoko_secret[];	
+extern unsigned long e_dummy_kinoko[];	
+extern unsigned long e_1up_secret_chase[];	
+extern unsigned long e_dummy_kinoko_chase[];	
+extern unsigned long e_1up_secret_tate[];	
+extern unsigned long e_NEWSlift[];	
+extern unsigned long e_NEWSlift_button[];	
+extern unsigned long e_takeblock[];	
+extern unsigned long e_gurubiri[];	
+extern unsigned long e_py_gondola[];	
+extern unsigned long e_py_gondola_dot[];	
+extern unsigned long e_sb_pytop[];	
+extern unsigned long e_sb_py_hahen[];	
+extern unsigned long e_pytop_dummy[];	
+extern unsigned long e_dunjon_rock[];	
+extern unsigned long e_dunjon_rock_st[];	
+extern unsigned long e_1up_kinoko_slider[];	
+extern unsigned long e_birdsing[];	
+extern unsigned long e_soyokaze[];	
+extern unsigned long e_iwanami[];	
+extern unsigned long e_iwanami_parts[];	
+extern unsigned long e_tripstar_getdummy[];	
+extern unsigned long e_dummy_appstar[];	
+extern unsigned long e_po_floatingbord[];	
+extern unsigned long e_wd_kibako[];	
+extern unsigned long e_po_moveblock[];	
+extern unsigned long e_numbers[];	
+extern unsigned long e_d_manta[];	
+extern unsigned long e_manta_ring[];	
+extern unsigned long e_wd_pillar[];	
+extern unsigned long e_wd_pillarbase[];	
+extern unsigned long e_pillar_hit[];	
+extern unsigned long e_iwa_smoke[];	
+extern unsigned long e_clock_furiko[];	
+extern unsigned long e_tbox_quiz[];	
+extern unsigned long e_tbox_quiz_ground[];	
+extern unsigned long e_trebox[];	
+extern unsigned long e_trebox_futa[];	
+extern unsigned long e_sandfall[];	
+
+extern unsigned long e_test[];	
+
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

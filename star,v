@@ -1,0 +1,255 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@
+/*	course (1)	.... stage9	battle_field */
+
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,   0,0,0,  e_tripstar)  /* bomking   */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,   0,1,0,  e_tripstar)  /* kame race */
+			seqLevelActor(0x003f,S_polystar, 1550, 1200, 0300,  0,0,0,   0,2,0,  e_tripstar)  /* --------- */
+			seqLevelActor(0x003f,S_polystar, -600, 4400, 0600,  0,0,0,   0,3,0,  e_tripstar)  /* --------- */
+			seqLevelActor(0x003f,S_polystar, -5000,4500, -500,  0,0,0,   0,4,0,  e_tripstar)  /* 8 coin    */
+			seqLevelActor(0x003f,S_polystar, -5500,1500, 2300,  0,0,0,   0,5,0,  e_tripstar)  /* 8 coin    */
+
+			seqActor(S_itembox  , -2500, 0250, -4000,  0,0,0,  0,0,0,  e_itembox	)		  /* hane   itembox */
+			seqActor(S_itembox  , 6300, 1300, 4700,  0,0,0,  0,3,0,  e_itembox	)			  /* kame itembox */
+
+/*	course (2)	.... stage24 castle2 */
+
+			seqLevelActor(0x003f,S_polystar, 0300, 5550, 0000,  0,0,0,  0,0,0,  e_tripstar) /* -------- */
+			seqLevelActor(0x003f,S_polystar, -2500, 1500, -750,  0,0,0,  0,1,0,  e_tripstar) /* -------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 3750, -2800,  0,0,0,  0,2,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -400, 3700, 0000,  0,0,0,  0,3,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 6666, 6350, 6666,  0,0,0,  0,4,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -300, 5550, 0000,  0,0,0,  0,5,0,  e_tripstar) /* 8_coin */
+
+			seqActor(S_itembox  , 1270, 4100, 930,  0,0,0,  0,2,0,  e_itembox	)	/* toumei itembox */
+
+/*	course (3)	.... stage12 sunkenship	*/
+		/* in the cave */
+			seqLevelActor(0x003f,S_polystar, 5100, -4500, -250,  0,0,0,  0,0,0,  e_tripstar) /* --------- */
+
+		/* in the ship */
+			seqLevelActor(0x003f,S_polystar, -680, 1360, 1580,  0,0,0,  0,1,0,  e_tripstar) /* hip_drop_box */
+
+		/* on the sea */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,2,0,  e_tripstar) /* on_the_ship */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,3,0,  e_tripstar) /* whirlpool */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,4,0,  e_tripstar) /* on_the_mast */
+			seqLevelActor(0x003f,S_polystar, -1600, 1300, -1400,  0,0,0,  0,5,0,  e_tripstar) /* 8_coin */
+
+			seqActor(S_itembox  , -5000, 1400, -300,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 0120, 0000, 3150,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 4500, -4800, 4300,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 2400, 1700, 7400,  0,0,0,  0,3,0,  e_itembox	)	/* kame itembox */
+
+/*	course (4)	.... stage5 snow_mountain */
+
+			seqLevelActor(0x003f,S_polystar, 3500, -4700, 4650,  0,0,0,  0,0,0,  e_tripstar) /* pengin1 */
+			seqLevelActor(0x003f,S_polystar, 3650, -200, -1200,  0,0,0,  0,1,0,  e_tripstar) /* pengin2 */
+			seqLevelActor(0x003f,S_polystar, -4100, -950, 1850,  0,0,0,  0,2,0,  e_tripstar) /* snowball */
+			seqLevelActor(0x003f,S_polystar, -2000, -2200, -3000,0,0,0,  0,3,0,  e_tripstar) /* --------- */
+		/* child pengin */
+			/* pengin1= -470 , 3460 , -870     pengin2= -470 , 3460 -870 */
+		/* in the slider */
+			seqLevelActor(0x003f,S_polystar, -7500, -5700, -6550,  0,0,0,  0,4,0,  e_tripstar)	/* slider */
+			seqLevelActor(0x003f,S_polystar, -6550, -4500, -7500,  0,0,0,  0,5,0,  e_tripstar)	/* slider_race */
+
+/*	course (5)	.... stage4 ghost_house	*/
+
+			seqLevelActor(0x003f,S_polystar, -1850, -2200, -1150,  0,0,0,  0,0,0,  e_tripstar)  /* chikasuiro */
+			seqLevelActor(0x003f,S_polystar, 100, 200, 800,  0,0,0,  0,1,0,  e_tripstar) 	/* onigokko */
+			seqLevelActor(0x003f,S_polystar, 1200, 1100, 1800,  0,0,0,  0,2,0,  e_tripstar) 	/* --------- */
+			seqLevelActor(0x003f,S_polystar, -2000, 1300, 1850,  0,0,0,  0,3,0,  e_tripstar)	/* --------- */
+			seqLevelActor(0x003f,S_polystar, 2500, 2000, 0250,  0,0,0,  0,4,0,  e_tripstar) 	/* --------- */
+			seqLevelActor(0x003f,S_polystar, 3150, 1150, 0750,  0,0,0,  0,5,0,  e_tripstar) 	/* 8_coin */
+
+			seqActor(S_itembox  , -1150, 0200, -1000,  0,0,0,  0,2,0,  e_itembox	)	/* toumei itembox */
+
+/*	course (6)	.... stage7 cave_maze */
+
+			seqLevelActor(0x003f,S_polystar, -3600, -4000, 3600,  0,0,0,  0,0,0,  e_tripstar) /* nessy */
+			seqLevelActor(0x003f,S_polystar, 5800, -4000, 2400,  0,0,0,  0,1,0,  e_tripstar) /* metal */
+			seqLevelActor(0x003f,S_polystar, -2100, 2100, -7550,  0,0,0,  0,2,0,  e_tripstar) /* gus_room */
+			seqLevelActor(0x003f,S_polystar, 0800, 0800, -3000,  0,0,0,  0,3,0,  e_tripstar) /* secret_hole */
+			seqLevelActor(0x003f,S_polystar, -5600, 3200, 0600,  0,0,0,  0,4,0,  e_tripstar) /* up_to_the_hole */
+			seqLevelActor(0x003f,S_polystar, 4000, 0250, 5200,  0,0,0,  0,5,0,  e_tripstar) /* 8_coin_in_lift_room */
+
+			seqActor(S_itembox  , 0000, 3900, 3000,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 1800, -550, -1600,  0,0,0,  0,1,0,  e_itembox	)	/* first_metal  itembox */
+			seqActor(S_itembox  , 5000, -450, -2700,  0,0,0,  0,1,0,  e_itembox	)	/* next_metal  itembox */
+			seqActor(S_itembox  , 3100, -550, 0500,  0,0,0,  0,1,0,  e_itembox	)	/* next_metal  itembox */
+			seqActor(S_itembox  , 1900, -550, -4000,  0,0,0,  0,1,0,  e_itembox	)	/* next_metal  itembox */
+			seqActor(S_itembox  , -500, 2100, -7800,  0,0,0,  0,2,0,  e_itembox	)	/* toumei itembox */
+
+/*	course (7)	.... stage22 volcano */
+
+			seqLevelActor(0x003f,S_polystar, -1450, 0500, -6700,  0,0,0,  0,0,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 3850, 0323, -5600,  0,0,0,  0,1,0,  e_tripstar) /* bigmotos */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,2,0,  e_tripstar) /* 9_pazzuls */
+			seqLevelActor(0x003f,S_polystar, -5100, -800, -4100,  0,0,0,  0,3,0,  e_tripstar) /* 8_coin_by_kame */
+
+			seqActor(S_itembox  , 7600, 0550, 1400,  0,0,0,  0,3,0,  e_itembox	)	/* kame itembox */
+
+		/* in_volcano */
+			seqLevelActor(0x003f,S_polystar, 2550, 3850, -850,  0,0,0,  0,4,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 1800, 3400, 1450,  0,0,0,  0,5,0,  e_tripstar) /* --------- */
+
+
+/*	course (8)	.... stage8 desert_pyramid */
+		/* desert */
+			seqLevelActor(0x003f,S_polystar, -1500, 1300, -320,  0,0,0,  0,0,0,  e_tripstar) /* top_the_pyramid */			seqLevelActor(0x003f,S_polystar, -2000, 1500, -650,  0,0,0,  0,2,0,  e_tripstar) /* top_the_pyramid */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,1,0,  e_tripstar) /* hagetaka */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,2,0,  e_tripstar) /* put_on_4_pole */
+
+			seqActor(S_itembox  , 4850, 300, -5900,  0,0,0,  0,0,0,  e_itembox	)	/* hane   itembox */
+			seqActor(S_itembox  , -6000, 300, -4000,  0,0,0,  0,3,0,  e_itembox	)	/* kame itembox */
+
+		/* normal_pyramid */
+			seqLevelActor(0x003f,S_polystar, 1300, 4900, -400,  0,0,0,  0,3,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 1200, 1600,  0,0,0,  0,4,0,  e_tripstar) /* 8_coin */
+
+		/* pyramid_from_the_top */
+			seqLevelActor(0x003f,S_polystar, 0000, -1000, -3800,  0,0,0,  0,5,0,  e_tripstar) /* BIG_hand */
+
+
+/*	course (9)	.... stage23 submarine */
+		/* cx2302_before_submarine_escape */
+			seqLevelActor(0x003f,S_polystar, 3900, 0850, -600,  0,0,0,  0,0,0,  e_tripstar) /* on_the_submarine */
+
+		/* cx2301 */
+			seqLevelActor(0x003f,S_polystar, -3100, -3600, 0000,  0,0,0,  0,1,0,  e_tripstar) /* order_box */
+
+		/* cx2302_after_submarine_escape */
+			seqLevelActor(0x003f,S_polystar, 3400, -3200, -500,  0,0,0,  0,2,0,  e_tripstar) /* through_ring */
+			seqLevelActor(0x003f,S_polystar, 3900, 0300, 5950,  0,0,0,  0,3,0,  e_tripstar) /* 8_coin */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,4,0,  e_tripstar) /* UFO_catcher */
+			seqActor(S_itembox  , 3100, -3750, -3600,  0,0,0,  0,8,0,  e_itembox	)		/* star_box itembox */
+
+			seqActor(S_itembox  , 1100, 0350, 3850,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 6700, 0350, 3850,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+
+/*	course (10)	.... stage10 snowman */
+
+			seqLevelActor(0x003f,S_polystar, -350, 4750, 0400,  0,0,0,  0,0,0,  e_tripstar) /* snowmans_head */
+			seqLevelActor(0x003f,S_polystar, 4800, 1000, 4300,  0,0,0,  0,1,0,  e_tripstar) /* in_the_ice_tower */
+			seqLevelActor(0x003f,S_polystar, 4300, 1000, 0500,  0,0,0,  0,2,0,  e_tripstar) /* pengin_family */
+			seqLevelActor(0x003f,S_polystar, 0000, 5100, 0300,  0,0,0,  0,3,0,  e_tripstar) /* over_the_snowmans_head */
+			seqLevelActor(0x003f,S_polystar, 0300, 1500, -5300,  0,0,0,  0,4,0,  e_tripstar) /* big_motos */
+			seqLevelActor(0x003f,S_polystar, -4000, 1200, 4500,  0,0,0,  0,5,0,  e_tripstar) /* 8_coin */
+
+			seqActor(S_itembox  , 5100, 1200, -5500,  0,0,0,  0,0,0,  e_itembox	)	/* hane   itembox */
+			seqActor(S_itembox  , -5500, 1200, -5400,  0,0,0,  0,1,0,  e_itembox )	/* metal  itembox */
+			seqActor(S_itembox  , 4300, 1200, 3000,  0,0,0,  0,3,0,  e_itembox	)	/* kame itembox */
+
+/*	course (11)	.... stage11 water_town	*/
+
+			seqLevelActor(0x003f,S_polystar, 1400, 1600, 5600,  0,0,0,  0,0,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0800, 4800, 0700,  0,0,0,  0,1,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -800, 2300, -2000,  0,0,0,  0,2,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0600, -2650, 0000,  0,0,0,  0,3,0,  e_tripstar) /* under_town */
+			seqLevelActor(0x003f,S_polystar, 3000, -3100, 3200,  0,0,0,  0,4,0,  e_tripstar) /* no_water_under_town */
+			seqLevelActor(0x003f,S_polystar, 5500, 0500, 5500,  0,0,0,  0,5,0,  e_tripstar) /* 8_coin */
+
+		/* water_switch */
+			/* ( 4550 , 3100 ,4750 )  ( -400 , -1950 , 0250 )   ( 3350 , -3450 , -2300 )
+
+			seqActor(S_itembox  , -5100, -3250, 5000,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 5100, -3250, 5000,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 1800, -3250, 0000,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , -4900, 2200, -250,  0,0,0,  0,2,0,  e_itembox	)	/* toumei itembox */
+
+/*	course (12)	.... stage36 monkey_mountain */
+
+			seqLevelActor(0x003f,S_polystar, 1200, 2600, 0150,  0,0,0,  0,0,0,  e_tripstar) /* top_of_the_mountain */
+			seqLevelActor(0x003f,S_polystar, 1800, 1200, 1050,  0,0,0,  0,1,0,  e_tripstar) /* waterfall */
+			seqLevelActor(0x003f,S_polystar, -2900, -2700, 3650,  0,0,0,  0,2,0,  e_tripstar) /* slider_exit */
+			seqLevelActor(0x003f,S_polystar, 7300, -3100, 1300,  0,0,0,  0,3,0,  e_tripstar) /* on_the_mushroom */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,4,0,  e_tripstar) /* monkey_basket */
+		/* in_the_slider (cx3604)*/
+			seqLevelActor(0x003f,S_polystar, -7100, -1250, -4800,  0,0,0,  0,5,0,  e_tripstar) /* 8_coin_in_the_slider */
+
+/*	course (13)	.... stage13 big&small */
+		/* BIG_map_cx1301 (small_mario) */
+			seqLevelActor(0x003f,S_polystar, -2550, 7400, 0600,  0,0,0,  0,0,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 2500, 4200, -2500,  0,0,0,  0,1,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0350, 2700, -8500,  0,0,0,  0,2,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 3250, 6700,  0,0,0,  0,3,0,  e_tripstar) /* --------- */
+		/* SMALL_map_cx1302 (big_mario) */
+			seqLevelActor(0x003f,S_polystar, -850, 2600, 0200,  0,0,0,  0,4,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0850, 1500, -850,  0,0,0,  0,5,0,  e_tripstar) /* --------- */
+
+/*	course (14)	.... stage14 clock_tower */
+
+			seqLevelActor(0x003f,S_polystar, -1260, -2280, -1260,  0,0,0,  0,0,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -1680, -1340, -820,  0,0,0,  0,1,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -1840, 0060, -960,  0,0,0,  0,2,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -1580, 3060, -340,  0,0,0,  0,3,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, -1140, 6200, -780,  0,0,0,  0,4,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 1500, -4600, 0900,  0,0,0,  0,5,0,  e_tripstar) /* 8coin */
+
+/*	course (15)	.... stage15 fire_building */
+
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,0,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,1,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,2,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,3,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,4,0,  e_tripstar) /* --------- */
+			seqLevelActor(0x003f,S_polystar, 0000, 0000, 0000,  0,0,0,  0,5,0,  e_tripstar) /* --------- */
+
+
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,0,0,  e_itembox	)	/* hane   itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,1,0,  e_itembox	)	/* metal  itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,2,0,  e_itembox	)	/* toumei itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,3,0,  e_itembox	)	/* kame itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,4,0,  e_itembox	)	/* 1_coin itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,5,0,  e_itembox	)	/* 3_coin itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,6,0,  e_itembox	)	/* 10_coin itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,7,0,  e_itembox	)	/* 1up itembox */
+			seqActor(S_itembox  , 0000, 0000, 0000,  0,0,0,  0,8,0,  e_itembox	)	/* star_box itembox */
+
+
+
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

@@ -1,0 +1,576 @@
+head	1.3;
+access;
+symbols
+	iQue_20031010:1.3
+	iQue_release_master_1_0:1.3
+	iQue_08_21_03:1.2
+	iQue_beta_1_0:1.2;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2003.09.09.20.55.47;	author wheeler;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.03.09.01.27.41;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.03.09.00.10.49;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Add null terminator to string.
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+						scene management module
+
+			Copyright 1996 Nintendo co., ltd.  All rights reserved
+
+							April 23, 1996
+ ********************************************************************************/
+
+#include "headers.h"
+
+
+extern void  DrawMessage(void);
+extern short MessageEvent(void);
+extern void  MeterGaugeEvent(void);
+
+
+
+MapNode		*shapeList[SN_NUMSHAPES];			/* shape list memory			*/
+SceneRecord  sceneList[SN_NUMSCENES];			/* scene list memory			*/
+
+ActorRecord	starringActor[1];					/* Mario's actor record			*/
+ActorPtr	marioActor = &starringActor[0];		/* pointer to the Mario'actor	*/
+
+MapNode		**stageShapes = shapeList;			/* pointer to the shape list 	*/
+SceneRecord	 *stageScenes = sceneList;			/* pointer to the scene list	*/
+
+ScenePtr	snSceneInfo   = NULL;	/* pointer to the active scene information	*/
+EndingPtr	snEndingScene = NULL;	/* pointer to the ending scene information	*/
+
+SnWipeCtrl wipeControl;				/* wipe control record						*/
+
+static Vp	 *snViewPort = NULL;		/* pointer to the optional view port	*/
+static Vp	 *snTrimming = NULL;		/* pointer to the trimming port			*/
+static short faderDelay  = 0;			/* delayed fader counter				*/
+static ulong backColor	 = 0;			/* back color (out of trimming)			*/						
+static ulong blankColor  = 0;			/* software blanking color				*/
+static uchar blankColorR = 0;			/* software bankking color red level	*/
+static uchar blankColorG = 0;			/* software blanking color green level	*/
+static uchar blankColorB = 0;			/* software blanking color green level	*/
+
+short activePlayerNo = 1;				/* active player number					*/
+short activeCourseNo;					/* active course number					*/
+short activeLevelNo;					/* active star level number				*/
+short activeStageNo = 1;				/* active stage number					*/
+short activeSceneNo;					/* active scene number					*/
+short ramSaveCourse;					/* RAM save course number				*/
+
+short mesgEvent;						/* result of message routine			*/
+short mesgLatch;						/* latch for message result				*/
+
+/********************************************************************************/
+/*	Player entrant path name lists.												*/
+/********************************************************************************/
+
+#define	NUM_PATHNAMES	20
+
+extern Path e_player_waiting[];
+extern Path e_player_landing[];
+extern Path e_player_falling[];
+extern Path e_player_rolling[];
+extern Path e_player_downing[];
+extern Path e_player_entpict[];
+extern Path e_player_flight[];
+extern Path e_player_swimming[];
+
+extern Path e_player_entwinner[];
+extern Path e_player_entloser[];
+extern Path e_player_landwinner[];
+extern Path e_player_landloser[];
+extern Path e_player_pushout[];
+extern Path e_player_pushdown[];
+
+
+static Path *pathNameList[NUM_PATHNAMES] = {
+	e_tripdoor,
+	e_tripstar,
+	e_tripchimney,
+	e_tripchimney2,
+	e_dokan,
+	e_warp,
+	e_player_waiting,
+	e_player_landing,
+	e_player_falling,
+	e_player_rolling,
+	e_player_downing,
+	e_player_entpict,
+	e_player_flight,
+	e_player_swimming,
+
+	e_player_entwinner,
+	e_player_entloser,
+	e_player_landwinner,
+	e_player_landloser,
+	e_player_pushout,
+	e_player_pushdown
+};
+static uchar portNameList[NUM_PATHNAMES] = {
+	SN_TRIP_DOOR,
+	SN_TRIP_STAR,
+	SN_TRIP_CHIMNEY,
+	SN_TRIP_CHIMNEY,
+	SN_TRIP_CHIMNEY,
+	SN_WARP_POINT,
+	SN_ENTER_WAITING,
+	SN_ENTER_LANDING,
+	SN_ENTER_FALLING,
+	SN_ENTER_ROLLING,
+	SN_ENTER_DOWNING,
+	SN_ENTER_PICTURE,
+	SN_ENTER_FLIGHT,
+	SN_ENTER_SWIMMING,
+
+	SN_ENTER_WINNER,
+	SN_ENTER_LOSER,
+	SN_ENTER_LANDWINNER,
+	SN_ENTER_LANDLOSER,
+	SN_ENTER_PUSHOUT,
+	SN_ENTER_PUSHDOWN
+};
+/********************************************************************************/
+/*	Standard view port record.													*/
+/********************************************************************************/
+
+static Vp viewport = {
+	320*2, 240*2, G_MAXZ/2, 0,
+	320*2, 240*2, G_MAXZ/2, 0,
+};
+
+
+
+/*===============================================================================
+ *
+ *
+ *	Trip port support routines.
+ *
+ */
+
+#define	SnGetBlankColor(r,g,b)		(r=blankColorR,g=blankColorG,b=blankColorB)
+
+/********************************************************************************/
+/*	Set view port.																*/
+/********************************************************************************/
+extern void
+SnSetViewPort(Vp *viewing, Vp *trimming, uchar red, uchar green, uchar blue)
+{
+	ushort color = RGBA16(red>>3,green>>3,blue>>3,1);
+
+	backColor  = (color << 16) | color;
+	snViewPort = viewing;
+	snTrimming = trimming;
+}
+/********************************************************************************/
+/*	Set software blanking color.												*/
+/********************************************************************************/
+static void
+SnSetBlankColor(uchar red, uchar green, uchar blue)
+{
+	ushort color = RGBA16(red>>3,green>>3,blue>>3,1);
+
+	blankColor  = (color << 16) | color;
+	blankColorR = red;
+	blankColorG = green;
+	blankColorB = blue;
+}
+/********************************************************************************/
+/*	Display demo message.														*/
+/********************************************************************************/
+extern void
+SnDisplayDemoMessage(void)
+{
+#if CHINA
+	unsigned char str[] ={0xb0, 0x00};
+#endif
+	if ((frameCounter & 0x1f) < 20) {
+		if (contConnection == 0) {
+			dcprintf(160,20, "NO CONTROLLER");
+		} else {
+#if CHINA
+			dcprintf(60,38, str);
+#else
+			dcprintf(60,38, "PRESS");
+#endif
+			dcprintf(60,20, "START");
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *	Trip port support routines.
+ *
+ */
+
+/********************************************************************************/
+/*	Get trip port type.															*/
+/********************************************************************************/
+extern int
+SnGetPortType(StrategyPtr stratp)
+{
+	int	 count;
+	Path *pathname = VirtualToSegment(SEGMENT_PATHDATA, stratp->pathname);
+
+	for (count = 0; count < NUM_PATHNAMES; count++) {
+		if (pathname == pathNameList[count])  return((int)portNameList[count]);
+	}
+	return(0);
+}
+/********************************************************************************/
+/*	Get port pointer.															*/
+/********************************************************************************/
+extern PortPtr
+SnGetPortPtr(uchar code)
+{
+	PortPtr port = NULL;
+
+	for (port = snSceneInfo->ports; port != NULL; port = port->next) {
+		if (port->number == code)  break;
+	}
+	return(port);
+}
+/********************************************************************************/
+/*	Find port pointer.															*/
+/********************************************************************************/
+extern PortPtr
+SnFindPortPtr(StrategyPtr stratp)
+{
+	uchar code = (stratp->s[stw_actorcode].d & 0x00ff0000) >> 16;
+
+	return( SnGetPortPtr(code));
+}
+/********************************************************************************/
+/*	Check player transfer.														*/
+/********************************************************************************/
+static void
+InitPorts(void)
+{
+	PortPtr  port;
+	MapNode	*node = strategyGroup.child;
+
+	do {
+		StrategyPtr stratp = (StrategyPtr)node;
+
+		if ((stratp->status != 0) && SnGetPortType(stratp)) {
+			if ((port = SnFindPortPtr(stratp)) != NULL)  port->stratp = stratp;
+		}
+	} while ((node = node->next) != strategyGroup.child);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *	Scene management routines.
+ *
+ */
+
+//********************************************************************************/
+/*																				*/
+/*	Initialize scene informations.												*/
+/*																				*/
+/********************************************************************************/
+extern void
+SnInitSceneInfo(void)
+{
+	int count;
+
+	snSceneInfo		    = NULL;
+	wipeControl.active  = 0;
+	wipeControl.blank   = 0;
+	marioActor->sceneNo = -1;
+
+	for (count = 0; count < SN_NUMSCENES; count++) {
+		sceneList[count].sceneNo	 = count;
+		sceneList[count].entrant	 = 0;
+		sceneList[count].environment = 0;
+		sceneList[count].mapScene	 = NULL;
+		sceneList[count].mapInfo	 = NULL;
+		sceneList[count].areaInfo	 = NULL;
+		sceneList[count].tagInfo	 = NULL;
+		sceneList[count].ports		 = NULL;
+		sceneList[count].bgport		 = NULL;
+		sceneList[count].connect	 = NULL;
+		sceneList[count].actors		 = NULL;
+		sceneList[count].camera		 = NULL;
+		sceneList[count].windzone	 = NULL;
+		sceneList[count].waterjet[0] = NULL;
+		sceneList[count].waterjet[1] = NULL;
+		sceneList[count].message[0]	 = 255;
+		sceneList[count].message[1]	 = 255;
+		sceneList[count].audmode	 =   0;
+		sceneList[count].musicno	 =   0;
+	}
+}
+/********************************************************************************/
+/*	Dispose scene.																*/
+/********************************************************************************/
+extern void
+SnDisposeScene(void)
+{
+	int count;
+
+	if (snSceneInfo != NULL) {
+		MapSendMessage(snSceneInfo->mapScene, MAP_CBACK_SUSPEND);
+		snSceneInfo		   = NULL;
+		wipeControl.active = 0;
+	}
+	for (count = 0; count < SN_NUMSCENES; count++) {
+		if (sceneList[count].mapScene != NULL) {
+			MapSendMessage(sceneList[count].mapScene, MAP_CBACK_DISPOSE);
+			sceneList[count].mapScene = NULL;
+		}
+	}
+}
+/********************************************************************************/
+/*	Open the scene.																*/
+/********************************************************************************/
+extern void
+SnOpenScene(int sceneNo)
+{
+	if (snSceneInfo == NULL && sceneList[sceneNo].mapScene != NULL) {
+		snSceneInfo   = &sceneList[sceneNo];
+		activeSceneNo = snSceneInfo->sceneNo;
+
+		if (snSceneInfo->mapInfo != NULL)  mcInitBGCheck(sceneNo, snSceneInfo->mapInfo, snSceneInfo->areaInfo, snSceneInfo->tagInfo);
+		if (snSceneInfo->actors  != NULL)  SetStrategy(0, snSceneInfo->actors);
+
+		InitPorts();
+		MapSendMessage(snSceneInfo->mapScene, MAP_CBACK_ACTIVAT);
+	}
+}
+/********************************************************************************/
+/*	Close the scene.															*/
+/********************************************************************************/
+extern void
+SnCloseScene(void)
+{
+	if (snSceneInfo != NULL) {
+		RemoveStrategy(0, snSceneInfo->sceneNo);
+		MapSendMessage(snSceneInfo->mapScene, MAP_CBACK_SUSPEND);
+		snSceneInfo->entrant = 0;
+		snSceneInfo			 = NULL;
+		wipeControl.active	 = 0;
+	}
+}
+/********************************************************************************/
+/*	Enter the player.															*/
+/********************************************************************************/
+extern void
+SnEnterPlayer(void)
+{
+	Na_LevelSeAllStop();
+	SnOpenScene(marioActor->sceneNo);
+	if (snSceneInfo->sceneNo == marioActor->sceneNo) {
+		setflag(snSceneInfo->entrant, 1);
+		SetStrategy(0, marioActor);
+	}
+}
+/********************************************************************************/
+/*	Exit the player.															*/
+/********************************************************************************/
+extern void
+SnExitPlayer(void)
+{
+	if (snSceneInfo != NULL && (snSceneInfo->entrant & 1)) {
+		RemoveStrategy(0, marioActor->actorID);
+		clrflag(snSceneInfo->entrant, 1);
+
+		if (snSceneInfo->entrant == 0)  SnCloseScene();
+	}
+}
+/********************************************************************************/
+/*	Change the scene.															*/
+/********************************************************************************/
+extern void
+SnChangeScene(int newScene)
+{
+	int entrant = snSceneInfo->entrant;
+
+	if (activeSceneNo != newScene) {
+		SnCloseScene();
+		SnOpenScene(newScene);
+		snSceneInfo->entrant		= entrant;
+		player1stp->s[stw_effect].d = 0;
+	}
+	if (entrant & 1)  player1stp->map.sceneNo = newScene,  marioActor->sceneNo = newScene;
+}
+/********************************************************************************/
+/*	Do strategy execution.														*/
+/********************************************************************************/
+extern void
+SnExecuteStrategy(void)
+{
+	animationCounter += 1;
+	ExecStrategy(0);
+}
+/********************************************************************************/
+/*	Start screen fader.															*/
+/********************************************************************************/
+extern void
+SnStartFader(short mode, short frame, uchar red, uchar green, uchar blue)
+{
+	wipeControl.active = TRUE;
+	wipeControl.mode   = mode;
+	wipeControl.frame  = frame;
+	wipeControl.blank  = 0;
+
+	if (mode & 1)  SnSetBlankColor(red, green, blue);
+			 else  SnGetBlankColor(red, green, blue);
+
+	if (mode < 8) {
+		wipeControl.params.screen.red   = red;
+		wipeControl.params.screen.green = green;
+		wipeControl.params.screen.blue  = blue;
+	} else {
+		wipeControl.params.window.red   = red;
+		wipeControl.params.window.green = green;
+		wipeControl.params.window.blue  = blue;
+
+		wipeControl.params.window.start_xo	 = 160;
+		wipeControl.params.window.start_yo	 = 120;
+		wipeControl.params.window.end_xo	 = 160;
+		wipeControl.params.window.end_yo	 = 120;
+		wipeControl.params.window.angle_inc	 =   0;
+
+		if (mode & 1) {
+			wipeControl.params.window.start_side = 320;
+			wipeControl.params.window.end_side	 = (mode >= WIPE_DOCRO_WIN_CLOSE) ? 16 : 0;
+		} else {
+			wipeControl.params.window.start_side = (mode >= WIPE_DOCRO_WIN_OPEN ) ? 16 : 0;
+			wipeControl.params.window.end_side	 = 320;
+		}
+	}
+}
+/********************************************************************************/
+/*	Start screen fader with delay.												*/
+/********************************************************************************/
+extern void
+SnDelayFader(short mode, short frame, uchar red, uchar green, uchar blue, short delay)
+{
+	faderDelay = delay;
+	SnStartFader(mode, frame, red, green, blue);
+}
+/********************************************************************************/
+/*	Draw screens.																*/
+/********************************************************************************/
+extern void
+SnDrawScreen(void)
+{
+	if (snSceneInfo != NULL && wipeControl.blank == 0) {
+		DrawScene(snSceneInfo->mapScene, snViewPort, snTrimming, backColor);
+		gSPViewport(graphPtr++, K0_TO_PHYS(&viewport));
+		gDPSetScissor(graphPtr++, G_SC_NON_INTERLACE, 0, CLIP_UPPER, SCREEN_WIDTH, CLIP_LOWER);
+		MeterGaugeEvent();
+
+		gDPSetScissor(graphPtr++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		DrawMessage();
+		EndingDemoMessageEvent();
+		DrawStaffRoll();
+
+		gDPSetScissor(graphPtr++, G_SC_NON_INTERLACE, 0, CLIP_UPPER, SCREEN_WIDTH, CLIP_LOWER);
+		if ((mesgEvent = MessageEvent()) != 0)  mesgLatch = mesgEvent;
+
+
+		if (snTrimming != NULL)  SetTrimmingRectangle(snTrimming);
+						   else  gDPSetScissor(graphPtr++, G_SC_NON_INTERLACE, 0, CLIP_UPPER, SCREEN_WIDTH, CLIP_LOWER);
+
+		if (wipeControl.active) {
+			if (faderDelay == 0) {
+				wipeControl.active = !Wipe(0, wipeControl.mode, wipeControl.frame, (void *)&wipeControl.params);
+				if (wipeControl.active == 0) {
+					if (wipeControl.mode & 1)  wipeControl.blank = 1;
+										 else  SnSetBlankColor(0, 0, 0);
+				}
+			} else {
+				faderDelay -= 1;
+			}
+		}
+	}
+	else {
+		DrawMessage();
+		if (snTrimming != NULL)  SoftwareTrimBlanking(snTrimming, blankColor);
+						   else  SoftwareBlanking(blankColor);
+	}
+	snViewPort = NULL;
+	snTrimming = NULL;
+}
+@
+
+
+1.2
+log
+@incorporated iQue's texture, modified encoding for 8bit font glyph.
+@
+text
+@d174 1
+a174 1
+	unsigned char str[1] ={0xb0};
+@
+
+
+1.1
+log
+@more source code from Nintendo.
+@
+text
+@d173 3
+d180 3
+d184 1
+@
+

@@ -1,0 +1,1985 @@
+head	1.28;
+access;
+symbols
+	iQue_20031010:1.26
+	iQue_release_master_1_0:1.26
+	iQue_08_21_03:1.17
+	iQue_beta_1_0:1.13
+	LINUX_PORT:1.3;
+locks; strict;
+comment	@# @;
+
+
+1.28
+date	2003.10.16.05.24.55;	author wheeler;	state Exp;
+branches;
+next	1.27;
+
+1.27
+date	2003.10.15.06.22.08;	author wheeler;	state Exp;
+branches;
+next	1.26;
+
+1.26
+date	2003.09.17.01.04.00;	author tong;	state Exp;
+branches;
+next	1.25;
+
+1.25
+date	2003.09.14.00.18.59;	author wheeler;	state Exp;
+branches;
+next	1.24;
+
+1.24
+date	2003.09.10.21.18.17;	author wheeler;	state Exp;
+branches;
+next	1.23;
+
+1.23
+date	2003.09.09.21.07.10;	author wheeler;	state Exp;
+branches;
+next	1.22;
+
+1.22
+date	2003.09.08.21.54.37;	author tong;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	2003.09.04.23.57.28;	author tong;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2003.09.04.17.14.54;	author jprincen;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2003.09.04.01.30.58;	author jprincen;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2003.08.26.04.20.21;	author tong;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2003.08.20.04.04.04;	author wheeler;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2003.08.16.06.02.50;	author wheeler;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2003.08.15.01.17.48;	author wheeler;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2003.07.25.02.56.10;	author tong;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2003.07.07.16.50.09;	author tong;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2003.06.10.22.16.04;	author tong;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2003.06.10.09.11.30;	author tong;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2003.06.10.08.46.47;	author tong;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2003.06.10.05.37.03;	author tong;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.04.01.04.28.48;	author tong;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.03.09.00.12.25;	author tong;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.01.13.18.36.47;	author wheeler;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.12.20.01.47.05;	author tong;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.12.10.02.34.26;	author tong;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.10.30.21.56.21;	author blythe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.10.30.21.10.33;	author blythe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.30.07.49.52;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.28
+log
+@Rollback copyright changes
+@
+text
+@
+#
+#	makefile for Ultra 64 MARIO Brothers
+#
+#	Copyright (c) 1996,1997 Nintendo co., ltd.  All rights reserved
+#
+#
+#
+
+#use LOCALE: LOCALE_ZH, LOCALE_US
+ifndef LOCALE
+LOCALE = LOCALE_ZH
+endif
+
+APP	= demo
+
+#################################################################################
+#	RCP segment table															#
+#################################################################################
+
+SEGMENT_CODE			=	0x00000000
+SEGMENT_DYNAMIC			=	0x01000000
+SEGMENT_BASIC			=	0x02000000
+SEGMENT_KEEP			=	0x03000000
+SEGMENT_PLAYER			=	0x04000000
+SEGMENT_FACE			=	0x04000000
+SEGMENT_ENEMY1			=	0x05000000
+SEGMENT_ENEMY2			=	0x06000000
+SEGMENT_STAGE1			=	0x07000000
+SEGMENT_ENEMY3			=	0x08000000
+SEGMENT_TEXTURE			=	0x09000000
+SEGMENT_BACK			=	0x0A000000
+SEGMENT_WEATHER			=	0x0B000000
+SEGMENT_ENEMYDATA1		=	0x0C000000
+SEGMENT_ENEMYDATA2		=	0x0D000000
+SEGMENT_STAGEDATA1		=	0x0E000000
+SEGMENT_ENEMYDATA3		=	0x0F000000
+SEGMENT_BOOTSEQ			=	0x10000000
+SEGMENT_MARIOANIM		=	0x11000000
+SEGMENT_LUIGIANIM		=	0x12000000
+SEGMENT_PATHDATA		=	0x13000000
+SEGMENT_DEMODATA		=	0x14000000
+SEGMENT_GAMEDATA		=	0x15000000
+SEGMENT_KEEPDATA		=	0x16000000
+SEGMENT_PLAYDATA		=	0x17000000
+
+
+#################################################################################
+#       Added objects for BroadOn                                               #
+#################################################################################
+BROADON_OBJS = \
+cnv_func.o
+
+#################################################################################
+#	Nishida objects																#
+#################################################################################
+
+USRLIB_OBJS = \
+math.o \
+mathtbl.o \
+hierarchy.o \
+maplang.o \
+seqlang.o \
+bgcheck.o \
+bgdecode.o \
+path.o 
+
+#################################################################################
+#	Nishida objects																#
+#################################################################################
+
+NISHIDA_OBJS = \
+debug.o \
+system.o \
+gfxmain.o \
+audmain.o \
+mtrmain.o \
+game.o \
+collision.o \
+player.o \
+physics.o \
+autodemo.o \
+special.o \
+waiting.o \
+running.o \
+jumping.o \
+swimming.o \
+action.o \
+callback.o \
+memory.o \
+backup.o \
+scene.o \
+hmsdraw.o \
+time.o \
+slidec.o
+
+
+#################################################################################
+#	Kawagoe object																#
+#################################################################################
+
+KAWAGOE_OBJS = \
+camera.o
+
+
+#################################################################################
+#	Yajima objects																#
+#################################################################################
+
+YAJIMA_OBJS = \
+course.o \
+strategy.o \
+stratlib.o \
+alien.o \
+bgmove.o \
+mvbgdata.o \
+objhit.o \
+linklist.o \
+objsound.o \
+coin.o \
+door.o \
+ydebug.o
+
+
+#################################################################################
+#	Tanimoto objects															#
+#################################################################################
+
+TANIMOTO_OBJS = \
+wipe2.o \
+shade.o \
+bgdraw3.o \
+water.o \
+tutil.o \
+wave.o
+
+
+#################################################################################
+#	Iwamoto objects																#
+#################################################################################
+
+IWAMOTO_OBJS = \
+dprint.o \
+message.o \
+weather.o \
+gusheffect.o \
+flkdecode.o \
+gauge.o \
+ienemy.o
+
+#################################################################################
+# Iwawaki OBJS						
+#################################################################################
+
+IWAWAKI_OBJS = \
+wenemy.o
+
+#################################################################################
+#	Title demo and audio object													#
+#################################################################################
+
+DEMO_OBJS = \
+title.o \
+titlebg.o \
+fileselect.o \
+starselect.o 
+
+
+AUDIO_OBJS = \
+audio/audio.o
+
+
+#################################################################################
+#	Player and enemy shape objects												#
+#################################################################################
+
+SHAPE = \
+shape/hms_player.o \
+shape/gfx_player.o \
+shape/hms_keep.o \
+shape/gfx_keep.o \
+shape/hms_basic_enemy.o \
+shape/gfx_basic_enemy.o \
+shape/gfx_weather.o \
+shape/hms_enemy1_a.o \
+shape/hms_enemy1_b.o \
+shape/hms_enemy1_c.o \
+shape/hms_enemy1_d.o \
+shape/hms_enemy1_e.o \
+shape/hms_enemy1_f.o \
+shape/hms_enemy1_g.o \
+shape/hms_enemy1_h.o \
+shape/hms_enemy1_i.o \
+shape/hms_enemy1_j.o \
+shape/hms_enemy1_k.o \
+shape/hms_enemy2_a.o \
+shape/hms_enemy2_d.o \
+shape/hms_enemy2_e.o \
+shape/hms_enemy2_f.o \
+shape/hms_enemy2_g.o \
+shape/hms_enemy2_h.o \
+shape/gfx_enemy1_a.o \
+shape/gfx_enemy1_b.o \
+shape/gfx_enemy1_c.o \
+shape/gfx_enemy1_d.o \
+shape/gfx_enemy1_e.o \
+shape/gfx_enemy1_f.o \
+shape/gfx_enemy1_g.o \
+shape/gfx_enemy1_h.o \
+shape/gfx_enemy1_i.o \
+shape/gfx_enemy1_j.o \
+shape/gfx_enemy1_k.o \
+shape/gfx_enemy2_a.o \
+shape/gfx_enemy2_d.o \
+shape/gfx_enemy2_e.o \
+shape/gfx_enemy2_f.o \
+shape/gfx_enemy2_g.o \
+shape/gfx_enemy2_h.o
+
+
+#################################################################################
+#	Data objects																#
+#################################################################################
+
+DATA = \
+data/basic.o \
+data/anime.o \
+data/contdata.o \
+data/dynamic.o \
+data/fifobuf.o \
+data/framebuf.o \
+data/depthbuf.o \
+data/textbuf.o \
+data/buffers.o \
+data/npathdata.o \
+data/pathdata.o \
+data/ipathdata.o \
+data/kpathdata.o \
+data/wpathdata.o
+
+DATA_RM = \
+data/basic.o \
+data/anime.o \
+data/contdata.o \
+data/dynamic.o \
+data/fifobuf.o \
+data/framebuf.o \
+data/depthbuf.o \
+data/textbuf.o \
+data/buffers.o \
+data/npathdata.o \
+data/pathdata.o \
+data/ipathdata.o \
+data/kpathdata.o
+
+#################################################################################
+#	Map texture group objects													#
+#################################################################################
+
+MAPTEXTURE = \
+map/texture/a_lava_texture.o \
+map/texture/b_house_texture.o \
+map/texture/c_field_texture.o \
+map/texture/d_water_texture.o \
+map/texture/e_mt_texture.o \
+map/texture/f_snow_mt_texture.o \
+map/texture/g_cave_texture.o \
+map/texture/h_mecha_texture.o \
+map/texture/i_slider_texture.o \
+map/texture/j_fort_texture.o \
+map/texture/k_castlein_texture.o \
+map/texture/l_castleout_texture.o
+
+TEXTURE_SYMBOL_INC = \
+map/texture/a_lava_texsymb.h \
+map/texture/b_house_texsymb.h \
+map/texture/c_field_texsymb.h \
+map/texture/d_water_texsymb.h \
+map/texture/e_mt_texsymb.h \
+map/texture/f_snow_mt_texsymb.h \
+map/texture/g_cave_texsymb.h \
+map/texture/h_mecha_texsymb.h \
+map/texture/i_slider_texsymb.h \
+map/texture/j_fort_texsymb.h \
+map/texture/k_castlein_texsymb.h \
+map/texture/l_castleout_texsymb.h
+
+
+#################################################################################
+#	Back screen texture objects													#
+#################################################################################
+
+BACKSCRN = \
+map/back/mainmap_backscrn.o \
+map/back/snowtower_backscrn.o \
+map/back/kuppa_backscrn.o \
+map/back/motos_backscrn.o \
+map/back/waterland_backscrn.o \
+map/back/mountain_backscrn.o \
+map/back/sabaku_backscrn.o \
+map/back/bigworld_backscrn.o \
+map/back/yokoscrl_backscrn.o \
+map/back/kuppa3_backscrn.o
+
+
+
+#################################################################################
+#	Stage map hierarchy data objects											#
+#################################################################################
+
+MAP = \
+map/title/Mtitle.o \
+map/select/Mselect.o \
+map/stage1/Mstage1.o \
+map/stage2/Mstage2.o \
+map/stage3/Mstage3.o \
+map/stage4/Mstage4.o \
+map/stage5/Mstage5.o \
+map/stage6/Mstage6.o \
+map/stage7/Mstage7.o \
+map/stage8/Mstage8.o \
+map/stage9/Mstage9.o \
+map/stage10/Mstage10.o \
+map/stage11/Mstage11.o \
+map/stage12/Mstage12.o \
+map/stage13/Mstage13.o \
+map/stage14/Mstage14.o \
+map/stage15/Mstage15.o \
+map/stage16/Mstage16.o \
+map/stage17/Mstage17.o \
+map/stage18/Mstage18.o \
+map/stage19/Mstage19.o \
+map/stage20/Mstage20.o \
+map/stage21/Mstage21.o \
+map/stage22/Mstage22.o \
+map/stage23/Mstage23.o \
+map/stage24/Mstage24.o \
+map/stage25/Mstage25.o \
+map/stage26/Mstage26.o \
+map/stage27/Mstage27.o \
+map/stage28/Mstage28.o \
+map/stage29/Mstage29.o \
+map/stage30/Mstage30.o \
+map/stage31/Mstage31.o \
+map/stage32/Mstage32.o \
+map/stage33/Mstage33.o \
+map/stage34/Mstage34.o \
+map/stage35/Mstage35.o \
+map/stage36/Mstage36.o \
+map/stage37/Mstage37.o \
+map/stage38/Mstage38.o
+
+#################################################################################
+#	Sequence data (initialize data) objects										#
+#################################################################################
+
+SEQUENCE = \
+map/Sboot.o \
+map/Sgame.o \
+map/title/Stitle.o \
+map/select/Sselect.o \
+map/stage1/Sstage1.o \
+map/stage2/Sstage2.o \
+map/stage3/Sstage3.o \
+map/stage4/Sstage4.o \
+map/stage5/Sstage5.o \
+map/stage6/Sstage6.o \
+map/stage7/Sstage7.o \
+map/stage8/Sstage8.o \
+map/stage9/Sstage9.o \
+map/stage10/Sstage10.o \
+map/stage11/Sstage11.o \
+map/stage12/Sstage12.o \
+map/stage13/Sstage13.o \
+map/stage14/Sstage14.o \
+map/stage15/Sstage15.o \
+map/stage16/Sstage16.o \
+map/stage17/Sstage17.o \
+map/stage18/Sstage18.o \
+map/stage19/Sstage19.o \
+map/stage20/Sstage20.o \
+map/stage21/Sstage21.o \
+map/stage22/Sstage22.o \
+map/stage23/Sstage23.o \
+map/stage24/Sstage24.o \
+map/stage25/Sstage25.o \
+map/stage26/Sstage26.o \
+map/stage27/Sstage27.o \
+map/stage28/Sstage28.o \
+map/stage29/Sstage29.o \
+map/stage30/Sstage30.o \
+map/stage31/Sstage31.o \
+map/stage32/Sstage32.o \
+map/stage33/Sstage33.o \
+map/stage34/Sstage34.o \
+map/stage35/Sstage35.o \
+map/stage36/Sstage36.o \
+map/stage37/Sstage37.o \
+map/stage38/Sstage38.o
+
+#################################################################################
+#	Stage shape and texture data objects										#
+#################################################################################
+
+STAGE = \
+map/title/nintendo_logo.o \
+map/title/debug_title.o \
+map/title/title_back.o \
+map/select/Gselect.o \
+map/stage1/Gstage1.o \
+map/stage2/Gstage2.o \
+map/stage3/Gstage3.o \
+map/stage4/Gstage4.o \
+map/stage5/Gstage5.o \
+map/stage6/Gstage6.o \
+map/stage7/Gstage7.o \
+map/stage8/Gstage8.o \
+map/stage9/Gstage9.o \
+map/stage10/Gstage10.o \
+map/stage11/Gstage11.o \
+map/stage12/Gstage12.o \
+map/stage13/Gstage13.o \
+map/stage14/Gstage14.o \
+map/stage15/Gstage15.o \
+map/stage16/Gstage16.o \
+map/stage17/Gstage17.o \
+map/stage18/Gstage18.o \
+map/stage19/Gstage19.o \
+map/stage20/Gstage20.o \
+map/stage21/Gstage21.o \
+map/stage22/Gstage22.o \
+map/stage23/Gstage23.o \
+map/stage24/Gstage24.o \
+map/stage25/Gstage25.o \
+map/stage26/Gstage26.o \
+map/stage27/Gstage27.o \
+map/stage28/Gstage28.o \
+map/stage29/Gstage29.o \
+map/stage30/Gstage30.o \
+map/stage31/Gstage31.o \
+map/stage32/Gstage32.o \
+map/stage33/Gstage33.o \
+map/stage34/Gstage34.o \
+map/stage35/Gstage35.o \
+map/stage36/Gstage36.o \
+map/stage37/Gstage37.o \
+map/stage38/Gstage38.o
+
+##############################
+# TMP OBJS
+##############################
+TMP_OBJS = \
+tmp_motor.o
+
+#################################################################################
+#	Player segment include files												#
+#################################################################################
+
+PLAYER_INC = \
+shape/Player/hms_mario.sou \
+shape/Player/hms_effect.sou
+
+#################################################################################
+#	Weather segment include files												#
+#################################################################################
+
+WEATHER_INC = \
+shape/Weather/snowdata.sou
+
+
+#################################################################################
+#	Basic segment include files													#
+#################################################################################
+
+BASIC_INC = \
+data/Basic/alphabet.sou \
+data/Basic/common.sou \
+data/Basic/tanidata.sou
+
+
+#################################################################################
+#	Gstage include files														#
+#################################################################################
+
+
+GSTAGE4_INC = \
+map/stage4/teresa/cx0401.tag
+
+GSTAGE5_INC = \
+map/stage5/yukiyama1/cx0501.tag \
+map/stage5/yuki_slider1/cx0502.tag
+
+GSTAGE6_INC = \
+map/stage6/selroom1f/sel1f.tag \
+map/stage6/selroom2f/sel2f.tag \
+map/stage6/selroom1b/sel1b.tag
+
+GSTAGE7_INC = \
+map/stage7/horror_dungeon/cx0701.tag
+
+GSTAGE8_INC = \
+map/stage8/sabaku/cx0801.tag \
+map/stage8/in_pyramid/cx0802.tag \
+map/stage8/in_pyramid/cx0803.tag
+
+GSTAGE9_INC = \
+map/stage9/battle_field/cx0901.tag
+
+GSTAGE10_INC = \
+map/stage10/yukiyama2/cx1001.tag \
+map/stage10/kamakura/cx1002.tag
+
+GSTAGE11_INC = \
+map/stage11/pool/cx1101.tag \
+map/stage11/pool/cx1102.tag
+
+GSTAGE12_INC = \
+map/stage12/water_donjon/cx1201.tag \
+map/stage12/tinbotusen/cx1202.tag
+
+GSTAGE13_INC = \
+map/stage13/big_world/cx1301.tag \
+map/stage13/big_world/cx1302.tag
+
+GSTAGE14_INC = \
+map/stage14/mecha_room/cx1401.tag
+
+GSTAGE15_INC = \
+map/stage15/fire_bubble2/cx1501.tag
+
+GSTAGE16_INC = \
+map/stage16/mainmap2/cx1601.tag
+
+GSTAGE17_INC = \
+map/stage17/ext1_yokoscroll/cx1701.tag
+
+GSTAGE18_INC = \
+map/stage18/dummy/cx1801.tag
+
+GSTAGE19_INC = \
+map/stage19/ext2_yokoscroll/cx1901.tag
+
+GSTAGE20_INC = \
+map/stage20/ext9/cx2001.tag
+
+GSTAGE21_INC = \
+map/stage21/ext3_tatescroll/cx2101.tag
+
+GSTAGE22_INC = \
+map/stage22/motos/cx2201.tag \
+map/stage22/in_valcano/cx2202.tag
+
+GSTAGE23_INC = \
+map/stage23/waterland/cx2301.tag \
+map/stage23/waterland/cx2302.tag
+
+GSTAGE24_INC = \
+map/stage24/mountain/cx2401.tag
+
+GSTAGE26_INC = \
+map/stage26/uraniwa/cx2601.tag
+
+GSTAGE27_INC = \
+map/stage27/ext4_minislider/cx2701.tag
+
+GSTAGE28_INC = \
+map/stage28/ext5_in_fall/cx2801.tag
+
+GSTAGE29_INC = \
+map/stage29/ext6_flying_mario/cx2901.tag
+
+GSTAGE31_INC = \
+map/stage31/ext8/cx3101.tag
+
+GSTAGE36_INC = \
+map/stage36/donkey/cx3601.tag \
+map/stage36/slider2/cx3602.tag \
+map/stage36/slider2/cx3603.tag \
+map/stage36/slider2/cx3604.tag
+
+
+#################################################################################
+#	Yajima code include files													#
+#################################################################################
+
+YAJIMA_INC = \
+data/p/pathobake.p
+
+#################################################################################
+#	Iwamoto code include files													#
+#################################################################################
+
+IWAMOTO_INC = \
+data/ipathfile.s
+
+
+#################################################################################
+#																				#
+#	making mario																#
+#																				#
+#################################################################################
+
+include $(ROOT)/usr/include/make/PRdefs
+
+#LD		  = $(ROOT)/usr/lib/PR/nld
+#CC_FLAGS  = -Wab,-r4300_mul -O2 -float -mips2 -xansi -signed -fullwarn -prototypes -Xcpluscomm -non_shared -I$(ROOT)/usr/include -I$(ROOT)/usr/include/PR -G 0 
+CC = mips-linux-gcc
+CC_FLAGS  = -fno-pic -mcpu=4300 -nostdinc -I$(ROOT)/usr/include -I$(ROOT)/usr/include/PR -c -O2 -G 0
+ACC_FLAGS  = -fno-pic -mcpu=4300 -nostdinc -I$(ROOT)/usr/include -I$(ROOT)/usr/include/PR -c -O2 -x assembler-with-cpp 
+#LD_FLAGS  = $(MKDEPOPT) --no-warn-mismatch -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -lultra_d -lgcc
+LD_FLAGS  = $(MKDEPOPT) --no-warn-mismatch -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -lultra_rom -lgcc
+
+CODE_SEG  = code.out
+ULIB_SEG  = ulib.out
+
+
+default rom $(APP):	spec $(CODE_SEG) $(ULIB_SEG) $(DEMO_OBJS) $(SHAPE) $(DATA) $(ANIME) $(BACKSCRN) $(SEQUENCE) $(MAP) $(MAPTEXTURE) $(STAGE) 
+#		makerom -s 64 -f 0xff -m -r rom spec > rom.map 
+		$(ROOT)/usr/sbin/makerom -m -r rom spec > rom.map
+ifeq ($(LOCALE), LOCALE_ZH)
+		$(ROOT)/usr/sbin/pubrom -d -p sm.prop -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_z.txt rom sm
+else
+		$(ROOT)/usr/sbin/pubrom -d -p sm.prop -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm_e
+endif
+#		./copymask rom mask
+#		makemask mask
+
+$(CODE_SEG): $(NISHIDA_OBJS) $(YAJIMA_OBJS) $(KAWAGOE_OBJS) $(TANIMOTO_OBJS) $(IWAMOTO_OBJS) $(IWAWAKI_OBJS) $(AUDIO_OBJS) $(TMP_OBJS)
+		$(LD) -o $(CODE_SEG) -r $(NISHIDA_OBJS) $(KAWAGOE_OBJS) $(YAJIMA_OBJS) $(TANIMOTO_OBJS) $(IWAMOTO_OBJS) $(IWAWAKI_OBJS) $(AUDIO_OBJS) $(TMP_OBJS) $(LD_FLAGS) > link.map
+
+$(ULIB_SEG): $(USRLIB_OBJS)
+		$(LD) -o $(ULIB_SEG) -r $(USRLIB_OBJS) $(MKDEPORT) -nostdlib  > ulib.map
+
+
+################################################################################
+# Making TMP OBJS (missing from OS2.0L)
+################################################################################
+TMP_CODE_FILES = tmp_motor.c
+tmp_motor.o	: tmp_motor.c	; $(CC) $(CC_FLAGS) -o tmp_motor.o      tmp_motor.c
+
+#################################################################################
+#	Making Nishida objects														#
+#################################################################################
+
+#debug.o		: debug.c							; $(CC) $(CC_FLAGS) -o debug.o      debug.c
+#system.o	: system.c							; $(CC) $(CC_FLAGS) -o system.o     system.c
+#gfxmain.o	: gfxmain.c							; $(CC) $(CC_FLAGS) -o gfxmain.o    gfxmain.c
+#audmain.o	: audmain.c							; $(CC) $(CC_FLAGS) -o audmain.o    audmain.c
+mtrmain.o	: mtrmain.c							; $(CC) $(CC_FLAGS) -o mtrmain.o    mtrmain.c
+title.o		: title.c							; $(CC) $(CC_FLAGS) -o title.o      title.c
+game.o		: game.c include/ending.h			; $(CC) $(CC_FLAGS) -o game.o       game.c
+#collision.o	: collision.c						; $(CC) $(CC_FLAGS) -o collision.o  collision.c
+#player.o	: player.c 							; $(CC) $(CC_FLAGS) -o player.o     player.c
+#physics.o	: physics.c 						; $(CC) $(CC_FLAGS) -o physics.o    physics.c
+#autodemo.o	: autodemo.c 						; $(CC) $(CC_FLAGS) -o autodemo.o   autodemo.c
+#special.o	: special.c 						; $(CC) $(CC_FLAGS) -o special.o    special.c
+#waiting.o	: waiting.c 						; $(CC) $(CC_FLAGS) -o waiting.o    waiting.c
+#running.o	: running.c 						; $(CC) $(CC_FLAGS) -o running.o    running.c
+#jumping.o	: jumping.c 						; $(CC) $(CC_FLAGS) -o jumping.o    jumping.c
+#swimming.o	: swimming.c 						; $(CC) $(CC_FLAGS) -o swimming.o   swimming.c
+#action.o	: action.c 							; $(CC) $(CC_FLAGS) -o action.o     action.c
+#callback.o	: callback.c 						; $(CC) $(CC_FLAGS) -o callback.o   callback.c
+memory.o	: memory.c							; $(CC) $(CC_FLAGS) -o memory.o     memory.c
+#backup.o	: backup.c							; $(CC) $(CC_FLAGS) -o backup.o     backup.c
+#seqlang.o	: seqlang.c							; $(CC) $(CC_FLAGS) -o seqlang.o    seqlang.c
+#maplang.o	: maplang.c							; $(CC) $(CC_FLAGS) -o maplang.o    maplang.c
+scene.o		: scene.c							; $(CC) $(CC_FLAGS) -o scene.o      scene.c
+#hierarchy.o	: hierarchy.c						; $(CC) $(CC_FLAGS) -o hierarchy.o  hierarchy.c
+#hmsdraw.o	: hmsdraw.c							; $(CC) $(CC_FLAGS) -o hmsdraw.o    hmsdraw.c
+#time.o		: time.c							; $(CC) $(CC_FLAGS) -o time.o       time.c
+#math.o		: math.c							; $(CC) $(CC_FLAGS) -o math.o       math.c
+#mathtbl.o	: mathtbl.s							; $(CC) $(ACC_FLAGS) -o mathtbl.o    mathtbl.s
+#slidec.o	: slidec.s							; $(CC) $(ACC_FLAGS) -o slidec.o     slidec.s
+
+
+#################################################################################
+#	Making Yajima objects														#
+#################################################################################
+
+#path.o		: path.c include/shapename.h		; $(CC) $(CC_FLAGS) -o path.o      path.c
+#strategy.o	: strategy.c						; $(CC) $(CC_FLAGS) -o strategy.o  strategy.c
+#course.o	: course.c							; $(CC) $(CC_FLAGS) -o course.o 	course.c
+#coin.o		: coin.c							; $(CC) $(CC_FLAGS) -o coin.o  	coin.c
+#door.o		: door.c							; $(CC) $(CC_FLAGS) -o door.o  	door.c
+#stratlib.o	: stratlib.c						; $(CC) $(CC_FLAGS) -o stratlib.o  stratlib.c
+#linklist.o	: linklist.c						; $(CC) $(CC_FLAGS) -o linklist.o  linklist.c
+#alien.o		: alien.c	$(YAJIMA_INC)			; $(CC) $(CC_FLAGS) -o alien.o  	alien.c
+#bgcheck.o	: bgcheck.c							; $(CC) $(CC_FLAGS) -o bgcheck.o   bgcheck.c
+#bgdecode.o	: bgdecode.c						; $(CC) $(CC_FLAGS) -o bgdecode.o  bgdecode.c
+#bgmove.o	: bgmove.c							; $(CC) $(CC_FLAGS) -o bgmove.o    bgmove.c
+#mvbgdata.o	: mvbgdata.c						; $(CC) $(CC_FLAGS) -o mvbgdata.o  mvbgdata.c
+#objhit.o	: objhit.c							; $(CC) $(CC_FLAGS) -o objhit.o    objhit.c
+#objsound.o	: objsound.c						; $(CC) $(CC_FLAGS) -o objsound.o  objsound.c
+#ydebug.o	: ydebug.c							; $(CC) $(CC_FLAGS) -o ydebug.o    ydebug.c
+
+
+#################################################################################
+#	Making Kawagoe objects														#
+#################################################################################
+
+#camera.o	: include/camera.h kobject.c zoom.c windemo.c camera.c camlib.c camdemo.c	; $(CC) $(CC_FLAGS) -o camera.o camera.c
+
+
+#################################################################################
+#	Making Tanimoto objects														#
+#################################################################################
+
+#wipe2.o		: wipe2.c							; $(CC) $(CC_FLAGS) -o wipe2.o      wipe2.c
+#shade.o		: shade.c							; $(CC) $(CC_FLAGS) -o shade.o      shade.c
+#bgdraw3.o	: bgdraw3.c							; $(CC) $(CC_FLAGS) -o bgdraw3.o    bgdraw3.c
+#water.o		: water.c							; $(CC) $(CC_FLAGS) -o water.o      water.c
+##areamap.o	: areamap.c							; $(CC) $(CC_FLAGS) -o areamap.o    areamap.c
+#wave.o		: wave.c							; $(CC) $(CC_FLAGS) -o wave.o    	  wave.c
+#tutil.o		: tutil.c							; $(CC) $(CC_FLAGS) -o tutil.o      tutil.c
+#tpmario.o	: tpmario.c							; $(CC) $(CC_FLAGS) -o tpmario.o    tpmario.c
+titlebg.o	: titlebg.c							; $(CC) $(CC_FLAGS) -o titlebg.o    titlebg.c
+
+
+#################################################################################
+#	Making Iwamoto objects														#
+#################################################################################
+
+dprint.o			  : dprint.c				; $(CC) $(CC_FLAGS) -o dprint.o     dprint.c
+message.o			  : message.c pausemess.c endingmess.c				; $(CC) $(CC_FLAGS) -o message.o    message.c
+gauge.o				  : gauge.c					; $(CC) $(CC_FLAGS) -o gauge.o      gauge.c
+#weather.o			  : weather.c				; $(CC) $(CC_FLAGS) -o weather.o    weather.c
+#gusheffect.o		  : gusheffect.c			; $(CC) $(CC_FLAGS) -o gusheffect.o gusheffect.c
+#flkdecode.o			  : flkdecode.c tagdecode.c ; $(CC) $(CC_FLAGS) -o flkdecode.o  flkdecode.c
+fileselect.o          : fileselect.c selectmess.c           ; $(CC) $(CC_FLAGS) -o fileselect.o fileselect.c
+starselect.o		  : starselect.c 			; $(CC) $(CC_FLAGS) -o starselect.o starselect.c
+#ienemy.o		  	  : ienemy.c $(IWAMOTO_INC)	; $(CC) $(CC_FLAGS) -o ienemy.o 	 ienemy.c
+
+#################################################################################
+#	Making Iwawaki objects														#
+#################################################################################
+
+#wenemy.o		  : wenemy.c 			; $(CC) $(CC_FLAGS) -o wenemy.o wenemy.c
+
+
+#################################################################################
+#	Making map hierachy data objects											#
+#################################################################################
+
+map/title/Mtitle.o	  : map/title/Mtitle.c			; $(CC) $(CC_FLAGS) -o map/title/Mtitle.o      map/title/Mtitle.c
+map/select/Mselect.o  : map/select/Mselect.c		; $(CC) $(CC_FLAGS) -o map/select/Mselect.o    map/select/Mselect.c
+map/stage1/Mstage1.o  : map/stage1/Mstage1.c		; $(CC) $(CC_FLAGS) -o map/stage1/Mstage1.o    map/stage1/Mstage1.c
+map/stage2/Mstage2.o  : map/stage2/Mstage2.c		; $(CC) $(CC_FLAGS) -o map/stage2/Mstage2.o    map/stage2/Mstage2.c
+map/stage3/Mstage3.o  : map/stage3/Mstage3.c		; $(CC) $(CC_FLAGS) -o map/stage3/Mstage3.o    map/stage3/Mstage3.c
+map/stage4/Mstage4.o  : map/stage4/Mstage4.c		; $(CC) $(CC_FLAGS) -o map/stage4/Mstage4.o    map/stage4/Mstage4.c
+map/stage5/Mstage5.o  : map/stage5/Mstage5.c		; $(CC) $(CC_FLAGS) -o map/stage5/Mstage5.o    map/stage5/Mstage5.c
+map/stage6/Mstage6.o  : map/stage6/Mstage6.c		; $(CC) $(CC_FLAGS) -o map/stage6/Mstage6.o    map/stage6/Mstage6.c
+map/stage7/Mstage7.o  : map/stage7/Mstage7.c		; $(CC) $(CC_FLAGS) -o map/stage7/Mstage7.o    map/stage7/Mstage7.c
+map/stage8/Mstage8.o  : map/stage8/Mstage8.c		; $(CC) $(CC_FLAGS) -o map/stage8/Mstage8.o    map/stage8/Mstage8.c
+map/stage9/Mstage9.o  : map/stage9/Mstage9.c		; $(CC) $(CC_FLAGS) -o map/stage9/Mstage9.o    map/stage9/Mstage9.c
+map/stage10/Mstage10.o: map/stage10/Mstage10.c		; $(CC) $(CC_FLAGS) -o map/stage10/Mstage10.o  map/stage10/Mstage10.c
+map/stage11/Mstage11.o: map/stage11/Mstage11.c		; $(CC) $(CC_FLAGS) -o map/stage11/Mstage11.o  map/stage11/Mstage11.c
+map/stage12/Mstage12.o: map/stage12/Mstage12.c		; $(CC) $(CC_FLAGS) -o map/stage12/Mstage12.o  map/stage12/Mstage12.c
+map/stage13/Mstage13.o: map/stage13/Mstage13.c		; $(CC) $(CC_FLAGS) -o map/stage13/Mstage13.o  map/stage13/Mstage13.c
+map/stage14/Mstage14.o: map/stage14/Mstage14.c		; $(CC) $(CC_FLAGS) -o map/stage14/Mstage14.o  map/stage14/Mstage14.c
+map/stage15/Mstage15.o: map/stage15/Mstage15.c		; $(CC) $(CC_FLAGS) -o map/stage15/Mstage15.o  map/stage15/Mstage15.c
+map/stage16/Mstage16.o: map/stage16/Mstage16.c		; $(CC) $(CC_FLAGS) -o map/stage16/Mstage16.o  map/stage16/Mstage16.c
+map/stage17/Mstage17.o: map/stage17/Mstage17.c		; $(CC) $(CC_FLAGS) -o map/stage17/Mstage17.o  map/stage17/Mstage17.c
+map/stage18/Mstage18.o: map/stage18/Mstage18.c		; $(CC) $(CC_FLAGS) -o map/stage18/Mstage18.o  map/stage18/Mstage18.c
+map/stage19/Mstage19.o: map/stage19/Mstage19.c		; $(CC) $(CC_FLAGS) -o map/stage19/Mstage19.o  map/stage19/Mstage19.c
+map/stage20/Mstage20.o: map/stage20/Mstage20.c		; $(CC) $(CC_FLAGS) -o map/stage20/Mstage20.o  map/stage20/Mstage20.c
+map/stage21/Mstage21.o: map/stage21/Mstage21.c		; $(CC) $(CC_FLAGS) -o map/stage21/Mstage21.o  map/stage21/Mstage21.c
+map/stage22/Mstage22.o: map/stage22/Mstage22.c		; $(CC) $(CC_FLAGS) -o map/stage22/Mstage22.o  map/stage22/Mstage22.c
+map/stage23/Mstage23.o: map/stage23/Mstage23.c		; $(CC) $(CC_FLAGS) -o map/stage23/Mstage23.o  map/stage23/Mstage23.c
+map/stage24/Mstage24.o: map/stage24/Mstage24.c		; $(CC) $(CC_FLAGS) -o map/stage24/Mstage24.o  map/stage24/Mstage24.c
+map/stage25/Mstage25.o: map/stage25/Mstage25.c		; $(CC) $(CC_FLAGS) -o map/stage25/Mstage25.o  map/stage25/Mstage25.c
+map/stage26/Mstage26.o: map/stage26/Mstage26.c		; $(CC) $(CC_FLAGS) -o map/stage26/Mstage26.o  map/stage26/Mstage26.c
+map/stage27/Mstage27.o: map/stage27/Mstage27.c		; $(CC) $(CC_FLAGS) -o map/stage27/Mstage27.o  map/stage27/Mstage27.c
+map/stage28/Mstage28.o: map/stage28/Mstage28.c		; $(CC) $(CC_FLAGS) -o map/stage28/Mstage28.o  map/stage28/Mstage28.c
+map/stage29/Mstage29.o: map/stage29/Mstage29.c 		; $(CC) $(CC_FLAGS) -o map/stage29/Mstage29.o  map/stage29/Mstage29.c
+map/stage30/Mstage30.o: map/stage30/Mstage30.c  	; $(CC) $(CC_FLAGS) -o map/stage30/Mstage30.o  map/stage30/Mstage30.c
+map/stage31/Mstage31.o: map/stage31/Mstage31.c 		; $(CC) $(CC_FLAGS) -o map/stage31/Mstage31.o  map/stage31/Mstage31.c
+map/stage32/Mstage32.o: map/stage32/Mstage32.c 		; $(CC) $(CC_FLAGS) -o map/stage32/Mstage32.o  map/stage32/Mstage32.c
+map/stage33/Mstage33.o: map/stage33/Mstage33.c		; $(CC) $(CC_FLAGS) -o map/stage33/Mstage33.o  map/stage33/Mstage33.c
+map/stage34/Mstage34.o: map/stage34/Mstage34.c 		; $(CC) $(CC_FLAGS) -o map/stage34/Mstage34.o  map/stage34/Mstage34.c
+map/stage35/Mstage35.o: map/stage35/Mstage35.c  	; $(CC) $(CC_FLAGS) -o map/stage35/Mstage35.o  map/stage35/Mstage35.c
+map/stage36/Mstage36.o: map/stage36/Mstage36.c 		; $(CC) $(CC_FLAGS) -o map/stage36/Mstage36.o  map/stage36/Mstage36.c
+map/stage37/Mstage37.o: map/stage37/Mstage37.c 		; $(CC) $(CC_FLAGS) -o map/stage37/Mstage37.o  map/stage37/Mstage37.c
+map/stage38/Mstage38.o: map/stage38/Mstage38.c 		; $(CC) $(CC_FLAGS) -o map/stage38/Mstage38.o  map/stage38/Mstage38.c
+
+#################################################################################
+#	Making game sequecne data objects											#
+#################################################################################
+
+map/Sboot.o			  : map/Sboot.s					; $(CC) $(ACC_FLAGS) -o map/Sboot.o			    map/Sboot.s
+map/Sgame.o			  : map/Sgame.s					; $(CC) $(ACC_FLAGS) -o map/Sgame.o			    map/Sgame.s
+map/title/Stitle.o	  : map/title/Stitle.s			; $(CC) $(ACC_FLAGS) -o map/title/Stitle.o      map/title/Stitle.s
+map/select/Sselect.o  : map/select/Sselect.s		; $(CC) $(ACC_FLAGS) -o map/select/Sselect.o    map/select/Sselect.s
+map/stage1/Sstage1.o  : map/stage1/Sstage1.s		; $(CC) $(ACC_FLAGS) -o map/stage1/Sstage1.o    map/stage1/Sstage1.s
+map/stage2/Sstage2.o  : map/stage2/Sstage2.s		; $(CC) $(ACC_FLAGS) -o map/stage2/Sstage2.o    map/stage2/Sstage2.s
+map/stage3/Sstage3.o  : map/stage3/Sstage3.s		; $(CC) $(ACC_FLAGS) -o map/stage3/Sstage3.o    map/stage3/Sstage3.s
+map/stage4/Sstage4.o  : map/stage4/Sstage4.s		; $(CC) $(ACC_FLAGS) -o map/stage4/Sstage4.o    map/stage4/Sstage4.s
+map/stage5/Sstage5.o  : map/stage5/Sstage5.s		; $(CC) $(ACC_FLAGS) -o map/stage5/Sstage5.o    map/stage5/Sstage5.s
+map/stage6/Sstage6.o  : map/stage6/Sstage6.s		; $(CC) $(ACC_FLAGS) -o map/stage6/Sstage6.o    map/stage6/Sstage6.s
+map/stage7/Sstage7.o  : map/stage7/Sstage7.s		; $(CC) $(ACC_FLAGS) -o map/stage7/Sstage7.o    map/stage7/Sstage7.s
+map/stage8/Sstage8.o  : map/stage8/Sstage8.s		; $(CC) $(ACC_FLAGS) -o map/stage8/Sstage8.o    map/stage8/Sstage8.s
+map/stage9/Sstage9.o  : map/stage9/Sstage9.s		; $(CC) $(ACC_FLAGS) -o map/stage9/Sstage9.o    map/stage9/Sstage9.s
+map/stage10/Sstage10.o: map/stage10/Sstage10.s		; $(CC) $(ACC_FLAGS) -o map/stage10/Sstage10.o  map/stage10/Sstage10.s
+map/stage11/Sstage11.o: map/stage11/Sstage11.s		; $(CC) $(ACC_FLAGS) -o map/stage11/Sstage11.o  map/stage11/Sstage11.s
+map/stage12/Sstage12.o: map/stage12/Sstage12.s		; $(CC) $(ACC_FLAGS) -o map/stage12/Sstage12.o  map/stage12/Sstage12.s
+map/stage13/Sstage13.o: map/stage13/Sstage13.s		; $(CC) $(ACC_FLAGS) -o map/stage13/Sstage13.o  map/stage13/Sstage13.s
+map/stage14/Sstage14.o: map/stage14/Sstage14.s		; $(CC) $(ACC_FLAGS) -o map/stage14/Sstage14.o  map/stage14/Sstage14.s
+map/stage15/Sstage15.o: map/stage15/Sstage15.s		; $(CC) $(ACC_FLAGS) -o map/stage15/Sstage15.o  map/stage15/Sstage15.s
+map/stage16/Sstage16.o: map/stage16/Sstage16.s		; $(CC) $(ACC_FLAGS) -o map/stage16/Sstage16.o  map/stage16/Sstage16.s
+map/stage17/Sstage17.o: map/stage17/Sstage17.s		; $(CC) $(ACC_FLAGS) -o map/stage17/Sstage17.o  map/stage17/Sstage17.s
+map/stage18/Sstage18.o: map/stage18/Sstage18.s		; $(CC) $(ACC_FLAGS) -o map/stage18/Sstage18.o  map/stage18/Sstage18.s
+map/stage19/Sstage19.o: map/stage19/Sstage19.s		; $(CC) $(ACC_FLAGS) -o map/stage19/Sstage19.o  map/stage19/Sstage19.s
+map/stage20/Sstage20.o: map/stage20/Sstage20.s		; $(CC) $(ACC_FLAGS) -o map/stage20/Sstage20.o  map/stage20/Sstage20.s
+map/stage21/Sstage21.o: map/stage21/Sstage21.s		; $(CC) $(ACC_FLAGS) -o map/stage21/Sstage21.o  map/stage21/Sstage21.s
+map/stage22/Sstage22.o: map/stage22/Sstage22.s		; $(CC) $(ACC_FLAGS) -o map/stage22/Sstage22.o  map/stage22/Sstage22.s
+map/stage23/Sstage23.o: map/stage23/Sstage23.s		; $(CC) $(ACC_FLAGS) -o map/stage23/Sstage23.o  map/stage23/Sstage23.s
+map/stage24/Sstage24.o: map/stage24/Sstage24.s		; $(CC) $(ACC_FLAGS) -o map/stage24/Sstage24.o  map/stage24/Sstage24.s
+map/stage25/Sstage25.o: map/stage25/Sstage25.s		; $(CC) $(ACC_FLAGS) -o map/stage25/Sstage25.o  map/stage25/Sstage25.s
+map/stage26/Sstage26.o: map/stage26/Sstage26.s		; $(CC) $(ACC_FLAGS) -o map/stage26/Sstage26.o  map/stage26/Sstage26.s
+map/stage27/Sstage27.o: map/stage27/Sstage27.s		; $(CC) $(ACC_FLAGS) -o map/stage27/Sstage27.o  map/stage27/Sstage27.s
+map/stage28/Sstage28.o: map/stage28/Sstage28.s		; $(CC) $(ACC_FLAGS) -o map/stage28/Sstage28.o  map/stage28/Sstage28.s
+map/stage29/Sstage29.o: map/stage29/Sstage29.s		; $(CC) $(ACC_FLAGS) -o map/stage29/Sstage29.o  map/stage29/Sstage29.s
+map/stage30/Sstage30.o: map/stage30/Sstage30.s		; $(CC) $(ACC_FLAGS) -o map/stage30/Sstage30.o  map/stage30/Sstage30.s
+map/stage31/Sstage31.o: map/stage31/Sstage31.s		; $(CC) $(ACC_FLAGS) -o map/stage31/Sstage31.o  map/stage31/Sstage31.s
+map/stage32/Sstage32.o: map/stage32/Sstage32.s		; $(CC) $(ACC_FLAGS) -o map/stage32/Sstage32.o  map/stage32/Sstage32.s
+map/stage33/Sstage33.o: map/stage33/Sstage33.s		; $(CC) $(ACC_FLAGS) -o map/stage33/Sstage33.o  map/stage33/Sstage33.s
+map/stage34/Sstage34.o: map/stage34/Sstage34.s 		; $(CC) $(ACC_FLAGS) -o map/stage34/Sstage34.o  map/stage34/Sstage34.s
+map/stage35/Sstage35.o: map/stage35/Sstage35.s  	; $(CC) $(ACC_FLAGS) -o map/stage35/Sstage35.o  map/stage35/Sstage35.s
+map/stage36/Sstage36.o: map/stage36/Sstage36.s 		; $(CC) $(ACC_FLAGS) -o map/stage36/Sstage36.o  map/stage36/Sstage36.s
+map/stage37/Sstage37.o: map/stage37/Sstage37.s 		; $(CC) $(ACC_FLAGS) -o map/stage37/Sstage37.o  map/stage37/Sstage37.s
+map/stage38/Sstage38.o: map/stage38/Sstage38.s 		; $(CC) $(ACC_FLAGS) -o map/stage38/Sstage38.o  map/stage38/Sstage38.s
+
+
+#################################################################################
+#	BACK SCREEN TEXTURE															#
+#################################################################################
+
+map/back/mainmap_backscrn.o: map/back/mainmap_backscrn.c
+	./press_linux map/back/mainmap_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/mainmap_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/mainmap_backscrn.o  map/back/mainmap_backscrn.s
+
+map/back/snowtower_backscrn.o: map/back/snowtower_backscrn.c
+	./press_linux map/back/snowtower_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/snowtower_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/snowtower_backscrn.o  map/back/snowtower_backscrn.s
+
+map/back/kuppa_backscrn.o: map/back/kuppa_backscrn.c
+	./press_linux map/back/kuppa_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/kuppa_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/kuppa_backscrn.o  map/back/kuppa_backscrn.s
+
+map/back/motos_backscrn.o: map/back/motos_backscrn.c
+	./press_linux map/back/motos_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/motos_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/motos_backscrn.o  map/back/motos_backscrn.s
+
+map/back/waterland_backscrn.o: map/back/waterland_backscrn.c
+	./press_linux map/back/waterland_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/waterland_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/waterland_backscrn.o  map/back/waterland_backscrn.s
+
+map/back/mountain_backscrn.o: map/back/mountain_backscrn.c
+	./press_linux map/back/mountain_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/mountain_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/mountain_backscrn.o  map/back/mountain_backscrn.s
+
+map/back/sabaku_backscrn.o: map/back/sabaku_backscrn.c
+	./press_linux map/back/sabaku_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/sabaku_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/sabaku_backscrn.o  map/back/sabaku_backscrn.s
+
+map/back/bigworld_backscrn.o: map/back/bigworld_backscrn.c
+	./press_linux map/back/bigworld_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/bigworld_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/bigworld_backscrn.o  map/back/bigworld_backscrn.s
+
+map/back/yokoscrl_backscrn.o: map/back/yokoscrl_backscrn.c
+	./press_linux map/back/yokoscrl_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/yokoscrl_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/yokoscrl_backscrn.o  map/back/yokoscrl_backscrn.s
+
+map/back/kuppa3_backscrn.o: map/back/kuppa3_backscrn.c
+	./press_linux map/back/kuppa3_backscrn $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/back/kuppa3_backscrn > null
+	$(CC) $(ACC_FLAGS) -o map/back/kuppa3_backscrn.o  map/back/kuppa3_backscrn.s
+
+
+
+#################################################################################
+#	Making texture group data objects											#
+#################################################################################
+
+map/texture/a_lava_texture.o: map/texture/a_lava_texture.c
+	./press_linux map/texture/a_lava_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/a_lava_texture > map/texture/a_lava_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/a_lava_texture.o map/texture/a_lava_texture.s
+
+map/texture/b_house_texture.o: map/texture/b_house_texture.c
+	./press_linux map/texture/b_house_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/b_house_texture > map/texture/b_house_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/b_house_texture.o map/texture/b_house_texture.s
+
+map/texture/c_field_texture.o: map/texture/c_field_texture.c
+	./press_linux map/texture/c_field_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/c_field_texture > map/texture/c_field_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/c_field_texture.o map/texture/c_field_texture.s
+
+map/texture/d_water_texture.o: map/texture/d_water_texture.c
+	./press_linux map/texture/d_water_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/d_water_texture > map/texture/d_water_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/d_water_texture.o map/texture/d_water_texture.s
+
+map/texture/e_mt_texture.o: map/texture/e_mt_texture.c
+	./press_linux map/texture/e_mt_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/e_mt_texture > map/texture/e_mt_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/e_mt_texture.o map/texture/e_mt_texture.s
+
+map/texture/f_snow_mt_texture.o: map/texture/f_snow_mt_texture.c
+	./press_linux map/texture/f_snow_mt_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/f_snow_mt_texture > map/texture/f_snow_mt_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/f_snow_mt_texture.o map/texture/f_snow_mt_texture.s
+
+map/texture/g_cave_texture.o: map/texture/g_cave_texture.c
+	./press_linux map/texture/g_cave_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/g_cave_texture > map/texture/g_cave_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/g_cave_texture.o map/texture/g_cave_texture.s
+
+map/texture/h_mecha_texture.o: map/texture/h_mecha_texture.c
+	./press_linux map/texture/h_mecha_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/h_mecha_texture > map/texture/h_mecha_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/h_mecha_texture.o map/texture/h_mecha_texture.s
+
+map/texture/i_slider_texture.o: map/texture/i_slider_texture.c
+	./press_linux map/texture/i_slider_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/i_slider_texture > map/texture/i_slider_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/i_slider_texture.o map/texture/i_slider_texture.s
+
+map/texture/j_fort_texture.o: map/texture/j_fort_texture.c
+	./press_linux map/texture/j_fort_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/j_fort_texture > map/texture/j_fort_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/j_fort_texture.o map/texture/j_fort_texture.s
+
+map/texture/k_castlein_texture.o: map/texture/k_castlein_texture.c
+	./press_linux map/texture/k_castlein_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/k_castlein_texture > map/texture/k_castlein_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/k_castlein_texture.o map/texture/k_castlein_texture.s
+
+map/texture/l_castleout_texture.o: map/texture/l_castleout_texture.c
+	./press_linux map/texture/l_castleout_texture $(SEGMENT_TEXTURE) > symbol.out
+	./convszp_linux symbol.out map/texture/l_castleout_texture > map/texture/l_castleout_texsymb.h
+	$(CC) $(ACC_FLAGS) -o map/texture/l_castleout_texture.o map/texture/l_castleout_texture.s
+
+
+
+#################################################################################
+#	Making stage shape and texture data objects									#
+#################################################################################
+
+ifeq ($(LOCALE), LOCALE_ZH)
+map/title/nintendo_logo.o: map/title/nintendo_logo.c i10n/assets/zh/iqnin_logo.raw
+	dd bs=8192 count=1 if=i10n/assets/zh/iqnin_logo.raw of=i10n/assets/zh/iqnin_logo1.raw
+	dd bs=8192 skip=1 count=1 if=i10n/assets/zh/iqnin_logo.raw of=i10n/assets/zh/iqnin_logo2.raw
+	./i10n/tools/gen5551.pl i10n/assets/zh/iqnin_logo1.raw i10n/assets/zh/iqnin_logo1.h ninten02_txt
+	./i10n/tools/gen5551.pl i10n/assets/zh/iqnin_logo2.raw i10n/assets/zh/iqnin_logo2.h ninten01_txt
+	./press_linux map/title/nintendo_logo $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/title/nintendo_logo > null
+	$(CC) $(ACC_FLAGS) -o map/title/nintendo_logo.o  map/title/nintendo_logo.s
+else
+map/title/nintendo_logo.o: map/title/nintendo_logo.c
+	./press_linux map/title/nintendo_logo $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/title/nintendo_logo > null
+	$(CC) $(ACC_FLAGS) -o map/title/nintendo_logo.o  map/title/nintendo_logo.s
+endif
+map/title/debug_title.o: map/title/debug_title.c
+	./press_linux map/title/debug_title $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/title/debug_title > null
+	$(CC) $(ACC_FLAGS) -o map/title/debug_title.o  map/title/debug_title.s
+
+ifeq ($(LOCALE), LOCALE_ZH)
+map/title/title_back.o: map/title/title_back.c i10n/assets/zh/titlebg_zh.raw i10n/assets/zh/gameover_zh.raw
+	dd bs=4800 count=1 if=i10n/assets/zh/titlebg_zh.raw of=i10n/assets/zh/titlebg1_zh.raw
+	dd bs=4800 skip=1 count=1 if=i10n/assets/zh/titlebg_zh.raw of=i10n/assets/zh/titlebg2_zh.raw
+	dd bs=4800 skip=2 count=1 if=i10n/assets/zh/titlebg_zh.raw of=i10n/assets/zh/titlebg3_zh.raw
+	dd bs=4800 skip=3 count=1 if=i10n/assets/zh/titlebg_zh.raw of=i10n/assets/zh/titlebg4_zh.raw
+	i10n/tools/gen5551_rgb.pl i10n/assets/zh/titlebg1_zh.raw i10n/assets/zh/titlebg1_zh.h mario_title0_txt
+	i10n/tools/gen5551_rgb.pl i10n/assets/zh/titlebg2_zh.raw i10n/assets/zh/titlebg2_zh.h mario_title1_txt
+	i10n/tools/gen5551_rgb.pl i10n/assets/zh/titlebg3_zh.raw i10n/assets/zh/titlebg3_zh.h mario_title2_txt
+	i10n/tools/gen5551_rgb.pl i10n/assets/zh/titlebg4_zh.raw i10n/assets/zh/titlebg4_zh.h mario_title3_txt
+	dd bs=6400 count=1 if=i10n/assets/zh/gameover_zh.raw of=i10n/assets/zh/gameover0_zh.raw
+	dd bs=6400 skip=1 count=1 if=i10n/assets/zh/gameover_zh.raw of=i10n/assets/zh/gameover1_zh.raw
+	dd bs=6400 skip=2 count=1 if=i10n/assets/zh/gameover_zh.raw of=i10n/assets/zh/gameover2_zh.raw
+	dd bs=6400 skip=3 count=1 if=i10n/assets/zh/gameover_zh.raw of=i10n/assets/zh/gameover3_zh.raw
+	i10n/tools/gen5551.pl i10n/assets/zh/gameover0_zh.raw i10n/assets/zh/gameover0_zh.h game_over_000_txt
+	i10n/tools/gen5551.pl i10n/assets/zh/gameover1_zh.raw i10n/assets/zh/gameover1_zh.h game_over_001_txt
+	i10n/tools/gen5551.pl i10n/assets/zh/gameover2_zh.raw i10n/assets/zh/gameover2_zh.h game_over_002_txt
+	i10n/tools/gen5551.pl i10n/assets/zh/gameover3_zh.raw i10n/assets/zh/gameover3_zh.h game_over_003_txt
+	./press_linux map/title/title_back $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/title/title_back > null
+	$(CC) $(ACC_FLAGS) -o map/title/title_back.o  map/title/title_back.s
+else
+map/title/title_back.o: map/title/title_back.c
+	./press_linux map/title/title_back $(SEGMENT_BACK) > symbol.out
+	./convszp_linux symbol.out map/title/title_back > null
+	$(CC) $(ACC_FLAGS) -o map/title/title_back.o  map/title/title_back.s
+endif
+
+ifeq ($(LOCALE), LOCALE_ZH)
+map/select/Gselect.o: map/select/Gselect.c i10n/assets/zh/selectpict_zh.raw
+	dd bs=8k count=1 if=i10n/assets/zh/selectpict_zh.raw of=i10n/assets/zh/selectpict0_zh.raw
+	dd bs=8k skip=1 count=1 if=i10n/assets/zh/selectpict_zh.raw of=i10n/assets/zh/selectpict1_zh.raw
+	i10n/tools/gen5551.pl i10n/assets/zh/selectpict0_zh.raw i10n/assets/zh/selectpict0_zh.h select_pict_txt_00
+	i10n/tools/gen5551.pl i10n/assets/zh/selectpict1_zh.raw i10n/assets/zh/selectpict1_zh.h select_pict_txt_10
+	./press_linux map/select/Gselect $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/select/Gselect > null
+	$(CC) $(ACC_FLAGS) -o map/select/Gselect.o  map/select/Gselect.s
+else
+map/select/Gselect.o: map/select/Gselect.c
+	./press_linux map/select/Gselect $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/select/Gselect > null
+	$(CC) $(ACC_FLAGS) -o map/select/Gselect.o  map/select/Gselect.s
+endif
+
+map/stage1/Gstage1.o: map/stage1/Gstage1.c
+	./press_linux map/stage1/Gstage1 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage1/Gstage1 > null
+	$(CC) $(ACC_FLAGS) -o map/stage1/Gstage1.o  map/stage1/Gstage1.s
+
+map/stage2/Gstage2.o: map/stage2/Gstage2.c
+	./press_linux map/stage2/Gstage2 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage2/Gstage2 > null
+	$(CC) $(ACC_FLAGS) -o map/stage2/Gstage2.o  map/stage2/Gstage2.s
+
+map/stage3/Gstage3.o: map/stage3/Gstage3.c
+	./press_linux map/stage3/Gstage3 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage3/Gstage3 > null
+	$(CC) $(ACC_FLAGS) -o map/stage3/Gstage3.o  map/stage3/Gstage3.s
+
+map/stage4/Gstage4.o: map/stage4/Gstage4.c $(TEXTURE_SYMBOL_INC) $(GSTAGE4_INC)
+	./press_linux map/stage4/Gstage4 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage4/Gstage4 > null
+	$(CC) $(ACC_FLAGS) -o map/stage4/Gstage4.o  map/stage4/Gstage4.s
+
+map/stage5/Gstage5.o: map/stage5/Gstage5.c $(TEXTURE_SYMBOL_INC) $(GSTAGE5_INC)
+	./press_linux map/stage5/Gstage5 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage5/Gstage5 > null
+	$(CC) $(ACC_FLAGS) -o map/stage5/Gstage5.o  map/stage5/Gstage5.s
+
+map/stage6/Gstage6.o: map/stage6/Gstage6.c $(TEXTURE_SYMBOL_INC) $(GSTAGE6_INC)
+	./press_linux map/stage6/Gstage6 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage6/Gstage6 > null
+	$(CC) $(ACC_FLAGS) -o map/stage6/Gstage6.o  map/stage6/Gstage6.s
+
+map/stage7/Gstage7.o: map/stage7/Gstage7.c $(TEXTURE_SYMBOL_INC) $(GSTAGE7_INC)
+	./press_linux map/stage7/Gstage7 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage7/Gstage7 > null
+	$(CC) $(ACC_FLAGS) -o map/stage7/Gstage7.o  map/stage7/Gstage7.s
+
+map/stage8/Gstage8.o: map/stage8/Gstage8.c $(TEXTURE_SYMBOL_INC) $(GSTAGE8_INC)
+	./press_linux map/stage8/Gstage8 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage8/Gstage8 > null
+	$(CC) $(ACC_FLAGS) -o map/stage8/Gstage8.o  map/stage8/Gstage8.s
+
+map/stage9/Gstage9.o: map/stage9/Gstage9.c $(TEXTURE_SYMBOL_INC) $(GSTAGE9_INC)
+	./press_linux map/stage9/Gstage9 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage9/Gstage9 > null
+	$(CC) $(ACC_FLAGS) -o map/stage9/Gstage9.o  map/stage9/Gstage9.s
+
+map/stage10/Gstage10.o: map/stage10/Gstage10.c $(TEXTURE_SYMBOL_INC) $(GSTAGE10_INC)
+	./press_linux map/stage10/Gstage10 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage10/Gstage10 > null
+	$(CC) $(ACC_FLAGS) -o map/stage10/Gstage10.o  map/stage10/Gstage10.s
+
+map/stage11/Gstage11.o: map/stage11/Gstage11.c $(TEXTURE_SYMBOL_INC) $(GSTAGE11_INC)
+	./press_linux map/stage11/Gstage11 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage11/Gstage11 > null
+	$(CC) $(ACC_FLAGS) -o map/stage11/Gstage11.o  map/stage11/Gstage11.s
+
+map/stage12/Gstage12.o: map/stage12/Gstage12.c $(TEXTURE_SYMBOL_INC) $(GSTAGE12_INC)
+	./press_linux map/stage12/Gstage12 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage12/Gstage12 > null
+	$(CC) $(ACC_FLAGS) -o map/stage12/Gstage12.o  map/stage12/Gstage12.s
+
+map/stage13/Gstage13.o: map/stage13/Gstage13.c $(TEXTURE_SYMBOL_INC) $(GSTAGE13_INC)
+	./press_linux map/stage13/Gstage13 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage13/Gstage13 > null
+	$(CC) $(ACC_FLAGS) -o map/stage13/Gstage13.o  map/stage13/Gstage13.s
+
+map/stage14/Gstage14.o: map/stage14/Gstage14.c $(TEXTURE_SYMBOL_INC) $(GSTAGE14_INC)
+	./press_linux map/stage14/Gstage14 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage14/Gstage14 > null
+	$(CC) $(ACC_FLAGS) -o map/stage14/Gstage14.o  map/stage14/Gstage14.s
+
+map/stage15/Gstage15.o: map/stage15/Gstage15.c $(TEXTURE_SYMBOL_INC) $(GSTAGE15_INC)
+	./press_linux map/stage15/Gstage15 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage15/Gstage15 > null
+	$(CC) $(ACC_FLAGS) -o map/stage15/Gstage15.o  map/stage15/Gstage15.s
+
+map/stage16/Gstage16.o: map/stage16/Gstage16.c $(TEXTURE_SYMBOL_INC) $(GSTAGE16_INC)
+	./press_linux map/stage16/Gstage16 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage16/Gstage16 > null
+	$(CC) $(ACC_FLAGS) -o map/stage16/Gstage16.o  map/stage16/Gstage16.s
+
+map/stage17/Gstage17.o: map/stage17/Gstage17.c $(TEXTURE_SYMBOL_INC) $(GSTAGE17_INC)
+	./press_linux map/stage17/Gstage17 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage17/Gstage17 > null
+	$(CC) $(ACC_FLAGS) -o map/stage17/Gstage17.o  map/stage17/Gstage17.s
+
+map/stage18/Gstage18.o: map/stage18/Gstage18.c $(TEXTURE_SYMBOL_INC) $(GSTAGE18_INC)
+	./press_linux map/stage18/Gstage18 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage18/Gstage18 > null
+	$(CC) $(ACC_FLAGS) -o map/stage18/Gstage18.o  map/stage18/Gstage18.s
+
+map/stage19/Gstage19.o: map/stage19/Gstage19.c $(TEXTURE_SYMBOL_INC) $(GSTAGE19_INC)
+	./press_linux map/stage19/Gstage19 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage19/Gstage19 > null
+	$(CC) $(ACC_FLAGS) -o map/stage19/Gstage19.o  map/stage19/Gstage19.s
+
+map/stage20/Gstage20.o: map/stage20/Gstage20.c  $(TEXTURE_SYMBOL_INC) $(GSTAGE20_INC)
+	./press_linux map/stage20/Gstage20 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage20/Gstage20 > null
+	$(CC) $(ACC_FLAGS) -o map/stage20/Gstage20.o  map/stage20/Gstage20.s
+
+map/stage21/Gstage21.o: map/stage21/Gstage21.c $(TEXTURE_SYMBOL_INC) $(GSTAGE21_INC)
+	./press_linux map/stage21/Gstage21 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage21/Gstage21 > null
+	$(CC) $(ACC_FLAGS) -o map/stage21/Gstage21.o  map/stage21/Gstage21.s
+
+map/stage22/Gstage22.o: map/stage22/Gstage22.c $(TEXTURE_SYMBOL_INC) $(GSTAGE22_INC)
+	./press_linux map/stage22/Gstage22 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage22/Gstage22 > null
+	$(CC) $(ACC_FLAGS) -o map/stage22/Gstage22.o  map/stage22/Gstage22.s
+
+map/stage23/Gstage23.o: map/stage23/Gstage23.c $(TEXTURE_SYMBOL_INC) $(GSTAGE23_INC)
+	./press_linux map/stage23/Gstage23 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage23/Gstage23 > null
+	$(CC) $(ACC_FLAGS) -o map/stage23/Gstage23.o  map/stage23/Gstage23.s
+
+map/stage24/Gstage24.o: map/stage24/Gstage24.c $(TEXTURE_SYMBOL_INC) $(GSTAGE24_INC)
+	./press_linux map/stage24/Gstage24 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage24/Gstage24 > null
+	$(CC) $(ACC_FLAGS) -o map/stage24/Gstage24.o  map/stage24/Gstage24.s
+
+ifeq ($(LOCALE), LOCALE_ZH)
+map/stage25/Gstage25.o: map/stage25/Gstage25.c i10n/assets/zh/cake_zh.raw
+	i10n/tools/bakecake.py i10n/assets/zh/cake_zh.raw i10n/assets/zh/cake_zh.h
+	./press_linux map/stage25/Gstage25 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage25/Gstage25 > null
+	$(CC) $(ACC_FLAGS) -o map/stage25/Gstage25.o  map/stage25/Gstage25.s
+else
+map/stage25/Gstage25.o: map/stage25/Gstage25.c 
+	./press_linux map/stage25/Gstage25 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage25/Gstage25 > null
+	$(CC) $(ACC_FLAGS) -o map/stage25/Gstage25.o  map/stage25/Gstage25.s
+endif
+
+map/stage26/Gstage26.o: map/stage26/Gstage26.c $(TEXTURE_SYMBOL_INC) $(GSTAGE26_INC)
+	./press_linux map/stage26/Gstage26 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage26/Gstage26 > null
+	$(CC) $(ACC_FLAGS) -o map/stage26/Gstage26.o  map/stage26/Gstage26.s
+
+map/stage27/Gstage27.o: map/stage27/Gstage27.c $(TEXTURE_SYMBOL_INC) $(GSTAGE27_INC)
+	./press_linux map/stage27/Gstage27 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage27/Gstage27 > null
+	$(CC) $(ACC_FLAGS) -o map/stage27/Gstage27.o  map/stage27/Gstage27.s
+
+map/stage28/Gstage28.o: map/stage28/Gstage28.c $(TEXTURE_SYMBOL_INC) $(GSTAGE28_INC)
+	./press_linux map/stage28/Gstage28 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage28/Gstage28 > null
+	$(CC) $(ACC_FLAGS) -o map/stage28/Gstage28.o  map/stage28/Gstage28.s
+
+map/stage29/Gstage29.o: map/stage29/Gstage29.c $(TEXTURE_SYMBOL_INC) $(GSTAGE29_INC)
+	./press_linux map/stage29/Gstage29 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage29/Gstage29 > null
+	$(CC) $(ACC_FLAGS) -o map/stage29/Gstage29.o  map/stage29/Gstage29.s
+
+map/stage30/Gstage30.o: map/stage30/Gstage30.c $(TEXTURE_SYMBOL_INC)
+	./press_linux map/stage30/Gstage30 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage30/Gstage30 > null
+	$(CC) $(ACC_FLAGS) -o map/stage30/Gstage30.o  map/stage30/Gstage30.s
+
+map/stage31/Gstage31.o: map/stage31/Gstage31.c $(TEXTURE_SYMBOL_INC) $(GSTAGE31_INC)
+	./press_linux map/stage31/Gstage31 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage31/Gstage31 > null
+	$(CC) $(ACC_FLAGS) -o map/stage31/Gstage31.o  map/stage31/Gstage31.s
+
+map/stage32/Gstage32.o: map/stage32/Gstage32.c
+	./press_linux map/stage32/Gstage32 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage32/Gstage32 > null
+	$(CC) $(ACC_FLAGS) -o map/stage32/Gstage32.o  map/stage32/Gstage32.s
+
+
+map/stage33/Gstage33.o: map/stage33/Gstage33.c $(TEXTURE_SYMBOL_INC)
+	./press_linux map/stage33/Gstage33 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage33/Gstage33 > null
+	$(CC) $(ACC_FLAGS) -o map/stage33/Gstage33.o  map/stage33/Gstage33.s
+
+map/stage34/Gstage34.o: map/stage34/Gstage34.c $(TEXTURE_SYMBOL_INC)
+	./press_linux map/stage34/Gstage34 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage34/Gstage34 > null
+	$(CC) $(ACC_FLAGS) -o map/stage34/Gstage34.o  map/stage34/Gstage34.s
+
+map/stage35/Gstage35.o: map/stage35/Gstage35.c
+	./press_linux map/stage35/Gstage35 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage35/Gstage35 > null
+	$(CC) $(ACC_FLAGS) -o map/stage35/Gstage35.o  map/stage35/Gstage35.s
+
+map/stage36/Gstage36.o: map/stage36/Gstage36.c $(TEXTURE_SYMBOL_INC) $(GSTAGE36_INC)
+	./press_linux map/stage36/Gstage36 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage36/Gstage36 > null
+	$(CC) $(ACC_FLAGS) -o map/stage36/Gstage36.o  map/stage36/Gstage36.s
+
+map/stage37/Gstage37.o: map/stage37/Gstage37.c 
+	./press_linux map/stage37/Gstage37 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage37/Gstage37 > null
+	$(CC) $(ACC_FLAGS) -o map/stage37/Gstage37.o  map/stage37/Gstage37.s
+
+map/stage38/Gstage38.o: map/stage38/Gstage38.c
+	./press_linux map/stage38/Gstage38 $(SEGMENT_STAGE1) > symbol.out
+	./convszp_linux symbol.out map/stage38/Gstage38 > null
+	$(CC) $(ACC_FLAGS) -o map/stage38/Gstage38.o  map/stage38/Gstage38.s
+
+
+#################################################################################
+#	Making shape data objects													#
+#################################################################################
+
+#shape/snowdata.o: shape/snowdata.c
+#	$(CC) $(CC_FLAGS) -o shape/snowdata.o  shape/snowdata.c
+
+shape/hms_player.o: shape/hms_player.c $(PLAYER_INC)
+	$(CC) $(CC_FLAGS) -o shape/hms_player.o  shape/hms_player.c
+
+shape/gfx_player.o: shape/gfx_player.c $(PLAYER_INC)
+	./press_linux shape/gfx_player $(SEGMENT_PLAYER) > symbol.out
+	./convszp_linux symbol.out shape/gfx_player > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_player.o  shape/gfx_player.s
+
+shape/gfx_weather.o: shape/gfx_weather.c $(WEATHER_INC)
+	./press_linux shape/gfx_weather $(SEGMENT_WEATHER) > symbol.out
+	./convszp_linux symbol.out shape/gfx_weather > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_weather.o  shape/gfx_weather.s
+
+shape/hms_keep.o: shape/hms_keep.c
+	$(CC) $(CC_FLAGS) -o shape/hms_keep.o  shape/hms_keep.c
+
+
+ifeq ($(LOCALE), LOCALE_ZH)
+shape/gfx_keep.o: shape/gfx_keep.c i10n/assets/zh/power1_zh.raw i10n/assets/zh/power2_zh.raw
+	./i10n/tools/gen5551.pl i10n/assets/zh/power1_zh.raw i10n/assets/zh/power1_zh.txt pow_meter_txt_00
+	./i10n/tools/gen5551.pl i10n/assets/zh/power2_zh.raw i10n/assets/zh/power2_zh.txt pow_meter_txt_01
+	./press_linux shape/gfx_keep $(SEGMENT_KEEP) > symbol.out
+	./convszp_linux symbol.out shape/gfx_keep > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_keep.o  shape/gfx_keep.s
+else
+shape/gfx_keep.o: shape/gfx_keep.c 
+	./press_linux shape/gfx_keep $(SEGMENT_KEEP) > symbol.out
+	./convszp_linux symbol.out shape/gfx_keep > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_keep.o  shape/gfx_keep.s
+endif
+
+#################################################################################
+#	bank enemy files															#
+#################################################################################
+
+#-------------------- enemy group 3 --------------------------#
+
+shape/hms_basic_enemy.o: shape/hms_basic_enemy.c	
+	$(CC) $(CC_FLAGS) -o shape/hms_basic_enemy.o  shape/hms_basic_enemy.c
+shape/gfx_basic_enemy.o: shape/gfx_basic_enemy.c	
+	./press_linux shape/gfx_basic_enemy $(SEGMENT_ENEMY3) > symbol.out
+	./convszp_linux symbol.out shape/gfx_basic_enemy > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_basic_enemy.o  shape/gfx_basic_enemy.s
+
+#-------------------- enemy group 1 --------------------------#
+
+shape/hms_enemy1_a.o: shape/hms_enemy1_a.c	
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_a.o  shape/hms_enemy1_a.c
+shape/gfx_enemy1_a.o: shape/gfx_enemy1_a.c	
+	./press_linux shape/gfx_enemy1_a $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_a > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_a.o  shape/gfx_enemy1_a.s
+
+shape/hms_enemy1_b.o: shape/hms_enemy1_b.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_b.o  shape/hms_enemy1_b.c
+shape/gfx_enemy1_b.o: shape/gfx_enemy1_b.c
+	./press_linux shape/gfx_enemy1_b $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_b > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_b.o  shape/gfx_enemy1_b.s
+
+shape/hms_enemy1_c.o: shape/hms_enemy1_c.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_c.o  shape/hms_enemy1_c.c
+shape/gfx_enemy1_c.o: shape/gfx_enemy1_c.c
+	./press_linux shape/gfx_enemy1_c $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_c > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_c.o  shape/gfx_enemy1_c.s
+
+shape/hms_enemy1_d.o: shape/hms_enemy1_d.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_d.o  shape/hms_enemy1_d.c
+shape/gfx_enemy1_d.o: shape/gfx_enemy1_d.c
+	./press_linux shape/gfx_enemy1_d $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_d > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_d.o  shape/gfx_enemy1_d.s
+
+shape/hms_enemy1_e.o: shape/hms_enemy1_e.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_e.o  shape/hms_enemy1_e.c
+shape/gfx_enemy1_e.o: shape/gfx_enemy1_e.c
+	./press_linux shape/gfx_enemy1_e $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_e > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_e.o  shape/gfx_enemy1_e.s
+
+shape/hms_enemy1_f.o: shape/hms_enemy1_f.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_f.o  shape/hms_enemy1_f.c
+shape/gfx_enemy1_f.o: shape/gfx_enemy1_f.c
+	./press_linux shape/gfx_enemy1_f $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_f > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_f.o  shape/gfx_enemy1_f.s
+
+shape/hms_enemy1_g.o: shape/hms_enemy1_g.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_g.o  shape/hms_enemy1_g.c
+shape/gfx_enemy1_g.o: shape/gfx_enemy1_g.c
+	./press_linux shape/gfx_enemy1_g $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_g > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_g.o  shape/gfx_enemy1_g.s
+
+shape/hms_enemy1_h.o: shape/hms_enemy1_h.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_h.o  shape/hms_enemy1_h.c
+shape/gfx_enemy1_h.o: shape/gfx_enemy1_h.c
+	./press_linux shape/gfx_enemy1_h $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_h > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_h.o  shape/gfx_enemy1_h.s
+
+shape/hms_enemy1_i.o: shape/hms_enemy1_i.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_i.o  shape/hms_enemy1_i.c
+shape/gfx_enemy1_i.o: shape/gfx_enemy1_i.c
+	./press_linux shape/gfx_enemy1_i $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_i > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_i.o  shape/gfx_enemy1_i.s
+
+shape/hms_enemy1_j.o: shape/hms_enemy1_j.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_j.o  shape/hms_enemy1_j.c
+shape/gfx_enemy1_j.o: shape/gfx_enemy1_j.c
+	./press_linux shape/gfx_enemy1_j $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_j > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_j.o  shape/gfx_enemy1_j.s
+
+shape/hms_enemy1_k.o: shape/hms_enemy1_k.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy1_k.o  shape/hms_enemy1_k.c
+shape/gfx_enemy1_k.o: shape/gfx_enemy1_k.c
+	./press_linux shape/gfx_enemy1_k $(SEGMENT_ENEMY1) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy1_k > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy1_k.o  shape/gfx_enemy1_k.s
+
+#-------------------- enemy group 2 --------------------------#
+
+shape/hms_enemy2_a.o: shape/hms_enemy2_a.c 
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy2_a.o  shape/hms_enemy2_a.c
+shape/gfx_enemy2_a.o: shape/gfx_enemy2_a.c 
+	./press_linux shape/gfx_enemy2_a $(SEGMENT_ENEMY2) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy2_a > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy2_a.o  shape/gfx_enemy2_a.s
+
+shape/hms_enemy2_d.o: shape/hms_enemy2_d.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy2_d.o  shape/hms_enemy2_d.c
+shape/gfx_enemy2_d.o: shape/gfx_enemy2_d.c
+	./press_linux shape/gfx_enemy2_d $(SEGMENT_ENEMY2) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy2_d > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy2_d.o  shape/gfx_enemy2_d.s
+
+shape/hms_enemy2_e.o: shape/hms_enemy2_e.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy2_e.o  shape/hms_enemy2_e.c
+shape/gfx_enemy2_e.o: shape/gfx_enemy2_e.c
+	./press_linux shape/gfx_enemy2_e $(SEGMENT_ENEMY2) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy2_e > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy2_e.o  shape/gfx_enemy2_e.s
+
+shape/hms_enemy2_f.o: shape/hms_enemy2_f.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy2_f.o  shape/hms_enemy2_f.c
+shape/gfx_enemy2_f.o: shape/gfx_enemy2_f.c
+	./press_linux shape/gfx_enemy2_f $(SEGMENT_ENEMY2) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy2_f > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy2_f.o  shape/gfx_enemy2_f.s
+
+shape/hms_enemy2_g.o: shape/hms_enemy2_g.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy2_g.o  shape/hms_enemy2_g.c
+shape/gfx_enemy2_g.o: shape/gfx_enemy2_g.c
+	./press_linux shape/gfx_enemy2_g $(SEGMENT_ENEMY2) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy2_g > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy2_g.o  shape/gfx_enemy2_g.s
+
+shape/hms_enemy2_h.o: shape/hms_enemy2_h.c
+	$(CC) $(CC_FLAGS) -o shape/hms_enemy2_h.o  shape/hms_enemy2_h.c
+shape/gfx_enemy2_h.o: shape/gfx_enemy2_h.c
+	./press_linux shape/gfx_enemy2_h $(SEGMENT_ENEMY2) > symbol.out
+	./convszp_linux symbol.out shape/gfx_enemy2_h > null
+	$(CC) $(ACC_FLAGS) -o shape/gfx_enemy2_h.o  shape/gfx_enemy2_h.s
+
+#################################################################################
+#	Making data objects															#
+#################################################################################
+
+data/dynamic.o	: data/dynamic.c		; $(CC) $(CC_FLAGS) -o data/dynamic.o    data/dynamic.c
+data/framebuf.o	: data/framebuf.c		; $(CC) $(CC_FLAGS) -o data/framebuf.o   data/framebuf.c
+data/depthbuf.o	: data/depthbuf.c		; $(CC) $(CC_FLAGS) -o data/depthbuf.o   data/depthbuf.c
+data/fifobuf.o	: data/fifobuf.c		; $(CC) $(CC_FLAGS) -o data/fifobuf.o    data/fifobuf.c
+data/textbuf.o	: data/textbuf.c		; $(CC) $(CC_FLAGS) -o data/textbuf.o    data/textbuf.c
+data/buffers.o	: data/buffers.c		; $(CC) $(CC_FLAGS) -o data/buffers.o    data/buffers.c
+data/anime.o	: data/anime.s			; $(CC) $(ACC_FLAGS) -o data/anime.o      data/anime.s
+data/contdata.o : data/contdata.s		; $(CC) $(ACC_FLAGS) -o data/contdata.o   data/contdata.s
+data/pathdata.o	: data/pathdata.s		; $(CC) $(ACC_FLAGS) -o data/pathdata.o   data/pathdata.s
+data/ipathdata.o: data/ipathdata.s	$(IWAMOTO_INC)	; $(CC) $(ACC_FLAGS) -o data/ipathdata.o  data/ipathdata.s
+data/npathdata.o: data/npathdata.s		; $(CC) $(ACC_FLAGS) -o data/npathdata.o  data/npathdata.s
+data/wpathdata.o: data/wpathdata.s		; $(CC) $(ACC_FLAGS) -o data/wpathdata.o  data/wpathdata.s
+data/kpathdata.o: data/kpathdata.s	; $(CC) $(ACC_FLAGS) -o data/kpathdata.o  data/kpathdata.s
+
+ifeq ($(LOCALE), LOCALE_ZH)
+data/basic.o: data/basic.c $(BASIC_INC) i10n/assets/zh/16bitColorFontGlyph.raw i10n/assets/zh/translation.txt
+	i10n/tools/zh/zh_genmap16.pl i10n/assets/zh/16bitColorFontGlyph.raw i10n/assets/zh/16bitColorFontGlyph.h
+	i10n/tools/zh/zh_kanji.pl i10n/assets/zh/GB_SIMPLIFIED_CHINESE i10n/assets/zh/translation.txt i10n/assets/zh/zh_msg i10n/assets/zh/idx.txt
+	grep 'static unsigned char course' i10n/assets/zh/zh_msg.msg > i10n/assets/zh/course_name_zh.msg
+	grep 'static unsigned char star_name' i10n/assets/zh/zh_msg.msg > i10n/assets/zh/star_name_zh.msg
+	grep 'static unsigned char str' i10n/assets/zh/zh_msg.msg > i10n/assets/zh/mess_data_zh.msg
+	./press_linux data/basic $(SEGMENT_BASIC) > symbol.out
+	./convszp_linux symbol.out data/basic > null
+	$(CC) $(ACC_FLAGS) -o data/basic.o  data/basic.s
+else
+data/basic.o: data/basic.c $(BASIC_INC) i10n/assets/zh/16bitColorFontGlyph.raw
+	./press_linux data/basic $(SEGMENT_BASIC) > symbol.out
+	./convszp_linux symbol.out data/basic > null
+	$(CC) $(ACC_FLAGS) -o data/basic.o  data/basic.s
+endif
+
+#################################################################################
+#	Special convert																#
+#################################################################################
+
+include/shapename.h: include/shapename.def
+	defmake include/shapename
+
+
+clean:
+#	rm $(NISHIDA_OBJS) $(YAJIMA_OBJS) $(KAWAGOE_OBJS) $(TANIMOTO_OBJS) $(IWAMOTO_OBJS) $(IWAWAKI_OBJS)
+	rm -f message.o starselect.o fileselect.o tmp_motor.o memory.o title.o titlebg.o game.o dprint.o gauge.o scene.o
+	rm -f $(CODE_SEG) $(SHAPE) $(DATA_RM) $(ANIME) $(BACKSCRN) $(MAPTEXTURE) $(SEQUENCE) $(MAP) $(STAGE)
+	rm -f $(SHAPE:.o=.s) $(SHAPE:.o=.szp)
+	rm -f $(BACKSCRN:.o=.s) $(BACKSCRN:.o=.szp)
+	rm -f $(MAPTEXTURE:.o=.s) $(MAPTEXTURE:.o=.szp)
+	rm -f $(STAGE:.o=.s) $(STAGE:.o=.szp)
+	rm -f data/basic.s data/basic.szp
+	rm -f link.map make.out null rom.map symbol.out
+	rm -f $(TEXTURE_SYMBOL_INC)
+ifeq ($(LOCALE), LOCALE_ZH)
+	rm -f i10n/assets/zh/power1_zh.txt i10n/assets/zh/power2_zh.txt i10n/assets/zh/16bitColorFontGlyph.h
+	rm -f i10n/assets/zh/titlebg1_zh.raw i10n/assets/zh/titlebg1_zh.h
+	rm -f i10n/assets/zh/titlebg2_zh.raw i10n/assets/zh/titlebg2_zh.h
+	rm -f i10n/assets/zh/titlebg3_zh.raw i10n/assets/zh/titlebg3_zh.h
+	rm -f i10n/assets/zh/titlebg4_zh.raw i10n/assets/zh/titlebg4_zh.h
+	rm -f i10n/assets/zh/iqnin_logo1.raw i10n/assets/zh/iqnin_logo1.h
+	rm -f i10n/assets/zh/iqnin_logo2.raw i10n/assets/zh/iqnin_logo2.h
+	rm -f i10n/assets/zh/zh_msg.* i10n/assets/zh/*.msg
+endif
+@
+
+
+1.27
+log
+@Resize copyright message
+@
+text
+@d961 4
+a964 1
+	./i10n/tools/gen5551.pl i10n/assets/zh/iqnin_logo.raw i10n/assets/zh/iqnin_logo.h ninten01_txt
+@
+
+
+1.26
+log
+@pubrom -p
+@
+text
+@d961 1
+a961 4
+	dd bs=8192 count=1 if=i10n/assets/zh/iqnin_logo.raw of=i10n/assets/zh/iqnin_logo1.raw
+	dd bs=8192 skip=1 count=1 if=i10n/assets/zh/iqnin_logo.raw of=i10n/assets/zh/iqnin_logo2.raw
+	./i10n/tools/gen5551.pl i10n/assets/zh/iqnin_logo1.raw i10n/assets/zh/iqnin_logo1.h ninten02_txt
+	./i10n/tools/gen5551.pl i10n/assets/zh/iqnin_logo2.raw i10n/assets/zh/iqnin_logo2.h ninten01_txt
+@
+
+
+1.25
+log
+@Bake the cake
+@
+text
+@d621 1
+a621 1
+		$(ROOT)/usr/sbin/pubrom -d -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_z.txt rom sm
+d623 1
+a623 1
+		$(ROOT)/usr/sbin/pubrom -d -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm_e
+@
+
+
+1.24
+log
+@Adjust alignment of pause menu message.
+Make message.o build dependent on pausemess.c and endingmess.c
+@
+text
+@d1143 3
+a1145 1
+map/stage25/Gstage25.o: map/stage25/Gstage25.c
+d1149 6
+@
+
+
+1.23
+log
+@Process the new gameover and selectpict textures
+@
+text
+@d724 1
+a724 1
+message.o			  : message.c				; $(CC) $(CC_FLAGS) -o message.o    message.c
+@
+
+
+1.22
+log
+@pubrom -d to keep desc file
+@
+text
+@d980 1
+a980 1
+map/title/title_back.o: map/title/title_back.c i10n/assets/zh/titlebg_zh.raw 
+d989 8
+d1007 10
+d1021 1
+@
+
+
+1.21
+log
+@pubrom sm_e
+@
+text
+@d621 1
+a621 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_z.txt rom sm
+d623 1
+a623 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm_e
+@
+
+
+1.20
+log
+@Back out last change to publishing, since skKeepAlive() is now available by default
+@
+text
+@d623 1
+a623 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm
+@
+
+
+1.19
+log
+@Add SK rights so skKeepAlive() will work
+@
+text
+@d621 1
+a621 1
+		$(ROOT)/usr/sbin/pubrom -R 0xffffffff -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_z.txt rom sm
+d623 1
+a623 1
+		$(ROOT)/usr/sbin/pubrom -R 0xffffffff -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm
+@
+
+
+1.18
+log
+@use title txt file for pubrom
+@
+text
+@d621 1
+a621 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_z.txt rom sm
+d623 1
+a623 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm
+@
+
+
+1.17
+log
+@Add title in English to cmd
+@
+text
+@d620 5
+a624 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -t "Super Mario" rom sm
+@
+
+
+1.16
+log
+@Use pubrom instead of rommd.
+@
+text
+@d620 1
+a620 1
+		$(ROOT)/usr/sbin/pubrom -i metadata/thumb.rgba -T metadata/title.inta -n metadata/title_e.txt rom sm
+@
+
+
+1.15
+log
+@Make build of fileselect.o dependent on selectmess.c too.
+@
+text
+@d620 1
+a620 1
+		$(ROOT)/usr/sbin/rommd --addr 0x806D0000 -e 4 rom
+@
+
+
+1.14
+log
+@added rommd
+@
+text
+@d725 1
+a725 1
+fileselect.o          : fileselect.c            ; $(CC) $(CC_FLAGS) -o fileselect.o fileselect.c
+@
+
+
+1.13
+log
+@rm more .o files
+@
+text
+@d620 1
+a620 1
+#		$(ROOT)/usr/sbin/rommd -e 4 rom
+@
+
+
+1.12
+log
+@make font and message generation part of autobuild
+@
+text
+@d620 1
+d1411 1
+a1411 1
+	rm -f message.o starselect.o fileselect.o tmp_motor.o memory.o title.o titlegb.o game.o dprint.o gauge.o scene.o
+@
+
+
+1.11
+log
+@moved copyright texture into auto build
+@
+text
+@d1384 1
+a1384 1
+data/basic.o: data/basic.c $(BASIC_INC) i10n/assets/zh/16bitColorFontGlyph.raw
+d1386 4
+d1427 1
+@
+
+
+1.10
+log
+@auto build 16bit font glyph and title texture
+@
+text
+@d954 10
+d968 1
+a968 1
+
+d1421 2
+@
+
+
+1.9
+log
+@added LOCALE definition.
+@
+text
+@d964 14
+d982 1
+a982 1
+
+d1373 3
+a1375 1
+data/basic.o: data/basic.c $(BASIC_INC)
+d1379 6
+d1405 7
+a1411 1
+	rm -f i10n/assets/zh/power1_zh.txt i10n/assets/zh/power2_zh.txt
+@
+
+
+1.8
+log
+@fixed English build.
+@
+text
+@d10 4
+d1190 10
+a1199 1
+shape/gfx_keep.o: shape/gfx_keep.c
+d1203 1
+d1383 1
+@
+
+
+1.7
+log
+@to compile dprint.c, scene.c, gauge.c
+@
+text
+@d1360 1
+a1360 1
+	rm -f message.o starselect.o fileselect.o tmp_motor.o memory.o title.o titlegb.o game.o
+@
+
+
+1.6
+log
+@Uncomment rule for mtrmain.o
+@
+text
+@d606 1
+a606 1
+#LD_FLAGS  = $(MKDEPOPT) -nostdlib -L$(ROOT)/usr/lib -L$(ROOT)/usr/lib/PR -lultra_d
+d658 1
+a658 1
+#scene.o		: scene.c							; $(CC) $(CC_FLAGS) -o scene.o      scene.c
+d714 1
+a714 1
+#dprint.o			  : dprint.c				; $(CC) $(CC_FLAGS) -o dprint.o     dprint.c
+d716 1
+a716 1
+#gauge.o				  : gauge.c					; $(CC) $(CC_FLAGS) -o gauge.o      gauge.c
+@
+
+
+1.5
+log
+@updated make clean
+@
+text
+@d640 1
+a640 1
+#mtrmain.o	: mtrmain.c							; $(CC) $(CC_FLAGS) -o mtrmain.o    mtrmain.c
+@
+
+
+1.4
+log
+@new source code from nintendo.
+@
+text
+@d654 1
+a654 1
+#memory.o	: memory.c							; $(CC) $(CC_FLAGS) -o memory.o     memory.c
+d1360 1
+a1360 1
+	rm -f message.o starselect.o fileselect.o tmp_motor.o
+@
+
+
+1.3
+log
+@make make clean cleaner
+@
+text
+@d641 2
+a642 2
+#title.o		: title.c							; $(CC) $(CC_FLAGS) -o title.o      title.c
+#game.o		: game.c include/ending.h			; $(CC) $(CC_FLAGS) -o game.o       game.c
+d707 1
+a707 1
+#titlebg.o	: titlebg.c							; $(CC) $(CC_FLAGS) -o titlebg.o    titlebg.c
+@
+
+
+1.2
+log
+@include compat functions in tmp_motor.o, use -O2 for compilation
+@
+text
+@d1360 9
+a1368 2
+	rm message.o starselect.o fileselect.o
+	rm $(CODE_SEG) $(SHAPE) $(DATA_RM) $(ANIME) $(BACKSCRN) $(MAPTEXTURE) $(SEQUENCE) $(MAP) $(STAGE)
+@
+
+
+1.1
+log
+@linux build files.
+@
+text
+@d604 2
+a605 2
+CC_FLAGS  = -fno-pic -mcpu=4300 -nostdinc -I$(ROOT)/usr/include -I$(ROOT)/usr/include/PR -c -O -G 0
+ACC_FLAGS  = -fno-pic -mcpu=4300 -nostdinc -I$(ROOT)/usr/include -I$(ROOT)/usr/include/PR -c -O -x assembler-with-cpp 
+d613 1
+a613 1
+rom $(APP):	spec $(CODE_SEG) $(ULIB_SEG) $(DEMO_OBJS) $(SHAPE) $(DATA) $(ANIME) $(BACKSCRN) $(SEQUENCE) $(MAP) $(MAPTEXTURE) $(STAGE) 
+d615 1
+a615 1
+		makerom -m -r rom spec > rom.map
+d619 2
+a620 2
+$(CODE_SEG): $(NISHIDA_OBJS) $(YAJIMA_OBJS) $(KAWAGOE_OBJS) $(TANIMOTO_OBJS) $(IWAMOTO_OBJS) $(IWAWAKI_OBJS) $(AUDIO_OBJS) 
+		$(LD) -o $(CODE_SEG) -r $(NISHIDA_OBJS) $(KAWAGOE_OBJS) $(YAJIMA_OBJS) $(TANIMOTO_OBJS) $(IWAMOTO_OBJS) $(IWAWAKI_OBJS) $(AUDIO_OBJS) $(LD_FLAGS) > link.map
+@
+

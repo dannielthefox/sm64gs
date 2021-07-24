@@ -1,0 +1,1828 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/********************************************************************************
+	spec file for Ultra 64 MARIO Brothers
+
+	Copyright (c) 1996 Nintendo co., ltd.  All rights reserved
+
+	March 6, 1996
+ ********************************************************************************/
+
+#include "include/project.h"
+
+
+/********************************************************************************/
+/*																				*/
+/*	Code segment																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Code"
+	flags	BOOT OBJECT
+	entry	BootProcess
+	address CPROGRAM_START
+	stack	bootThreadStack + BOOT_STACKSIZE
+	include	"code.out"
+	include	"audio/audio_hb.o"
+	include	"audio/audio_hm.o"
+	include	"audio/audio_hw.o"
+	include	"audio/audio_hs.o"
+
+	include "$(ROOT)/usr/lib/PR/rspboot.o"
+/*	include "$(ROOT)/usr/lib/PR/gspFast3D.o"	*/
+	include "$(ROOT)/usr/lib/PR/gspFast3D.fifo.o"
+	include "audio/aspMain.o"
+endseg
+
+
+/********************************************************************************/
+/*																				*/
+/*	User library segment														*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"ULib"
+	flags	OBJECT
+	address ULIBCODE_START
+	include	"ulib.out"
+endseg
+
+
+/********************************************************************************/
+/*																				*/
+/*	Dynamic segment																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Dynamic"
+	flags	OBJECT
+	number	SEGMENT_DYNAMIC
+	include	"data/dynamic.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Buffers segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Buffers"
+	flags	OBJECT
+	address CPROGBUF_START
+	include "audio/audioheap.o"
+	include	"data/buffers.o"
+endseg
+
+beginseg
+	name	"Textbuf"
+	flags	OBJECT
+	address TEXTBUFF_START
+	include	"data/textbuf.o"
+endseg
+
+beginseg
+	name	"Framebuf"
+	flags	OBJECT
+	address FRAMEBUF_START
+	include	"data/framebuf.o"
+endseg
+
+beginseg
+	name	"Depthbuf"
+	flags	OBJECT
+	address DEPTHBUF_START
+	include	"data/depthbuf.o"
+endseg
+
+beginseg
+	name	"Fifobuf"
+	flags	OBJECT
+	address FIFOBUFF_START
+	include	"data/fifobuf.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Basic segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Boot"
+	flags	OBJECT
+	address	ADDRESS_BOOTSEQ
+	include	"map/Sboot.o"
+endseg
+
+beginseg
+	name	"Basic"
+	flags	OBJECT
+	number	SEGMENT_BASIC
+	include	"data/basic.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Player segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxPlayer"
+	flags	OBJECT
+	number	SEGMENT_PLAYER
+	include	"shape/gfx_player.o"
+endseg
+
+beginseg
+	name	"HmsPlayer"
+	flags	OBJECT
+	address	ADDRESS_PLAYDATA
+	include	"shape/hms_player.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Enemy segments																*/
+/*																				*/
+/********************************************************************************/
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_a"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_a.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_a"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_a.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_b"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_b.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_b"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_b.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_c"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_c.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_c"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_c.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_d"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_d.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_d"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_d.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_e"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_e.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_e"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_e.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_f"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_f.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_f"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_f.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_g"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_g.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_g"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_g.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_h"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_h.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_h"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_h.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_i"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_i.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_i"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_i.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_j"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_j.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_j"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_j.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy1_k"
+	flags	OBJECT
+	number	SEGMENT_ENEMY1
+	include	"shape/gfx_enemy1_k.o"
+endseg
+
+beginseg
+	name	"HmsEnemy1_k"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA1
+	include	"shape/hms_enemy1_k.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy2_a"
+	flags	OBJECT
+	number	SEGMENT_ENEMY2
+	include	"shape/gfx_enemy2_a.o"
+endseg
+
+beginseg
+	name	"HmsEnemy2_a"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA2
+	include	"shape/hms_enemy2_a.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy2_d"
+	flags	OBJECT
+	number	SEGMENT_ENEMY2
+	include	"shape/gfx_enemy2_d.o"
+endseg
+
+beginseg
+	name	"HmsEnemy2_d"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA2
+	include	"shape/hms_enemy2_d.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy2_e"
+	flags	OBJECT
+	number	SEGMENT_ENEMY2
+	include	"shape/gfx_enemy2_e.o"
+endseg
+
+beginseg
+	name	"HmsEnemy2_e"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA2
+	include	"shape/hms_enemy2_e.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy2_f"
+	flags	OBJECT
+	number	SEGMENT_ENEMY2
+	include	"shape/gfx_enemy2_f.o"
+endseg
+
+beginseg
+	name	"HmsEnemy2_f"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA2
+	include	"shape/hms_enemy2_f.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy2_g"
+	flags	OBJECT
+	number	SEGMENT_ENEMY2
+	include	"shape/gfx_enemy2_g.o"
+endseg
+
+beginseg
+	name	"HmsEnemy2_g"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA2
+	include	"shape/hms_enemy2_g.o"
+endseg
+
+/*---------------------------------------------*/
+beginseg
+	name	"GfxEnemy2_h"
+	flags	OBJECT
+	number	SEGMENT_ENEMY2
+	include	"shape/gfx_enemy2_h.o"
+endseg
+
+beginseg
+	name	"HmsEnemy2_h"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA2
+	include	"shape/hms_enemy2_h.o"
+endseg
+
+/*---------------------------------------------*/
+/********************************************************************************/
+/*																				*/
+/*	Basic Enemy Segments														*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxBasic_enemy"
+	flags	OBJECT
+	number	SEGMENT_ENEMY3
+	include "shape/gfx_basic_enemy.o"
+endseg
+
+beginseg
+	name	"HmsBasic_enemy"
+	flags	OBJECT
+	address	ADDRESS_ENEMYDATA3
+	include "shape/hms_basic_enemy.o"
+endseg
+
+
+/********************************************************************************/
+/*																				*/
+/*	Keep segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxKeep"
+	flags	OBJECT
+	number	SEGMENT_KEEP
+	include "shape/gfx_keep.o"
+endseg
+
+beginseg
+	name	"HmsKeep"
+	flags	OBJECT
+	address	ADDRESS_KEEPDATA
+	include "shape/hms_keep.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Path segment																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Path"
+	flags	OBJECT
+	address	ADDRESS_PATHDATA
+	include "data/pathdata.o"		/* yajima's  pathdata 	*/
+	include "data/npathdata.o"		/* nishida's pathdata 	*/
+	include "data/ipathdata.o"		/* iwamoto's pathdata 	*/
+	include "data/wpathdata.o"		/* iwawaki's pathdata2 	*/
+	include "data/kpathdata.o"		/* kawagoe's pathdata 	*/
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Title segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"TCode"
+	flags	OBJECT
+	address	DEMOCODE_START
+	include	"title.o"
+	include "titlebg.o"
+	include "fileselect.o"
+	include "starselect.o"
+	include "face/codesegment.o"
+endseg
+
+beginseg
+	name	"Title"
+	flags	OBJECT
+	address	ADDRESS_DEMODATA
+	include "map/title/Stitle.o"
+	include "map/title/Mtitle.o"
+endseg
+
+beginseg
+	name	"TLogo"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include	"map/title/nintendo_logo.o"
+endseg
+
+beginseg
+	name	"Debug"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include	"map/title/debug_title.o"
+endseg
+
+beginseg
+	name	"TWall"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include	"map/title/title_back.o"
+endseg
+
+beginseg
+	name	"datamseg"
+	flags	OBJECT
+	number	SEGMENT_FACE
+	include "face/datamseg.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Select segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"HmsSelect"
+	flags	OBJECT
+	address	ADDRESS_DEMODATA
+	include "map/select/Sselect.o"
+	include "map/select/Mselect.o"
+endseg
+
+beginseg
+	name	"GfxSelect"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include	"map/select/Gselect.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Game common datas															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Game"
+	flags	OBJECT
+	address	ADDRESS_GAMEDATA
+	include "map/Sgame.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Back screen segments														*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"BackMainmap"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/mainmap_backscrn.o"
+endseg
+
+beginseg
+	name	"BackSnowtower"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/snowtower_backscrn.o"
+endseg
+
+beginseg
+	name	"BackKuppa"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/kuppa_backscrn.o"
+endseg
+
+beginseg
+	name	"BackMotos"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/motos_backscrn.o"
+endseg
+
+beginseg
+	name	"BackWaterland"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/waterland_backscrn.o"
+endseg
+
+beginseg
+	name	"BackMountain"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/mountain_backscrn.o"
+endseg
+
+beginseg
+	name	"BackSabaku"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/sabaku_backscrn.o"
+endseg
+
+beginseg
+	name	"BackBigWorld"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/bigworld_backscrn.o"
+endseg
+
+beginseg
+	name	"BackYokoScrl"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/yokoscrl_backscrn.o"
+endseg
+
+beginseg
+	name	"BackKuppa3"
+	flags	OBJECT
+	number	SEGMENT_BACK
+	include "map/back/kuppa3_backscrn.o"
+endseg
+
+
+/********************************************************************************/
+/*																				*/
+/*	Texture segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"ALavaTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/a_lava_texture.o"
+endseg
+
+beginseg
+	name	"BHouseTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/b_house_texture.o"
+endseg
+
+beginseg
+	name	"CFieldTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/c_field_texture.o"
+endseg
+
+beginseg
+	name	"DWaterTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/d_water_texture.o"
+endseg
+
+beginseg
+	name	"EMtTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/e_mt_texture.o"
+endseg
+
+beginseg
+	name	"FSnowMtTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/f_snow_mt_texture.o"
+endseg
+
+beginseg
+	name	"GCaveTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/g_cave_texture.o"
+endseg
+
+beginseg
+	name	"HMechaTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/h_mecha_texture.o"
+endseg
+
+beginseg
+	name	"ISliderTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/i_slider_texture.o"
+endseg
+
+beginseg
+	name	"JFortTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/j_fort_texture.o"
+endseg
+
+beginseg
+	name	"KCastleInTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/k_castlein_texture.o"
+endseg
+
+beginseg
+	name	"LCastleOutTexture"
+	flags	OBJECT
+	number	SEGMENT_TEXTURE
+	include "map/texture/l_castleout_texture.o"
+endseg
+
+
+
+/********************************************************************************/
+/*																				*/
+/*	Weather segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"Weather"
+	flags	OBJECT
+	number	SEGMENT_WEATHER
+	include "shape/gfx_weather.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage1 segments																*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage1"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage1/Gstage1.o"
+endseg
+
+beginseg
+	name	"MapStage1"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage1/Sstage1.o"
+	include "map/stage1/Mstage1.o"
+endseg
+*/
+/********************************************************************************/
+/*																				*/
+/*	Stage2 segments																*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage2"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage2/Gstage2.o"
+endseg
+
+beginseg
+	name	"MapStage2"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage2/Sstage2.o"
+	include "map/stage2/Mstage2.o"
+endseg
+*/
+/********************************************************************************/
+/*																				*/
+/*	Stage3 segments																*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage3"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage3/Gstage3.o"
+endseg
+
+beginseg
+	name	"MapStage3"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage3/Sstage3.o"
+	include "map/stage3/Mstage3.o"
+endseg
+*/
+/********************************************************************************/
+/*																				*/
+/*	Stage4 segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage4"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage4/Gstage4.o"
+endseg
+
+beginseg
+	name	"MapStage4"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage4/Sstage4.o"
+	include "map/stage4/Mstage4.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage5 segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage5"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage5/Gstage5.o"
+endseg
+
+beginseg
+	name	"MapStage5"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage5/Sstage5.o"
+	include "map/stage5/Mstage5.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage6 segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage6"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage6/Gstage6.o"
+endseg
+
+beginseg
+	name	"MapStage6"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage6/Sstage6.o"
+	include "map/stage6/Mstage6.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage7 segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage7"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage7/Gstage7.o"
+endseg
+
+beginseg
+	name	"MapStage7"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage7/Sstage7.o"
+	include "map/stage7/Mstage7.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage8 segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage8"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage8/Gstage8.o"
+endseg
+
+beginseg
+	name	"MapStage8"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage8/Sstage8.o"
+	include "map/stage8/Mstage8.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage9 segments																*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage9"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage9/Gstage9.o"
+endseg
+
+beginseg
+	name	"MapStage9"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage9/Sstage9.o"
+	include "map/stage9/Mstage9.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage10 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage10"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage10/Gstage10.o"
+endseg
+
+beginseg
+	name	"MapStage10"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage10/Sstage10.o"
+	include "map/stage10/Mstage10.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage11 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage11"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage11/Gstage11.o"
+endseg
+
+beginseg
+	name	"MapStage11"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage11/Sstage11.o"
+	include "map/stage11/Mstage11.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage12 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage12"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage12/Gstage12.o"
+endseg
+
+beginseg
+	name	"MapStage12"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage12/Sstage12.o"
+	include "map/stage12/Mstage12.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage13 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage13"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage13/Gstage13.o"
+endseg
+
+beginseg
+	name	"MapStage13"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage13/Sstage13.o"
+	include "map/stage13/Mstage13.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage14 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage14"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage14/Gstage14.o"
+endseg
+
+beginseg
+	name	"MapStage14"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage14/Sstage14.o"
+	include "map/stage14/Mstage14.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage15 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage15"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage15/Gstage15.o"
+endseg
+
+beginseg
+	name	"MapStage15"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage15/Sstage15.o"
+	include "map/stage15/Mstage15.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage16 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage16"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage16/Gstage16.o"
+endseg
+
+beginseg
+	name	"MapStage16"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage16/Sstage16.o"
+	include "map/stage16/Mstage16.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage17 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage17"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage17/Gstage17.o"
+endseg
+
+beginseg
+	name	"MapStage17"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage17/Sstage17.o"
+	include "map/stage17/Mstage17.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage18 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage18"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage18/Gstage18.o"
+endseg
+
+beginseg
+	name	"MapStage18"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage18/Sstage18.o"
+	include "map/stage18/Mstage18.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage19 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage19"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage19/Gstage19.o"
+endseg
+
+beginseg
+	name	"MapStage19"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage19/Sstage19.o"
+	include "map/stage19/Mstage19.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage20 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage20"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage20/Gstage20.o"
+endseg
+
+beginseg
+	name	"MapStage20"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage20/Sstage20.o"
+	include "map/stage20/Mstage20.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage21 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage21"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage21/Gstage21.o"
+endseg
+
+beginseg
+	name	"MapStage21"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage21/Sstage21.o"
+	include "map/stage21/Mstage21.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage22 segments	3														*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage22"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage22/Gstage22.o"
+endseg
+
+beginseg
+	name	"MapStage22"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage22/Sstage22.o"
+	include "map/stage22/Mstage22.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage23 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage23"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage23/Gstage23.o"
+endseg
+
+beginseg
+	name	"MapStage23"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage23/Sstage23.o"
+	include "map/stage23/Mstage23.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage24 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage24"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage24/Gstage24.o"
+endseg
+
+beginseg
+	name	"MapStage24"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage24/Sstage24.o"
+	include "map/stage24/Mstage24.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage25 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage25"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage25/Gstage25.o"
+endseg
+
+beginseg
+	name	"MapStage25"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage25/Sstage25.o"
+	include "map/stage25/Mstage25.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage26 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage26"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage26/Gstage26.o"
+endseg
+
+beginseg
+	name	"MapStage26"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage26/Sstage26.o"
+	include "map/stage26/Mstage26.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage27 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage27"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage27/Gstage27.o"
+endseg
+
+beginseg
+	name	"MapStage27"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage27/Sstage27.o"
+	include "map/stage27/Mstage27.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage28 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage28"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage28/Gstage28.o"
+endseg
+
+beginseg
+	name	"MapStage28"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage28/Sstage28.o"
+	include "map/stage28/Mstage28.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage29 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage29"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage29/Gstage29.o"
+endseg
+
+beginseg
+	name	"MapStage29"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage29/Sstage29.o"
+	include "map/stage29/Mstage29.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage30 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage30"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage30/Gstage30.o"
+endseg
+
+beginseg
+	name	"MapStage30"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage30/Sstage30.o"
+	include "map/stage30/Mstage30.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage31 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage31"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage31/Gstage31.o"
+endseg
+
+beginseg
+	name	"MapStage31"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage31/Sstage31.o"
+	include "map/stage31/Mstage31.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage32 segments															*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage32"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage32/Gstage32.o"
+endseg
+
+beginseg
+	name	"MapStage32"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage32/Sstage32.o"
+	include "map/stage32/Mstage32.o"
+endseg
+*/
+
+/********************************************************************************/
+/*																				*/
+/*	Stage33 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage33"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage33/Gstage33.o"
+endseg
+
+beginseg
+	name	"MapStage33"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage33/Sstage33.o"
+	include "map/stage33/Mstage33.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage34 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage34"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage34/Gstage34.o"
+endseg
+
+beginseg
+	name	"MapStage34"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage34/Sstage34.o"
+	include "map/stage34/Mstage34.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage35 segments															*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage35"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage35/Gstage35.o"
+endseg
+
+beginseg
+	name	"MapStage35"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage35/Sstage35.o"
+	include "map/stage35/Mstage35.o"
+endseg
+*/
+/********************************************************************************/
+/*																				*/
+/*	Stage36 segments															*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"GfxStage36"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage36/Gstage36.o"
+endseg
+
+beginseg
+	name	"MapStage36"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage36/Sstage36.o"
+	include "map/stage36/Mstage36.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Stage37 segments															*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage37"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage37/Gstage37.o"
+endseg
+
+beginseg
+	name	"MapStage37"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage37/Sstage37.o"
+	include "map/stage37/Mstage37.o"
+endseg
+*/
+/********************************************************************************/
+/*																				*/
+/*	Stage38 segments															*/
+/*																				*/
+/********************************************************************************/
+/*
+beginseg
+	name	"GfxStage38"
+	flags	OBJECT
+	number	SEGMENT_STAGE1
+	include "map/stage38/Gstage38.o"
+endseg
+
+beginseg
+	name	"MapStage38"
+	flags	OBJECT
+	number	SEGMENT_STAGEDATA1
+	include "map/stage38/Sstage38.o"
+	include "map/stage38/Mstage38.o"
+endseg
+*/
+
+
+
+
+/********************************************************************************/
+/*																				*/
+/*	Player animation data														*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"MarioAnime"
+	flags	OBJECT
+	number	0
+	include "data/anime.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Controller data	for automatic demonstration									*/
+/*																				*/
+/********************************************************************************/
+
+beginseg
+	name	"ContData"
+	flags	OBJECT
+	number	0
+	include "data/contdata.o"
+endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Audio datas																	*/
+/*																				*/
+/********************************************************************************/
+
+	beginseg
+		name "Audiobank"
+		flags RAW
+		include "audio/mario.banks.cart"
+	endseg
+
+	beginseg
+		name "Audiotable"
+		flags RAW
+		include "audio/mario.table.cart"
+	endseg
+
+	beginseg
+		name "Audioseq"
+		flags RAW
+		include "audio/mario.music.cart"
+	endseg
+
+/********************************************************************************/
+/*																				*/
+/*	Wave data																	*/
+/*																				*/
+/********************************************************************************/
+
+beginwave
+	name	"demo"
+	include	"Code"
+	include	"ULib"
+	include	"Dynamic"
+	include	"Buffers"
+	include	"Fifobuf"
+	include	"Framebuf"
+	include	"Depthbuf"
+	include "Textbuf"
+
+	include	"Boot"
+	include	"Basic"
+
+	include	"GfxPlayer"
+	include	"HmsPlayer"
+
+	include	"GfxKeep"
+	include	"HmsKeep"
+	include	"GfxBasic_enemy"
+	include	"HmsBasic_enemy"
+
+	include "GfxEnemy1_a"
+	include "HmsEnemy1_a"
+	include "GfxEnemy1_b"
+	include "HmsEnemy1_b"
+	include "GfxEnemy1_c"
+	include "HmsEnemy1_c"
+	include "GfxEnemy1_d"
+	include "HmsEnemy1_d"
+	include "GfxEnemy1_e"
+	include "HmsEnemy1_e"
+	include "GfxEnemy1_f"
+	include "HmsEnemy1_f"
+	include "GfxEnemy1_g"
+	include "HmsEnemy1_g"
+	include "GfxEnemy1_h"
+	include "HmsEnemy1_h"
+	include "GfxEnemy1_i"
+	include "HmsEnemy1_i"
+	include "GfxEnemy1_j"
+	include "HmsEnemy1_j"
+	include "GfxEnemy1_k"
+	include "HmsEnemy1_k"
+	include "GfxEnemy2_a"
+	include "HmsEnemy2_a"
+	include "GfxEnemy2_d"
+	include "HmsEnemy2_d"
+	include "GfxEnemy2_e"
+	include "HmsEnemy2_e"
+	include "GfxEnemy2_f"
+	include "HmsEnemy2_f"
+	include "GfxEnemy2_g"
+	include "HmsEnemy2_g"
+	include "GfxEnemy2_h"
+	include "HmsEnemy2_h"
+
+	include	"TCode"
+	include	"Title"
+	include	"TLogo"
+	include	"Debug"
+	include	"TWall"
+	include	"datamseg"
+
+	include	"HmsSelect"
+	include "GfxSelect"
+
+	include "Path"
+	include "Game"
+	include "Weather"
+
+	include	"BackMainmap"
+	include	"BackSnowtower"
+	include	"BackKuppa"
+	include	"BackMotos"
+	include	"BackWaterland"
+	include	"BackMountain"
+	include "BackSabaku"
+	include "BackBigWorld"
+	include "BackYokoScrl"
+	include	"BackKuppa3"
+
+	include "ALavaTexture"
+	include "BHouseTexture"
+	include "CFieldTexture"
+	include "DWaterTexture"
+	include "EMtTexture"
+	include "FSnowMtTexture"
+	include "GCaveTexture"
+	include "HMechaTexture"
+	include "ISliderTexture"
+	include "JFortTexture"
+	include "KCastleInTexture"
+	include "LCastleOutTexture"
+
+/*	include "GfxStage1"		*/
+/*	include "MapStage1"		*/
+/*	include "GfxStage2"		*/
+/*	include "MapStage2"		*/
+/*	include "GfxStage3"		*/
+/*	include "MapStage3"		*/
+
+	include "GfxStage4"
+	include "MapStage4"
+	include "GfxStage5"
+	include "MapStage5"
+	include "GfxStage6"
+	include "MapStage6"
+	include "GfxStage7"
+	include "MapStage7"
+	include "GfxStage8"
+	include "MapStage8"
+	include "GfxStage9"
+	include "MapStage9"
+
+	include "GfxStage10"
+	include "MapStage10"
+	include "GfxStage11"
+	include "MapStage11"
+	include "GfxStage12"
+	include "MapStage12"
+	include "GfxStage13"
+	include "MapStage13"
+	include "GfxStage14"
+	include "MapStage14"
+	include "GfxStage15"
+	include "MapStage15"
+	include "GfxStage16"
+	include "MapStage16"
+	include "GfxStage17"
+	include "MapStage17"
+	include "GfxStage18"
+	include "MapStage18"
+	include "GfxStage19"
+	include "MapStage19"
+
+	include "GfxStage20"
+	include "MapStage20"
+	include "GfxStage21"
+	include "MapStage21"
+	include "GfxStage22"
+	include "MapStage22"
+	include "GfxStage23"
+	include "MapStage23"
+	include "GfxStage24"
+	include "MapStage24"
+	include "GfxStage25"
+	include "MapStage25"
+	include "GfxStage26"
+	include "MapStage26"
+	include "GfxStage27"
+	include "MapStage27"
+	include "GfxStage28"
+	include "MapStage28"
+	include "GfxStage29"
+	include "MapStage29"
+
+	include "GfxStage30"
+	include "MapStage30"
+	include "GfxStage31"
+	include "MapStage31"
+
+/*	include "GfxStage32"		*/
+/*	include "MapStage32"		*/
+
+	include "GfxStage33"
+	include "MapStage33"
+	include "GfxStage34"
+	include "MapStage34"
+
+/*	include "GfxStage35"		*/
+/*	include "MapStage35"		*/
+
+	include "GfxStage36"
+	include "MapStage36"
+
+/*	include "GfxStage37"		*/
+/*	include "MapStage37"		*/
+/*	include "GfxStage38"		*/
+/*	include "MapStage38"		*/
+
+	include	"MarioAnime"
+	include	"ContData"
+
+	include "Audioseq"
+	include "Audiobank"
+	include "Audiotable"
+
+endwave
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

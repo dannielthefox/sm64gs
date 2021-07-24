@@ -1,0 +1,51 @@
+head	1.2;
+access;
+symbols
+	iQue_20031010:1.2
+	iQue_release_master_1_0:1.2
+	iQue_08_21_03:1.2
+	iQue_beta_1_0:1.2
+	LINUX_PORT:1.2;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.09.03.23.18;	author blythe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.09.02.59.58;	author blythe;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@set the entry point too to remove __start warning
+@
+text
+@#!/bin/sh
+mips-linux-gcc -fno-pic -mcpu=4300 -nostdinc -I$ROOT/usr/include -I$ROOT/usr/include/PR -mips1 -funsigned-char -O -c -Dyj -c -o tmp.o $1.c
+mips-linux-ld -Tdata $2 -e $2 -o ttmp.o tmp.o
+objdump -t ttmp.o | grep -v _fdata | perl -ne 'chomp; if (/([0-9a-fA-F]{8})\s+g\s+O\s\.data\s+[0-9a-fA-F]{8}\s+(\w+)/) { print "<$2>=($1)\n", $x; }' 
+mips-linux-objcopy -j .data -O binary ttmp.o $1.bin
+rm -f tmp.o ttmp.o
+@
+
+
+1.1
+log
+@new version of dataasm
+@
+text
+@d3 1
+a3 1
+mips-linux-ld -Tdata $2 -o ttmp.o tmp.o
+@
+

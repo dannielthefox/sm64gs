@@ -1,0 +1,401 @@
+head	1.1;
+access;
+symbols
+	iQue_20031010:1.1
+	iQue_release_master_1_0:1.1
+	iQue_08_21_03:1.1
+	iQue_beta_1_0:1.1
+	LINUX_PORT:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.11.06.05.31.22;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@motor code.
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+					  motor pack control module
+
+		  Copyright 1996,1997 Nintendo co., ltd.  All rights reserved
+
+							June 2, 1997
+ ********************************************************************************/
+
+#include "headers.h"
+
+
+#define NUM_SISEMAPHORES	1
+#define NUM_MOTORMESGS		1
+
+
+#define	PRIORITY_MOTOR			 30
+
+
+static OSThread		motorThread;
+static OSPfs		pfs;
+
+static OSMesg		siSemaphoreBuf[NUM_SISEMAPHORES];
+static OSMesgQueue	siSemaphoreQue;
+
+static OSMesg		motorMessageBuf[NUM_MOTORMESGS];
+static OSMesgQueue	motorMessageQue;
+
+
+
+#define	MTR_EVENT_NOMESG	0
+#define	MTR_EVENT_CONSTON	1
+#define	MTR_EVENT_LEVELON	2
+
+
+typedef struct {
+	uchar	comm;
+	uchar	level;
+	short	time;
+	short	decay;
+} MotorEvent;
+
+typedef struct {
+	short	event;
+	short	level;
+	short	timer;
+	short	count;
+	short	start;
+	short	slip;
+	short	viblate;
+	short	decay;
+} MotorCtrl;
+
+static int			motorActive = FALSE;
+static int			motorPackOk = FALSE;
+static int			motorError  = 0;
+static MotorEvent	motorEvent[3];
+static MotorCtrl	motorCtrl;
+
+int motorCounter = 0;
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//		SI semaphore control routines
+//
+//
+//
+
+/********************************************************************************/
+/*																				*/
+/*		Create si semaphore.													*/
+/*																				*/
+/********************************************************************************/
+extern void
+InitSiSemaphore(void)
+{
+	osCreateMesgQueue(&siSemaphoreQue, siSemaphoreBuf, NUM_SISEMAPHORES);
+	osSendMesg(&siSemaphoreQue, (OSMesg)0L, OS_MESG_NOBLOCK);
+}
+/********************************************************************************/
+/*																				*/
+/*		Get si access permission.												*/
+/*																				*/
+/********************************************************************************/
+extern void
+GetSiPermission(void)
+{
+	OSMesg message;
+
+	osRecvMesg(&siSemaphoreQue, &message, OS_MESG_BLOCK);
+}
+/********************************************************************************/
+/*																				*/
+/*		release si access permission.											*/
+/*																				*/
+/********************************************************************************/
+extern void
+RelSiPermission(void)
+{
+	osSendMesg(&siSemaphoreQue, (OSMesg)0L, OS_MESG_NOBLOCK);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//		Motor control routines
+//
+//
+//
+
+/********************************************************************************/
+/*																				*/
+/*		Do motor on.															*/
+/*																				*/
+/********************************************************************************/
+static void
+DoMotorON(void)
+{
+	if (motorPackOk) {
+		GetSiPermission();
+		if (osMotorStart(&pfs) == 0)  motorError  = 0;
+								else  motorError += 1;
+		RelSiPermission();
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Do motor off.															*/
+/*																				*/
+/********************************************************************************/
+static void
+DoMotorOFF(void)
+{
+	if (motorPackOk) {
+		GetSiPermission();
+		if (osMotorStop(&pfs) == 0)  motorError  = 0;
+							   else  motorError += 1;
+		RelSiPermission();
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Control motor on/off.													*/
+/*																				*/
+/********************************************************************************/
+static void
+ControlMotor(void)
+{
+	if (sysHardwareReset > 0) {
+		DoMotorOFF();
+		return;
+	}
+
+	if (motorCtrl.start > 0) {
+		motorCtrl.start -= 1;
+		DoMotorON();
+	}
+	else if (motorCtrl.timer > 0) {
+		motorCtrl.timer -= 1;
+		if ((motorCtrl.level -= motorCtrl.decay) < 0)  motorCtrl.level = 0;
+
+		if (motorCtrl.event == MTR_EVENT_CONSTON) {
+			DoMotorON();
+		} else {
+			if (motorCtrl.count >= 0x100) {
+				motorCtrl.count -= 0x100;
+				DoMotorON();
+			} else {
+				motorCtrl.count += (motorCtrl.level * motorCtrl.level * motorCtrl.level) / 512 + 4;
+				DoMotorOFF();
+			}
+		}
+	}
+	else {
+		motorCtrl.timer = 0;
+		if (motorCtrl.slip >= 5) {
+			DoMotorON();
+		}
+		else if (motorCtrl.slip >= 2 && (videoFrame % motorCtrl.viblate) == 0) {
+			DoMotorON();
+		}
+		else {
+			DoMotorOFF();
+		}
+	}
+	if (motorCtrl.slip > 0)  motorCtrl.slip -= 1;
+}
+/********************************************************************************/
+/*																				*/
+/*		Get motor event.														*/
+/*																				*/
+/********************************************************************************/
+static void
+GetMotorEvent(void)
+{
+	if (motorEvent[0].comm != MTR_EVENT_NOMESG) {
+		motorCtrl.count = 0;
+		motorCtrl.start = 4;
+		motorCtrl.event = motorEvent[0].comm;
+		motorCtrl.timer = motorEvent[0].time;
+		motorCtrl.level = motorEvent[0].level;
+		motorCtrl.decay = motorEvent[0].decay;
+	}
+	motorEvent[0]	   = motorEvent[1];
+	motorEvent[1]	   = motorEvent[2];
+	motorEvent[2].comm = 0;
+}
+
+
+
+/********************************************************************************/
+/*																				*/
+/*		Send motor event.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+SendMotorEvent(short time, short level)
+{
+	if (autoDemoPtr == NULL) {
+		if (level > 70)  motorEvent[2].comm = MTR_EVENT_CONSTON;
+				   else  motorEvent[2].comm = MTR_EVENT_LEVELON;
+
+		motorEvent[2].level = level;
+		motorEvent[2].time  = time;
+		motorEvent[2].decay = 0;
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Send motor event.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+SendMotorDecay(short level)
+{
+	motorEvent[2].decay = level;
+}
+/********************************************************************************/
+/*																				*/
+/*		Check motor event.														*/
+/*																				*/
+/********************************************************************************/
+extern int
+CheckMotorNoEvent(void)
+{
+	if (motorCtrl.start + motorCtrl.timer > 3 )  return(FALSE);
+	if (motorEvent[0].comm != MTR_EVENT_NOMESG)  return(FALSE);
+	if (motorEvent[1].comm != MTR_EVENT_NOMESG)  return(FALSE);
+	if (motorEvent[2].comm != MTR_EVENT_NOMESG)  return(FALSE);
+	return(TRUE);
+}
+/********************************************************************************/
+/*																				*/
+/*		Send motor event.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+SendMotorSlip(void)
+{
+	if (autoDemoPtr == NULL) {
+		if (motorCtrl.slip == 0)  motorCtrl.slip = 7;
+		if (motorCtrl.slip <= 3)  motorCtrl.slip = 4;
+		motorCtrl.viblate = 7;
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Send motor event.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+SendMotorVib(int level)
+{
+	if (autoDemoPtr == NULL) {
+		if (motorCtrl.slip == 0)  motorCtrl.slip	= 7;
+		if (motorCtrl.slip <= 3)  motorCtrl.slip	= 4;
+		if (level		   == 4)  motorCtrl.viblate = 1;
+		if (level		   == 3)  motorCtrl.viblate = 2;
+		if (level		   == 2)  motorCtrl.viblate = 3;
+		if (level		   == 1)  motorCtrl.viblate = 4;
+		if (level		   == 0)  motorCtrl.viblate = 5;
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Send motor event.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+SendMotorSwim(void)
+{
+	if (autoDemoPtr == NULL) {
+		motorCtrl.slip    = 4;
+		motorCtrl.viblate = 4;
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Motor main process.														*/
+/*																				*/
+/********************************************************************************/
+static void
+MotorProcess(void *arg)
+{
+	OSMesg	message;
+
+	osSyncPrintf("start motor thread\n");
+	ResetMotorPack();
+	motorActive	= TRUE;
+	osSyncPrintf("go motor thread\n");
+
+	while (1) {
+		osRecvMesg(&motorMessageQue, &message, OS_MESG_BLOCK);
+
+		GetMotorEvent();
+		ControlMotor();
+		if (motorPackOk) {
+			if (motorError >= 30)  motorPackOk = FALSE;
+		} else {
+			if ((videoFrame % 60) == 0) {
+				motorPackOk	= (osMotorInit(&padMessageQ, &pfs, cont1p->contNo) == 0);
+				motorError  = 0;
+			}
+		}
+		if (motorCounter > 0)  motorCounter--;
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*		Motor main process.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+ResetMotorPack(void)
+{
+	motorPackOk = (osMotorInit(&padMessageQ, &pfs, cont1p->contNo) == 0);
+	if (motorPackOk)  osMotorStop(&pfs);
+
+	motorEvent[0].comm = 0;
+	motorEvent[1].comm = 0;
+	motorEvent[2].comm = 0;
+	motorCtrl.timer	   = 0;
+	motorCtrl.slip	   = 0;
+	motorCounter	   = 0;
+}
+/********************************************************************************/
+/*																				*/
+/*		Motor main process.														*/
+/*																				*/
+/********************************************************************************/
+extern void
+CreateMotorProcess(void)
+{
+    osCreateMesgQueue(&motorMessageQue, motorMessageBuf, 1);
+    osCreateThread(&motorThread, 6, MotorProcess, NULL, motorThreadStack+MAIN_STACKSIZE64, PRIORITY_MOTOR);
+	osStartThread(&motorThread);
+}
+/********************************************************************************/
+/*																				*/
+/*		Send a retrace message to the motor thread.								*/
+/*																				*/
+/********************************************************************************/
+extern void
+SendMotorMessage(void)
+{
+	if (motorActive)  osSendMesg(&motorMessageQue, (OSMesg)'VRTC', OS_MESG_NOBLOCK);
+}
+@

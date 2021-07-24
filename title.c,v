@@ -1,0 +1,213 @@
+head	1.1;
+access;
+symbols
+	iQue_20031010:1.1
+	iQue_release_master_1_0:1.1
+	iQue_08_21_03:1.1
+	iQue_beta_1_0:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.12.10.02.34.26;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@new source code from nintendo.
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+							  title module
+
+			Copyright 1996 Nintendo co., ltd.  All rights reserved
+
+							April 30, 1996
+ ********************************************************************************/
+
+#include "headers.h"
+#include "include/stage.h"
+
+#define	DEBUGKEY	(CONT_BACK|CONT_START|CONT_XL|CONT_XR)
+
+
+extern char _CodeSegmentEnd[];
+extern char _ULibSegmentEnd[];
+
+static ushort demoWaiting = 0;
+
+/********************************************************************************/
+/*	Check automatic demo														*/
+/********************************************************************************/
+static ulong
+CheckAutoDemo(ulong status)
+{
+	autoDemoPtr = NULL;
+
+	if (status == 0) {
+		if (cont1p->status == 0 && cont1p->length == 0.0f) {
+			if (++demoWaiting == 800) {
+//			if (++demoWaiting == 90) {
+				ReadPartialData(&controllerData, demoIndexNo);
+				if (++demoIndexNo == controllerData.ptable->nitems)  demoIndexNo = 0;
+				autoDemoPtr	   = (DemoController *)&controllerData.buffer[4];
+				status		   = controllerData.buffer[0];
+				activePlayerNo = 1;
+				activeLevelNo  = 1;
+			}
+		}
+		else {
+			demoWaiting = 0;
+		}
+	}
+	return(status);
+}
+
+
+
+
+
+
+
+
+/********************************************************************************/
+/*	Debug stage select process.													*/
+/********************************************************************************/
+static ulong
+DoDebugSelect(void)
+{
+	int sound = FALSE;
+
+	if (cont1p->trigger & CONT_XA	) activeStageNo +=  1, sound = TRUE;
+	if (cont1p->trigger & CONT_XB	) activeStageNo -=  1, sound = TRUE;
+	if (cont1p->trigger & CONT_UP	) activeStageNo -=  1, sound = TRUE;
+	if (cont1p->trigger & CONT_DOWN ) activeStageNo +=  1, sound = TRUE;
+	if (cont1p->trigger & CONT_LEFT ) activeStageNo -= 10, sound = TRUE;
+	if (cont1p->trigger & CONT_RIGHT) activeStageNo += 10, sound = TRUE;
+
+	if (sound)  Na_FixSeFlagEntry(NA_SE2_SELECT);
+
+
+	if (activeStageNo > 38)  activeStageNo =  1;
+	if (activeStageNo <  1)  activeStageNo = 38;
+
+	activePlayerNo = 4;
+	activeLevelNo  = 6;
+
+#if DEVELOP
+	dprintf(200, 116, "CODE %dK", (ULIBCODE_START - (int)_CodeSegmentEnd) / 1024 - 5);
+	dprintf(200, 100, "ULIB %dK", (CPROGRAM_END   - (int)_ULibSegmentEnd) / 1024	);
+#endif
+
+	dcprintf(160, 80, "SELECT STAGE");
+	dcprintf(160, 30, "PRESS START BUTTON");
+
+	dprintf(40, 60, "%2d", activeStageNo);
+	dmprintf(80, 60, stageName[activeStageNo-1]);
+
+	if (cont1p->trigger & CONT_START) {
+		if (cont1p->status == DEBUGKEY) {
+			sysDebugFlag = 0;
+			return(-1);
+		}
+		Na_FixSeFlagEntry(NA_SE2_SET);
+		return(activeStageNo);
+	}
+	return(0);
+}
+/********************************************************************************/
+/*	Game mode select process.													*/
+/********************************************************************************/
+static ulong
+DoModeSelect(void)
+{
+	static short sound  = 1;
+	ulong		 result = 0;
+
+
+	if (sound == 1) {
+		if (frameCounter <= 128)  Na_FixSeFlagEntry(NA_VC1_HELLO	  );
+						    else  Na_FixSeFlagEntry(NA_VC1_PRESS_START);
+		sound = 0;
+	}
+	SnDisplayDemoMessage();
+
+#if (DEBUGSW + VERSION_E3)
+	if (cont1p->status == DEBUGKEY)  sysDebugFlag = 1;
+							   else  sysDebugFlag = 0;
+#endif
+	if (cont1p->trigger & CONT_START) {
+		Na_FixSeFlagEntry(NA_SE2_SET);
+		SendMotorEvent(60,70);		/* MOTOR 1997.6.5 */
+		SendMotorDecay(1);			/* MOTOR 1997.6.5 */
+		result = sysDebugFlag + 100;
+		sound  = 1;
+	}
+	return(CheckAutoDemo(result));
+}
+/********************************************************************************/
+/*	Game over select process.													*/
+/********************************************************************************/
+static ulong
+DoGmOverSelect(void)
+{
+	static short sound = 1;
+	ulong result	   = 0;
+
+
+	if (sound == 1) {
+		Na_FixSeFlagEntry(NA_VC1_GAMEOVER);
+		sound = 0;
+	}
+	SnDisplayDemoMessage();
+
+#if (DEBUGSW + VERSION_E3)
+	if (cont1p->status == DEBUGKEY)  sysDebugFlag = 1;
+							   else  sysDebugFlag = 0;
+#endif
+	if (cont1p->trigger & CONT_START) {
+		Na_FixSeFlagEntry(NA_SE2_SET);
+		SendMotorEvent(60,70);		/* MOTOR 1997.6.5 */
+		SendMotorDecay(1);			/* MOTOR 1997.6.5 */
+		result = sysDebugFlag + 100;
+		sound  = 1;
+	}
+	return(CheckAutoDemo(result));
+}
+/********************************************************************************/
+/*	Nintendo logo process.														*/
+/********************************************************************************/
+static ulong
+DoNintendoLogo(void)
+{
+//	Na_FixSeFlagEntry(NA_SE2_COIN + NA_IN_OUTDOOR);
+	AudPlayMusic(0, 0, 0);
+	Na_FixSeFlagEntry(NA_SYS_CREDIT);
+	return(TRUE);
+}
+/********************************************************************************/
+/*	Title main process.															*/
+/********************************************************************************/
+extern ulong
+TitleProcess(short code, long param)
+{
+	ulong result;
+
+	switch (code) {
+		case 0: result = DoNintendoLogo();		break;
+		case 1: result = DoModeSelect();		break;
+		case 2: result = DoGmOverSelect();		break;
+		case 3: result = DoDebugSelect();		break;
+	}
+	return(result);
+}
+@

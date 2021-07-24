@@ -1,0 +1,1102 @@
+head	1.3;
+access;
+symbols
+	iQue_20031010:1.3
+	iQue_release_master_1_0:1.3
+	iQue_08_21_03:1.3
+	iQue_beta_1_0:1.3
+	LINUX_PORT:1.3;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2002.11.11.04.41.00;	author blythe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.11.05.18.22.24;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.31.23.48.39;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@allocate extra memory at the beginning of the heap.  redefine the
+SEGMENT_NUMBER macro to allow 8-bit segment id's on the host
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+						 memory manager module
+
+			Copyright 1996 Nintendo co., ltd.  All rights reserved
+
+							April 9, 1996
+ ********************************************************************************/
+
+#include "headers.h"
+// #include <bstring.h>
+
+
+#define	MEMINFO		0
+
+#define	MM_ALLOC_FORE	0
+#define	MM_ALLOC_BACK	1
+
+#define	Limit64(n)		((uint)(n)&0xfffffff8)
+#define	Limit128(n)		((uint)(n)&0xfffffff0)
+
+#define	Align128(n)		(((uint)(n)+15)&0xfffffff0)
+#define	Align64(n)		(((uint)(n)+ 7)&0xfffffff8)
+#define	Align32(n)		(((uint)(n)+ 3)&0xfffffffc)
+#define	Align16(n)		(((uint)(n)+ 1)&0xfffffffe)
+
+#define	AddSize(a,s)	(((uint)(a))+(s))
+#define	SubSize(a,s)	(((uint)(a))-(s))
+
+
+extern char _ULibSegmentRomStart[];
+extern char _ULibSegmentRomEnd[];
+
+extern void slidec(uchar *sou, uchar *des);
+
+
+/*--------------------------------------------------------------------------------
+ *	internal types.
+ */
+
+typedef struct fzoneMCB {
+	struct fzoneMCB	*prev;				/* pointer to the previous memory block	*/
+	struct fzoneMCB	*next;				/* pointer to the next memory block		*/
+	wlong			pad;
+} FZoneMCB;
+
+typedef struct memFrame {
+	uint			 size;				/* free memory size						*/
+	FZoneMCB		*fore;				/* fore-allocation pointer				*/
+	FZoneMCB		*back;				/* back-allocation pointer				*/
+	struct memFrame	*frame;				/* memory frame pointer					*/
+} MemFrame;
+
+typedef struct heapMCB {
+	struct heapMCB *link;				/* pointer to the next free block		*/
+	ulong			size;				/* size of memory block					*/
+} HeapMCB;
+
+HeapPtr	systemHeap;						/* pointer to the system heap memory	*/
+
+
+/*--------------------------------------------------------------------------------
+ *	local works
+ */
+
+static uint		 segmentTable[NUM_SEGMENTS+16];		/* segment address table	*/
+static uint		 fzoneSize;							/* unused memory size		*/
+static MemPtr	 fzoneHead;							/* head of the free zone 	*/
+static MemPtr	 fzoneTail;							/* tail of the free zone	*/
+static FZoneMCB *fzoneForeptr;						/* fore-allocation pointer	*/
+static FZoneMCB *fzoneBackptr;						/* back-allocation pointer	*/
+static MemFrame	*memoryFrame = NULL;				/* memory frame pointer		*/
+
+
+
+/*################################################################################
+ *
+ *
+ *	RCP segment address oparations.
+ *
+ */
+
+/********************************************************************************/
+/*																				*/
+/*	Set RCP segment base address.												*/
+/*																				*/
+/********************************************************************************/
+extern uint
+SetSegment(int number, void *cpuAddr)
+{
+	segmentTable[number] = K0_TO_PHYS(cpuAddr);
+
+	return(segmentTable[number]);
+}
+/********************************************************************************/
+/*																				*/
+/*	Get RCP segment base address.												*/
+/*																				*/
+/********************************************************************************/
+extern void *
+GetSegment(int number)
+{
+	return((MemPtr)PHYS_TO_K0(segmentTable[number]));
+}
+/********************************************************************************/
+/*																				*/
+/*	Convert RCP segment address to CPU virtual address.							*/
+/*																				*/
+/********************************************************************************/
+extern void *
+SegmentToVirtual(void *rcpAddr)
+{
+#undef SEGMENT_NUMBER
+#define SEGMENT_NUMBER(x)	((u32)(x)>>24)
+	uint number = SEGMENT_NUMBER(rcpAddr);
+	uint offset = SEGMENT_OFFSET(rcpAddr);
+
+	return((char *)PHYS_TO_K0(segmentTable[number] + offset));
+}
+/********************************************************************************/
+/*																				*/
+/*	Convert CPU virtual address to RCP segment address.							*/
+/*																				*/
+/********************************************************************************/
+extern void *
+VirtualToSegment(int number, void *cpuAddr)
+{
+	uint offset = K0_TO_PHYS(cpuAddr) - segmentTable[number];
+
+	return((void *)SEGMENT_ADDR(number, offset));
+}
+/********************************************************************************/
+/*																				*/
+/*	Store segment data into the gfx list.										*/
+/*																				*/
+/********************************************************************************/
+extern void
+StoreSegments(void)
+{
+	int number;
+
+	for (number = 0; number < NUM_SEGMENTS; number++) {
+		gSPSegment(graphPtr++, number, segmentTable[number]);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*################################################################################
+ *
+ *
+ *	The free zone managements.
+ *
+ */
+
+/********************************************************************************/
+/*																				*/
+/*	Initlaize the free zone.													*/
+/*																				*/
+/********************************************************************************/
+extern void
+InitFreeZone(MemPtr topAddr, MemPtr btmAddr)
+{
+#define BIGGER_HEAP
+#ifdef BIGGER_HEAP
+extern int _DepthbufSegmentEnd;
+topAddr = &_DepthbufSegmentEnd;
+#endif
+	fzoneHead = (MemPtr)Align128(topAddr) + sizeof(FZoneMCB);
+	fzoneTail = (MemPtr)Limit128(btmAddr) - sizeof(FZoneMCB);
+
+	fzoneSize	 = fzoneTail - fzoneHead;
+	fzoneForeptr = (FZoneMCB *)(fzoneHead - sizeof(FZoneMCB));
+	fzoneBackptr = (FZoneMCB *)(fzoneTail					);
+
+	fzoneForeptr->prev = NULL;
+	fzoneForeptr->next = NULL;
+	fzoneBackptr->prev = NULL;
+	fzoneBackptr->next = NULL;
+
+#if MEMINFO
+	rmonpf(("                  :  foreptr  :  backptr  : free size : alloc size\n"));
+	rmonpf((" initial free zone: %08XH : %08XH : %08XH\n", fzoneForeptr, fzoneBackptr, fzoneSize));
+#endif
+}
+/********************************************************************************/
+/*																				*/
+/*	Allocate a memory block from the free zone.									*/
+/*																				*/
+/********************************************************************************/
+extern void *
+AllocFreeZone(uint size, int mode)
+{
+	FZoneMCB *fzoneNextptr;
+	MemPtr	 allocMemory = NULL;
+
+	size = Align128(size) + sizeof(FZoneMCB);
+
+	if (0 < size && size <= fzoneSize) {
+		fzoneSize -= size;
+
+		if (mode == MM_ALLOC_FORE) {
+			fzoneNextptr	   = (FZoneMCB *)AddSize(fzoneForeptr,size);
+			fzoneForeptr->next = fzoneNextptr;
+			fzoneNextptr->prev = fzoneForeptr;
+			fzoneNextptr->next = NULL;
+
+			allocMemory  = (MemPtr)(fzoneForeptr + 1);
+			fzoneForeptr = fzoneNextptr;
+		}
+		else {
+			fzoneNextptr	   = (FZoneMCB *)SubSize(fzoneBackptr,size);
+			fzoneBackptr->prev = fzoneNextptr;
+			fzoneNextptr->next = fzoneBackptr;
+			fzoneNextptr->prev = NULL;
+
+			fzoneBackptr = fzoneNextptr;
+			allocMemory  = (MemPtr)(fzoneBackptr + 1);
+		}
+	}
+
+#if MEMINFO
+	rmonpf(("   alloc free zone: %08XH : %08XH : %08XH : %08XH\n", fzoneForeptr, fzoneBackptr, fzoneSize, size));
+#endif
+	return(allocMemory);
+}
+/********************************************************************************/
+/*																				*/
+/*	Purge a memory block from the free zone.									*/
+/*																				*/
+/********************************************************************************/
+extern uint
+PurgeFreeZone(void *address)
+{
+	FZoneMCB *fzoneTop	  = (FZoneMCB *)SubSize(address,sizeof(FZoneMCB));
+	FZoneMCB *fzoneBottom = (FZoneMCB *)SubSize(address,sizeof(FZoneMCB));
+
+	if (fzoneBottom < fzoneForeptr) {
+		while (fzoneBottom->next != NULL)  fzoneBottom = fzoneBottom->next;
+
+		fzoneForeptr		= fzoneTop;
+		fzoneForeptr->next	= NULL;
+		fzoneSize   	   += (uint)fzoneBottom - (uint)fzoneForeptr;
+	}
+	else {
+		while (fzoneBottom->prev != NULL)  fzoneBottom = fzoneBottom->prev;
+
+		fzoneBackptr	   = fzoneTop->next;
+		fzoneBackptr->prev = NULL;
+		fzoneSize		  += (uint)fzoneBackptr - (uint)fzoneBottom;
+	}
+#if MEMINFO
+	rmonpf(("   purge free zone: %08XH : %08XH : %08XH\n", fzoneForeptr, fzoneBackptr, fzoneSize));
+#endif
+	return(fzoneSize);
+}
+/********************************************************************************/
+/*																				*/
+/*	Resize a last memory block in the free zone.								*/
+/*																				*/
+/********************************************************************************/
+extern void *
+ResizeFreeZone(void *address, uint size)
+{
+	MemPtr	 memory = NULL;
+	FZoneMCB *fzone = (FZoneMCB *)SubSize(address,sizeof(FZoneMCB));
+
+	if (fzone->next == fzoneForeptr) {
+		PurgeFreeZone(address);
+		memory = AllocFreeZone(size, MM_ALLOC_FORE);
+	}
+#if MEMINFO
+	rmonpf(("  resize free zone: %08XH : %08XH : %08XH : %08XH\n", fzoneForeptr, fzoneBackptr, fzoneSize, size));
+#endif
+	return(memory);
+}
+/********************************************************************************/
+/*																				*/
+/*	Get free memory size.														*/
+/*																				*/
+/********************************************************************************/
+extern uint
+FreeZoneSize(void)
+{
+	return(fzoneSize - sizeof(FZoneMCB));
+}
+/********************************************************************************/
+/*																				*/
+/*	Link free sone memory.														*/
+/*																				*/
+/********************************************************************************/
+extern uint
+LinkFreeZone(void)
+{
+	MemFrame *frame	  = memoryFrame;
+	uint	 memsize  = fzoneSize;
+	FZoneMCB *foreptr = fzoneForeptr;
+	FZoneMCB *backptr = fzoneBackptr;
+
+	memoryFrame = AllocFreeZone(sizeof(MemFrame), MM_ALLOC_FORE);
+	memoryFrame->size  = memsize;
+	memoryFrame->fore  = foreptr;
+	memoryFrame->back  = backptr;
+	memoryFrame->frame = frame;
+#if MEMINFO
+	rmonpf(("    link free zone: %08XH : %08XH : %08XH\n", fzoneForeptr, fzoneBackptr, fzoneSize));
+#endif
+	return(fzoneSize);
+}
+/********************************************************************************/
+/*																				*/
+/*	Unlink free sone memory.													*/
+/*																				*/
+/********************************************************************************/
+extern uint
+UnlinkFreeZone(void)
+{
+	fzoneSize	 = memoryFrame->size;
+	fzoneForeptr = memoryFrame->fore;
+	fzoneBackptr = memoryFrame->back;
+	memoryFrame  = memoryFrame->frame;
+#if MEMINFO
+	rmonpf(("  unlink free zone: %08XH : %08XH : %08XH\n", fzoneForeptr, fzoneBackptr, fzoneSize));
+#endif
+	return(fzoneSize);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*################################################################################
+ *
+ *
+ *	Static data loaders.
+ *
+ */
+
+/********************************************************************************/
+/*	Read a data block from ROM.													*/
+/********************************************************************************/
+static void
+ReadBlock(char *ramAddr, char *romStart, char *romEnd)
+{
+	uint   size = Align128(romEnd - romStart);
+
+	osInvalDCache(ramAddr, size);
+
+	while (size > 0) {
+		uint load = (size >= 0x1000) ? 0x1000 : size;
+
+		osPiStartDma(&dmaIOMessageBuf, OS_MESG_PRI_NORMAL, OS_READ, (ulong)romStart, ramAddr, load, &dmaMessageQ);
+		osRecvMesg(&dmaMessageQ, &dummyMessage, OS_MESG_BLOCK);
+		ramAddr	 += load;
+		romStart += load;
+		size	 -= load;
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*	Load static data from ROM.													*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadData(char *romStart, char *romEnd, int mode)
+{
+	MemPtr ramAddr;
+	uint   ramSize = Align128(romEnd - romStart);
+
+
+	if ((ramAddr = AllocFreeZone(ramSize, mode)) != NULL) {
+		ReadBlock(ramAddr, romStart, romEnd);
+	}
+	return(ramAddr);
+}
+/********************************************************************************/
+/*																				*/
+/*	Load static segment from ROM.												*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadSegment(int number, char *romStart, char *romEnd, int mode)
+{
+	MemPtr addr;
+
+	if ((addr = LoadData(romStart, romEnd, mode)) != NULL) {
+		SetSegment(number, addr);
+	}
+	return(addr);
+}
+/********************************************************************************/
+/*																				*/
+/*	Load program from ROM.														*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadProgram(char *ramAddr, char *romStart, char *romEnd)
+{
+	MemPtr alcAddr = NULL;
+	uint   romsize = Align128(		  romEnd	   - romStart);
+	uint   alcsize = Align128((char *)fzoneBackptr - ramAddr );
+
+
+	if (romsize <= alcsize) {
+		if ((alcAddr = AllocFreeZone(alcsize, MM_ALLOC_BACK)) != NULL) {
+			bzero(alcAddr, alcsize);
+			osWritebackDCacheAll();
+
+			ReadBlock(alcAddr, romStart, romEnd);
+			osInvalICache(alcAddr, alcsize);
+			osInvalDCache(alcAddr, alcsize);
+		}
+	}
+	else {
+		rmonpf(("program code load failed AD=%08X ROM=%08X ALC=%08X\n",ramAddr,romsize,alcsize));
+	}
+	return(alcAddr);
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//		Load compressed data from ROM for IRIX 5.3.
+//
+//
+//
+//
+//////////////////////////////////////////////////////////////////////////////////
+
+#if 1
+/********************************************************************************/
+/*																				*/
+/*	Load compressed data from ROM.												*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadCompressed(int number, char *romStart, char *romEnd)
+{
+	MemPtr  alcaddr = NULL;
+	uint    romsize = Align128(romEnd - romStart);
+	MemPtr  tempmem = AllocFreeZone(romsize, MM_ALLOC_BACK);
+	uint   *alcsize = (uint *)(tempmem+4);
+
+
+	if (tempmem != NULL) {
+		ReadBlock(tempmem, romStart, romEnd);
+
+		if ((alcaddr = AllocFreeZone(*alcsize, MM_ALLOC_FORE)) != NULL) {
+			osSyncPrintf("start decompress\n");
+			slidec((uchar *)tempmem, (uchar *)alcaddr);
+			osSyncPrintf("end decompress\n");
+			SetSegment(number, alcaddr);
+			PurgeFreeZone(tempmem);
+		} else {
+			rmonpf(("compressed data load failed (ROM:$%08X  RAM:$%08X)\n", romsize, *alcsize));
+		}
+	} else {
+		rmonpf(("size of compressed data is too big\n"));
+	}
+	return(alcaddr);
+}
+/********************************************************************************/
+/*																				*/
+/*	Load compressed texture data from ROM.										*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadPressTexture(int number, char *romStart, char *romEnd)
+{
+	MemPtr  alcaddr = NULL;
+	uint    romsize = Align128(romEnd - romStart);
+	MemPtr  tempmem = AllocFreeZone(romsize, MM_ALLOC_BACK);
+	uint   *alcsize = (uint *)(tempmem+4);
+
+
+	if (tempmem != NULL) {
+		ReadBlock(tempmem, romStart, romEnd);
+		slidec((uchar *)tempmem, (uchar *)textureMemory);
+		SetSegment(number, textureMemory);
+		PurgeFreeZone(tempmem);
+	} else {
+		rmonpf(("size of compressed data is too big\n"));
+	}
+	return((MemPtr)textureMemory);
+}
+#endif
+
+#if 0
+//////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//		Load compressed data from ROM for IRIX 6.x.
+//
+//
+//
+//
+//////////////////////////////////////////////////////////////////////////////////
+
+typedef struct {
+	ulong		pressID1;			/* compredd module ID 1						*/
+	ulong		pressID2;			/* compredd module ID 2						*/
+	ulong		hdrsize;			/* header size								*/
+	ulong		romsize;			/* module size of the ROM					*/
+	ulong		ramsize;			/* module size of the RAM					*/
+	ulong		numglbs;			/* number of global tables					*/
+} PrsHeader;
+
+typedef struct {
+	ulong		value;				/* global value								*/
+	ulong		offset;				/* offset from top of module				*/
+} PrsGlobal;
+
+/********************************************************************************/
+/*																				*/
+/*		Uncompress data.														*/
+/*																				*/
+/********************************************************************************/
+static void
+Uncompress(char *source, char *destination)
+{
+	int			count;
+	PrsHeader *	prsheader = (PrsHeader *)source;
+	PrsGlobal *	glbtable  = (PrsGlobal *)(source + sizeof(PrsHeader));
+	char *		pressed	  = source + prsheader->hdrsize;
+	u32			bssSize	  = prsheader->ramsize - prsheader->romsize;
+
+
+	osInvalICache(destination, prsheader->ramsize);
+	osInvalDCache(destination, prsheader->ramsize);
+	slidstart(source + prsheader->hdrsize, destination);
+
+	for (count = 0; count < prsheader->numglbs; count++) {
+		*((u32 *)(destination + glbtable->offset)) = glbtable->value;
+		glbtable++;
+	}
+	if (bssSize > 0)  bzero(destination + prsheader->romsize, bssSize);
+	osWritebackDCache(destination, prsheader->ramsize);
+}
+/********************************************************************************/
+/*																				*/
+/*	Load compressed data from ROM.												*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadCompressed(int number, char *romStart, char *romEnd)
+{
+	MemPtr  alcaddr = NULL;
+	uint    romsize = Align128(romEnd - romStart);
+	MemPtr  tempmem = AllocFreeZone(romsize, MM_ALLOC_BACK);
+	uint    alcsize;
+
+
+	if (tempmem != NULL) {
+		ReadBlock(tempmem, romStart, romEnd);
+		alcsize = ((PrsHeader *)tempmem)->ramsize;
+
+		if ((alcaddr = AllocFreeZone(alcsize, MM_ALLOC_FORE)) != NULL) {
+			osSyncPrintf("start decompress\n");
+			Uncompress(tempmem, alcaddr);
+			osSyncPrintf("end decompress\n");
+			SetSegment(number, alcaddr);
+			PurgeFreeZone(tempmem);
+		} else {
+			rmonpf(("compressed data load failed (ROM:$%08X  RAM:$%08X)\n", romsize, alcsize));
+		}
+	} else {
+		rmonpf(("size of compressed data is too big\n"));
+	}
+	return(alcaddr);
+}
+/********************************************************************************/
+/*																				*/
+/*	Load compressed texture data from ROM.										*/
+/*																				*/
+/********************************************************************************/
+extern MemPtr
+LoadPressTexture(int number, char *romStart, char *romEnd)
+{
+	MemPtr  alcaddr = NULL;
+	uint    romsize = Align128(romEnd - romStart);
+	MemPtr  tempmem = AllocFreeZone(romsize, MM_ALLOC_BACK);
+
+
+	if (tempmem != NULL) {
+		ReadBlock(tempmem, romStart, romEnd);
+
+		Uncompress(tempmem, (char *)textureMemory);
+		SetSegment(number, textureMemory);
+		PurgeFreeZone(tempmem);
+	} else {
+		rmonpf(("size of compressed data is too big\n"));
+	}
+	return((MemPtr)textureMemory);
+}
+
+#endif
+
+
+
+
+
+
+
+
+
+
+/********************************************************************************/
+/*																				*/
+/*	Load user library.															*/
+/*																				*/
+/********************************************************************************/
+extern void
+LoadUserLibrary(void)
+{
+	MemPtr ramAddr = (MemPtr)ULIBCODE_START;
+	uint   ramSize = CPROGRAM_END - ULIBCODE_START;
+	uint   romSize = Align128(_ULibSegmentRomEnd - _ULibSegmentRomStart);
+
+
+	bzero(ramAddr, ramSize);
+	osWritebackDCacheAll();
+	ReadBlock(ramAddr, _ULibSegmentRomStart, _ULibSegmentRomEnd);
+	osInvalICache(ramAddr, ramSize);
+	osInvalDCache(ramAddr, ramSize);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*################################################################################
+ *
+ *
+ *	Arena memory management.
+ *
+ */
+
+/********************************************************************************/
+/*																				*/
+/*	Initialize the arena.														*/
+/*																				*/
+/********************************************************************************/
+extern ArenaPtr
+InitArena(int size, int mode)
+{
+	MemPtr	 memory;
+	ArenaPtr arena  = NULL;
+
+	size = Align32(size);
+
+	if ((memory = AllocFreeZone(size + sizeof(ArenaRecord), mode)) != NULL) {
+		arena		= (ArenaPtr)memory;
+		arena->size = size;
+		arena->used = 0;
+		arena->buff = memory + sizeof(ArenaRecord);
+		arena->free = memory + sizeof(ArenaRecord);
+	}
+	return(arena);
+}
+/********************************************************************************/
+/*																				*/
+/*	Allocate a memory block from the arena.										*/
+/*																				*/
+/********************************************************************************/
+extern void *
+AllocArena(ArenaPtr arena, int size)
+{
+	char *memory = NULL;
+
+	size = Align32(size);
+
+	if (0 < size && arena->used + size <= arena->size) {
+		memory		 = arena->free;
+		arena->free += size;
+		arena->used += size;
+	}
+	return(memory);
+}
+/********************************************************************************/
+/*																				*/
+/*	Resize a arena memory block.												*/
+/*																				*/
+/********************************************************************************/
+extern void *
+ResizeArena(ArenaPtr arena, int size)
+{
+	MemPtr	 memory;
+
+	size = Align32(size);
+
+	if ((memory = ResizeFreeZone(arena, size + sizeof(ArenaRecord))) != NULL) {
+		arena->size = size;
+	}
+	return(memory);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*################################################################################
+ *
+ *
+ *	heap memory management.
+ *
+ */
+
+/********************************************************************************/
+/*	Print heap. (for debug)														*/
+/********************************************************************************/
+#if 0
+static void
+PrintHeap(HeapPtr heap)
+{
+	HeapMCB *free = (HeapMCB *)heap->free;
+
+	rmonpf(("start print free heap\n"));
+	while (free != NULL) {
+		rmonpf(("%08XH - %08XH  (%08XH)\n", free, AddSize(free,free->size-1), free->size));
+		free = free->link;
+	}
+	rmonpf(("end print free heap\n"));
+}
+#endif
+/********************************************************************************/
+/*	Check heap. (for debug)														*/
+/********************************************************************************/
+#if 0
+static void
+CheckHeap(HeapPtr heap, MemPtr memory)
+{
+	HeapMCB *free = (HeapMCB *)heap->free;
+
+	if (free != NULL) {
+		MemPtr 	 next = (MemPtr)AddSize(free,free->size);
+
+		while (free->link != NULL) {
+			free = free->link;
+			if ((MemPtr)free == next) {
+				rmonpf(("heap broken (%08X , %08X) , %08X\n", heap->buff, heap->size, memory));
+				PrintHeap(heap);
+				for(;;);
+			}
+			next = (MemPtr)AddSize(free,free->size);
+		}
+	}
+}
+#endif
+/********************************************************************************/
+/*																				*/
+/*	Initilaize the heap.														*/
+/*																				*/
+/********************************************************************************/
+extern HeapPtr
+InitHeap(int size, int mode)
+{
+	MemPtr	 memory;
+	HeapMCB *hmcb;
+	HeapPtr  heap = NULL;
+
+	size = Align32(size);
+
+	if ((memory = AllocFreeZone(size + sizeof(HeapRecord), mode)) != NULL) {
+		heap	   = (HeapPtr)memory;
+		heap->size = size;
+		heap->buff = memory + sizeof(HeapRecord);
+		heap->free = memory + sizeof(HeapRecord);
+
+		hmcb	   = (HeapMCB *)heap->buff;
+		hmcb->link = NULL;
+		hmcb->size = heap->size;
+	}
+//	rmonpf(("Init heap\n"));
+//	PrintHeap(heap);
+
+	return(heap);
+}
+/********************************************************************************/
+/*																				*/
+/*	Allocate a memory block from the heap.										*/
+/*																				*/
+/********************************************************************************/
+extern void *
+AllocHeap(HeapPtr heap, int memsize)
+{
+	HeapMCB **freeblk = (HeapMCB **)&heap->free;
+	MemPtr	memory	  = NULL;
+
+
+	memsize = Align32(memsize) + sizeof(HeapMCB);
+
+	while (*freeblk != NULL) {
+		if (memsize <= (*freeblk)->size) {
+			memory = (MemPtr)(*freeblk + 1);
+
+			if (((*freeblk)->size - memsize) <= sizeof(HeapMCB)) {
+				*freeblk = (*freeblk)->link;
+			}
+			else {
+				HeapMCB *newblk = (HeapMCB *)AddSize(*freeblk, memsize);
+
+				newblk->size	 = (*freeblk)->size - memsize;
+				newblk->link	 = (*freeblk)->link;
+				(*freeblk)->size = memsize;
+				*freeblk		 = newblk;
+			}
+			break;
+		}
+		freeblk = &(*freeblk)->link;
+	}
+//	rmonpf(("Alloc heap (%08XH , %08XH)\n", memory, memsize));
+//	PrintHeap(heap);
+//	CheckHeap(heap, memory);
+	return(memory);
+}
+/********************************************************************************/
+/*																				*/
+/*	Free a memory block.														*/
+/*																				*/
+/********************************************************************************/
+extern void *
+FreeHeap(HeapPtr heap, void *memory)
+{
+	HeapMCB *memblk  = (HeapMCB *)memory - 1;
+	HeapMCB *freeblk = (HeapMCB *)heap->free;
+
+	if (heap->free == NULL) {
+		heap->free   = (MemPtr)memblk;
+		memblk->link = NULL;
+	}
+	else if (memblk < (HeapMCB *)heap->free) {
+		if (heap->free == (MemPtr)AddSize(memblk, memblk->size)) {
+			memblk->size += freeblk->size;
+			memblk->link  = freeblk->link;
+			heap->free	  = (MemPtr)memblk;
+		} else {
+			memblk->link = (HeapMCB *)heap->free;
+			heap->free	 = (MemPtr)memblk;
+		}
+	}
+	else {
+		while (freeblk->link != NULL) {
+			if (freeblk < memblk && memblk < freeblk->link)  break;
+			freeblk = freeblk->link;
+		}
+		if (memblk == (HeapMCB *)AddSize(freeblk, freeblk->size)) {
+			freeblk->size += memblk->size;
+			memblk		   = freeblk;
+		} else {
+			memblk->link  = freeblk->link;
+			freeblk->link = memblk;
+		}
+		if (memblk->link != NULL && memblk->link == (HeapMCB *)AddSize(memblk, memblk->size)) {
+			memblk->size += (memblk->link)->size;
+			memblk->link  = (memblk->link)->link;
+		}
+	}
+//	rmonpf(("Free heap  (%08XH , %08XH)\n", memory, ((HeapMCB *)memory-1)->size));
+//	CheckHeap(heap, memory);
+//	PrintHeap(heap);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*################################################################################
+ *
+ *	Dynamic Memory management oparations
+ *
+ */
+
+/********************************************************************************/
+/*																				*/
+/*	Allocate dynamic memory block.												*/
+/*																				*/
+/********************************************************************************/
+extern void *
+AllocDynamic(int size)
+{
+	MemPtr memory = NULL;
+
+	size = Align64(size);
+
+	if ((blockPtr - size >= (MemPtr)graphPtr)) {
+		blockPtr -= size;
+		memory	  = blockPtr;
+	}
+	else {
+		rmonpf(("DYnamic memory overflow\n"));
+	}
+	return(memory);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*################################################################################
+ *
+ *	Partial manager
+ *
+ */
+
+/********************************************************************************/
+/*																				*/
+/*	Load partition table.														*/
+/*																				*/
+/********************************************************************************/
+extern Partition *
+LoadPartitionTable(MemPtr romAddr)
+{
+	Partition *table;
+	int			size;
+
+
+	table = (Partition *)LoadData(romAddr, romAddr+sizeof(ulong), MM_ALLOC_FORE);
+	size  = table->nitems * 8 + 8;
+
+	PurgeFreeZone(table);
+	table = (Partition *)LoadData(romAddr, romAddr+size, MM_ALLOC_FORE);
+
+	table->topaddr = romAddr;
+	return(table);
+}
+/********************************************************************************/
+/*																				*/
+/*	Init partial data namagement record.										*/
+/*																				*/
+/********************************************************************************/
+extern void
+InitPartial(PartialPtr partial, MemPtr romAddr, MemPtr buffer)
+{
+	if (romAddr != NULL)  partial->ptable = LoadPartitionTable(romAddr);
+
+	partial->last	= NULL;
+	partial->buffer = buffer;
+}
+/********************************************************************************/
+/*																				*/
+/*	Read partial data.															*/
+/*																				*/
+/********************************************************************************/
+extern int
+ReadPartialData(PartialPtr partial, int index)
+{
+	int		  result  = FALSE;
+	Partition *ptable = partial->ptable;
+
+	if (index < ptable->nitems) {
+		MemPtr addr = ptable->item[index].offset + ptable->topaddr;
+		int	   size = ptable->item[index].length;
+
+		if (addr != partial->last) {
+			ReadBlock(partial->buffer, addr, addr+size);
+			partial->last = addr;
+			result		  = TRUE;
+		}
+	}
+	return(result);
+}
+@
+
+
+1.2
+log
+@irix 5.3 version.
+@
+text
+@d114 2
+d178 5
+@
+
+
+1.1
+log
+@memory management code.
+@
+text
+@d453 1
+a453 1
+#if 0
+d511 1
+d621 1
+a621 1
+
+@
+

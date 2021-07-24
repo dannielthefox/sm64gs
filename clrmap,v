@@ -1,0 +1,86 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.04.59;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.04.59;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@rm map/title/Mtitle.o
+rm map/select/Mselect.o
+rm map/stage1/Mstage1.o
+rm map/stage2/Mstage2.o
+rm map/stage3/Mstage3.o
+rm map/stage4/Mstage4.o
+rm map/stage5/Mstage5.o
+rm map/stage6/Mstage6.o
+rm map/stage7/Mstage7.o
+rm map/stage8/Mstage8.o
+rm map/stage9/Mstage9.o
+rm map/stage10/Mstage10.o
+rm map/stage11/Mstage11.o
+rm map/stage12/Mstage12.o
+rm map/stage13/Mstage13.o
+rm map/stage14/Mstage14.o
+rm map/stage15/Mstage15.o
+rm map/stage16/Mstage16.o
+rm map/stage17/Mstage17.o
+rm map/stage18/Mstage18.o
+rm map/stage19/Mstage19.o
+rm map/stage20/Mstage20.o
+rm map/stage21/Mstage21.o
+rm map/stage22/Mstage22.o
+rm map/stage23/Mstage23.o
+rm map/stage24/Mstage24.o
+rm map/stage25/Mstage25.o
+rm map/stage26/Mstage26.o
+rm map/stage27/Mstage27.o
+rm map/stage28/Mstage28.o
+rm map/stage29/Mstage29.o
+rm map/stage30/Mstage30.o
+rm map/stage31/Mstage31.o
+rm map/stage32/Mstage32.o
+rm map/stage33/Mstage33.o
+rm map/stage34/Mstage34.o
+rm map/stage35/Mstage35.o
+rm map/stage36/Mstage36.o
+rm map/stage37/Mstage37.o
+rm map/stage38/Mstage38.o
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

@@ -1,0 +1,608 @@
+head	1.1;
+access;
+symbols
+	iQue_20031010:1.1
+	iQue_release_master_1_0:1.1
+	iQue_08_21_03:1.1
+	iQue_beta_1_0:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.12.10.02.34.26;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@new source code from nintendo.
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+				  	   Title BG drawing function.
+
+			Copyright 1995 Nintendo co., ltd.  All rights reserved
+
+				  This module was programmed by Y.Tanimoto
+
+								1996.4.25
+*********************************************************************************/
+#include "headers.h"
+
+#define		TM_FIX_FRAME	45
+
+static ushort*	frameBuffer[3];
+
+extern Gfx	 mario_screen_init[] ;
+extern Gfx	 mario_screen_reset[];
+
+extern ushort	dispFrame ;
+extern ushort	drawFrame ;
+extern Gfx		vibpack_draw[];
+
+
+/* ============================================================================================
+		: Static Gfx and its records to initialize and draw title BG [ Fixed ].
+===============================================================================================	*/
+extern Gfx titleBG_draw_init[]	;
+extern Gfx titleBG_draw_on[]	;
+extern Gfx titleBG_draw_tri0[]	;
+extern Gfx titleBG_draw_tri1[]	;
+extern Gfx titleBG_draw_tri2[]	;
+extern Gfx titleBG_draw_tri3[]	;
+extern Gfx titleBG_draw_reset[]	;
+extern Gfx titleTM_draw[]		;
+extern Gfx RCP_Nintendo[]		;
+extern Gfx wipe_gfx_init[]		;
+
+static Gfx*	titleBG_draw[] = {	titleBG_draw_tri0, titleBG_draw_tri1,
+								titleBG_draw_tri2, titleBG_draw_tri3  };
+
+
+/* ============================================================================================
+		: 2D coordinate data [ Fixed ].
+===============================================================================================	*/
+static float	Xo[] = {    0.0,  80.0, 160.0, 240.0,  0.0, 80.0, 160.0, 240.0, 0.0, 80.0, 160.0, 240.0  };
+static float	Yo[] = {  160.0, 160.0, 160.0, 160.0, 80.0, 80.0,  80.0,  80.0, 0.0,  0.0,   0.0,   0.0	 };
+
+
+/* ============================================================================================
+		: Ptr to real image data records and their record.
+===============================================================================================	*/
+extern ushort*	titleBG_A[];
+extern ushort*	titleGm_O[];
+
+static ushort**	titleBG[] = {	titleBG_A, titleGm_O  };
+
+
+/* ============================================================================================
+		: Back pattern data and its record.
+===============================================================================================	*/
+static char	 back_pattern_A[] = {	0, 0, 0, 0,				//	<--- Each is image No.
+									0, 0, 0, 0,
+									0, 0, 0, 0,	  };
+
+static char* back_pattern_rec[] = {	  back_pattern_A   };
+
+
+static int	gover_count ;
+static int	gover_flag	;
+
+
+/* ============================================================================================
+		: Back pattern and its changing data for Game Over.
+===============================================================================================	*/
+static char	 back_pattern_GV[] = {	1, 1, 1, 1,				//	<--- Each is image No.
+									1, 1, 1, 1,
+									1, 1, 1, 1,	 };
+
+static char	 back_change_proc[] = {	0, 1, 2, 3, 7, 11, 10, 9, 8, 4, 5, 6 };
+
+
+/* ============================================================================================
+		: Back pattern data of multi-screen.
+===============================================================================================	*/
+static char  pos[] = {	1,1,1,1,1,1,1,1,
+						1,1,1,1,1,1,1,1,
+						1,1,0,0,0,0,1,1,
+						1,1,0,0,0,0,1,1,
+						1,1,1,1,1,1,1,1,
+						1,1,1,1,1,1,1,1	 };
+
+static char	 pos_proc[] = {  0,1,2,3,4,5,6,7,15,23,31,39,47,46,45,44,43,42,41,40,32,24,16,
+							 8,9,10,11,12,13,14,22,30,38,37,36,35,34,33,25,17  };
+
+static char	 pos_procFlag = 0 ;
+
+
+
+/* ============================================================================================
+		: Trademark drawing.
+===============================================================================================	*/
+static short	logo_Count	;
+static int		logo_Alpha	;
+extern float	logo_start[];
+extern float	logo_end[]	;
+
+
+/* ------------------------------------------------------------------------------------------------------------	*/
+/* ------------------------------------------------------------------------------------------------------------	*/
+
+
+/* ============================================================================================
+		: Title BG drawing function.
+===============================================================================================	*/
+extern ulong TitleLGDraw(int code, MapNode *node, void *data)
+{
+	MapCProg*	cprog  = (MapCProg *)node ;
+	Gfx*  		gfxPtr = NULL ;
+	Gfx*  		gfxTmp = NULL ;
+	Mtx*		scale  ;
+	float*		s_data = (float *)SegmentToVirtual(logo_start);
+	float*		e_data = (float *)SegmentToVirtual(logo_end);
+	float		sx_val ;
+	float		sy_val ;
+	float		sz_val ;
+
+	if (code != MAP_CBACK_EXEC)	{
+
+		logo_Count = 0 ;
+
+	}else
+	if (code == MAP_CBACK_EXEC)	{
+
+		MapSetRenderMode(cprog, RM_SURF);
+
+		scale  = (Mtx *)AllocDynamic(sizeof(Mtx));
+		gfxPtr = (Gfx *)AllocDynamic(4*sizeof(Gfx));
+		gfxTmp = gfxPtr ;
+
+		if (logo_Count >=  0 && logo_Count <= 19)	{
+			sx_val = s_data[3*logo_Count];
+			sy_val = s_data[3*logo_Count+1];
+			sz_val = s_data[3*logo_Count+2];
+		}else
+		if (logo_Count >= 20 && logo_Count <= TM_FIX_FRAME+29)	{
+			sx_val = 1.0 ;
+			sy_val = 1.0 ;
+			sz_val = 1.0 ;
+		}else
+		if (logo_Count >= TM_FIX_FRAME+30 && logo_Count <= TM_FIX_FRAME+45)	{
+			sx_val = e_data[3*(logo_Count-(TM_FIX_FRAME+30))];
+			sy_val = e_data[3*(logo_Count-(TM_FIX_FRAME+30))+1];
+			sz_val = e_data[3*(logo_Count-(TM_FIX_FRAME+30))+2];
+		}else{
+			sx_val = 0.0 ;
+			sy_val = 0.0 ;
+			sz_val = 0.0 ;
+		}
+
+		guScale(scale, sx_val, sy_val, sz_val);
+
+		gSPMatrix(gfxTmp++, scale, G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+		gSPDisplayList(gfxTmp++, RCP_Nintendo);
+		gSPPopMatrix(gfxTmp++, G_MTX_MODELVIEW);
+		gSPEndDisplayList(gfxTmp);
+
+		logo_Count++ ;
+
+	}
+
+	return((ulong)gfxPtr);
+}
+
+/* ============================================================================================
+		: Title trade mark drawing function.
+===============================================================================================	*/
+extern ulong TitleTMDraw(int code, MapNode *node, void *data)
+{
+	MapCProg*	cprog  = (MapCProg *)node ;
+	Gfx*  		gfxPtr = NULL ;
+	Gfx*  		gfxTmp = NULL ;
+
+	if (code != MAP_CBACK_EXEC)	{
+
+		logo_Alpha = 0 ;
+
+	}else
+	if (code == MAP_CBACK_EXEC)	{
+
+
+		gfxPtr = (Gfx *)AllocDynamic(5*sizeof(Gfx));
+		gfxTmp = gfxPtr ;
+
+		gSPDisplayList(gfxTmp++, wipe_gfx_init);
+		gDPSetEnvColor(gfxTmp++, 255, 255, 255, logo_Alpha);
+
+		switch(logo_Alpha)
+		{
+			case  255 : MapSetRenderMode(cprog, RM_SURF);
+						gDPSetRenderMode(gfxTmp++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+						break ;
+
+			default	  : MapSetRenderMode(cprog, RM_XSURF);
+						gDPSetRenderMode(gfxTmp++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+						break ;
+		}
+
+		gSPDisplayList(gfxTmp++, titleTM_draw);
+		gSPEndDisplayList(gfxTmp);
+
+		if (logo_Count >= 19)	{
+			logo_Alpha += 26 ;
+			if (logo_Alpha > 255)  {  logo_Alpha = 255 ;  }
+		}
+
+	}
+
+	return((ulong)gfxPtr);
+}
+
+/* ============================================================================================
+		: Draw one image in one position.
+===============================================================================================	*/
+static Gfx* TitleBGDrawEach(int positNo, char *ptrnXX)
+{
+	Mtx*	  transM = (Mtx *)AllocDynamic(sizeof(Mtx));
+	Gfx*	  gfxPtr = (Gfx *)AllocDynamic(36*sizeof(Gfx));
+	Gfx*	  gfxTmp = gfxPtr ;
+	ushort**  image ;
+	int		  i ;
+
+	image = (ushort **)SegmentToVirtual(titleBG[(ptrnXX[positNo])]);
+
+	guTranslate(transM, Xo[positNo], Yo[positNo], 0.0);
+
+	gSPMatrix(gfxTmp++, transM, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH );
+
+	gSPDisplayList(gfxTmp++, titleBG_draw_on);
+
+	for (i = 0 ; i < 4 ; i++)
+	{
+		gDPLoadTextureBlock(gfxTmp++, image[i], G_IM_FMT_RGBA, G_IM_SIZ_16b, 80, 20, 0,
+								G_TX_CLAMP|G_TX_NOMIRROR, G_TX_CLAMP|G_TX_NOMIRROR,
+								7, 6, G_TX_NOLOD, G_TX_NOLOD);
+
+		gSPDisplayList(gfxTmp++, titleBG_draw[i]);
+	}
+
+	gSPPopMatrix(gfxTmp++, G_MTX_MODELVIEW);
+
+	gSPEndDisplayList(gfxTmp);
+
+	return(gfxPtr);
+}
+
+/* ============================================================================================
+		: Title BG drawing function.
+===============================================================================================	*/
+extern ulong TitleBGDraw(int code, MapNode *node, void *data)
+{
+	MapCProg*	cprog  = (MapCProg *)node ;
+	int			ptrnNo = (int)((cprog->refCon) & 0xff);
+	char*		ptrnXX = back_pattern_rec[ptrnNo];
+	Gfx*  		gfxPtr = NULL ;
+	Gfx*  		gfxTmp = NULL ;
+	int	  		position ;
+
+	if (code == MAP_CBACK_EXEC)	{
+
+		gfxPtr = (Gfx *)AllocDynamic(16*sizeof(Gfx));
+		gfxTmp = gfxPtr ;
+
+		MapSetRenderMode(cprog, RM_SURF);
+
+		gSPDisplayList(gfxTmp++, wipe_gfx_init);
+		gSPDisplayList(gfxTmp++, titleBG_draw_init);
+
+		for (position = 0 ; position < 12 ; position++)
+		{
+			gSPDisplayList(gfxTmp++, TitleBGDrawEach(position, ptrnXX));
+		}
+
+		gSPDisplayList(gfxTmp++, titleBG_draw_reset);
+		gSPEndDisplayList(gfxTmp);
+
+	}
+
+	return((ulong)gfxPtr);
+}
+
+/* ============================================================================================
+		: Game Over BG drawing function.
+===============================================================================================	*/
+extern ulong GOverBGDraw(int code, MapNode *node, void *data)
+{
+	MapCProg*	cprog  = (MapCProg *)node ;
+	Gfx*  		gfxPtr = NULL ;
+	Gfx*  		gfxTmp = NULL ;
+	int	  		position, i	  ;
+
+	if (code != MAP_CBACK_EXEC)	{
+
+		gover_count =  0 ;
+		gover_flag  = -2 ;
+		for (i = 0 ; i < 12 ; i++)
+		{
+			back_pattern_GV[i] = 1 ;
+		}
+
+	}else{
+
+		gfxPtr = (Gfx *)AllocDynamic(16*sizeof(Gfx));
+		gfxTmp = gfxPtr ;
+
+		if (gover_flag == -2)	{
+			if (gover_count == 180)	{
+				gover_flag++ ;
+				gover_count = 0 ;
+			}
+		}else
+		if (gover_flag != 11)	{
+			if ((gover_count % 2) == 0)	{
+				gover_flag++ ;
+				back_pattern_GV[(back_change_proc[gover_flag])] = 0 ;
+			}
+		}
+
+		if (gover_flag != 11)	{  gover_count++ ;	}
+
+		MapSetRenderMode(cprog, RM_SURF);
+
+		gSPDisplayList(gfxTmp++, wipe_gfx_init);
+		gSPDisplayList(gfxTmp++, titleBG_draw_init);
+
+		for (position = 0 ; position < 12 ; position++)
+		{
+			gSPDisplayList(gfxTmp++, TitleBGDrawEach(position, back_pattern_GV));
+		}
+
+		gSPDisplayList(gfxTmp++, titleBG_draw_reset);
+		gSPEndDisplayList(gfxTmp);
+	}
+
+	return((ulong)gfxPtr);
+}
+
+
+/* --------------------------------------------------------------------------------------------	*/
+/* --------------------------------------------------------------------------------------------	*/
+
+
+/* ============================================================================================
+		: Generate gSPTextureRectangle() commands.
+===============================================================================================	*/
+static void GenTextureRect(Gfx **gfxTmp)
+{
+	int	  x, y ;
+
+	for (y = 0 ; y < 6 ; y++)
+	{
+		for (x = 0 ; x < 8 ; x++)
+		{
+			if (pos[y*8+x])	{	gSPTextureRectangle((*gfxTmp)++, ((40*x) << 2), ((40*y) << 2),
+													((40*x+39) << 2), ((40*y+39) << 2), 0,
+										  	  		(0 << 5), (0 << 5),  (4 << 10), (1 << 10)  );	}
+		}
+	}
+}
+
+/* ============================================================================================
+		: Copy image data block by copy-mode.
+===============================================================================================	*/
+static Gfx* DrawImageBlock(ushort *image, int imgW, int imgH)
+{
+	Gfx	 *gfxPtr ;
+	Gfx	 *gfxTmp ;
+
+	gfxPtr = (Gfx *)AllocDynamic(110*sizeof(Gfx));
+
+	if (gfxPtr == NULL)	{	return(gfxPtr)	;	}else
+						{	gfxTmp = gfxPtr ;	}
+	
+	gSPDisplayList(gfxTmp++, mario_screen_init);
+
+	gDPLoadTextureBlock(gfxTmp++, K0_TO_PHYS(image), G_IM_FMT_RGBA, G_IM_SIZ_16b, imgW, imgH, 0,
+									G_TX_CLAMP|G_TX_NOMIRROR, G_TX_CLAMP|G_TX_NOMIRROR,
+									6, 6, G_TX_NOLOD, G_TX_NOLOD);
+
+	GenTextureRect(&(gfxTmp));
+
+	gSPDisplayList(gfxTmp++, mario_screen_reset);
+
+ 	gSPEndDisplayList(gfxTmp++);
+
+	return(gfxPtr);
+}
+
+/* ============================================================================================
+		: Get and shrink image data from the frame-buffer.
+===============================================================================================	*/
+static ushort* ShrinkImageData(int imgW, int imgH, int unitW, int unitH)
+{
+	ushort*	 fb_image	;
+	ushort*	 dt_image	;
+	int		 fb_offset	;
+	int		 dt_offset	;
+	int		 sx, sy		;
+	int		 i, j, p, q	;
+	ushort	 r_short, g_short, b_short ;
+	float	 r_float, g_float, b_float ;
+	float	 r_total, g_total, b_total ;
+	float	 devide ;
+
+	fb_image = frameBuffer[drawFrame];
+	dt_image = (ushort *)AllocDynamic((imgW*imgH)*sizeof(ushort));
+
+	if (dt_image == NULL)	{	return(dt_image);	}
+
+	sx = 120 ;
+	sy =  80 ;
+
+	for (q = 0 ; q < imgH ; q++)
+	{
+		for (p = 0 ; p < imgW ; p++)
+		{
+			r_total = 0.0 ;
+			g_total = 0.0 ;
+			b_total = 0.0 ;
+
+			for (j = 0 ; j < unitH ; j++)
+			{
+				for (i = 0 ; i < unitW ; i++)
+				{
+					fb_offset = 320*(sy + unitH*q + j) + (sx + unitW*p + i);
+
+					r_short = fb_image[fb_offset];
+					g_short = fb_image[fb_offset];
+					b_short = fb_image[fb_offset];
+
+					r_float = (float)((r_short >> 11) & 0x1f);
+					g_float = (float)((g_short >>  6) & 0x1f);
+					b_float = (float)((b_short >>  1) & 0x1f);
+
+					r_total += r_float ;
+					g_total += g_float ;
+					b_total += b_float ;
+				}
+			}
+
+			devide = (float)(unitW*unitH);
+
+			r_short = (((ushort)((r_total / devide) + 0.5)) << 11) & 0xf800 ;
+			g_short = (((ushort)((g_total / devide) + 0.5)) <<  6) & 0x07c0 ;
+			b_short = (((ushort)((b_total / devide) + 0.5)) <<  1) & 0x003e ;
+
+			dt_offset = imgH*q + p ;
+
+			dt_image[dt_offset] = r_short + g_short + b_short + 1 ;
+
+		}
+	}
+
+	return(dt_image);
+}
+
+/* ============================================================================================
+		: Real time image change function.
+===============================================================================================	*/
+extern ulong ImageChangeFunc(int code, MapNode *node, void *data)
+{
+	MapCProg*	cprog  ;
+	ushort*		imgPtr ;
+	Gfx*		gfxPtr = NULL ;
+	int			i ;
+
+	if (code != MAP_CBACK_EXEC)	{
+
+		frameBuffer[0] = (ushort *)(frameMemoryA);
+		frameBuffer[1] = (ushort *)(frameMemoryB);
+		frameBuffer[2] = (ushort *)(frameMemoryC);
+
+		for (i = 0 ; i < 48 ; i++)
+		{
+			pos[i] = 0 ;
+		}
+
+	}else
+	if (code == MAP_CBACK_EXEC)	{
+
+		if (pos_procFlag == 0)	{
+
+			if (cont1p->trigger & CONT_BACK)  {
+				Na_FixSeFlagEntry(NA_SE2_SET);
+
+				pos[0] ^= 1 ;
+				pos_procFlag++ ;
+
+			}
+
+		}else{
+
+			(pos[(pos_proc[pos_procFlag])]) ^= 1 ;
+
+			pos_procFlag++ ;
+			if (pos_procFlag >= 40)	 {	pos_procFlag = 0 ;	}
+
+		}
+
+		if ((pos[0] == 1) || (pos[17] == 1))  {
+		
+			if ((imgPtr = ShrinkImageData(40, 40, 2, 2)) != NULL)	{
+
+				cprog = (MapCProg *)node ;
+				MapSetRenderMode(cprog, RM_SURF);
+				gfxPtr = DrawImageBlock(imgPtr, 40, 40);
+
+			}
+
+		}
+
+	}
+
+	return((ulong)gfxPtr);
+}
+
+
+/* --------------------------------------------------------------------------------------------	*/
+/* --------------------------------------------------------------------------------------------	*/
+
+
+/* ============================================================================================
+		: Draw vibrate-pack logo.
+===============================================================================================	*/
+extern ulong VibLogoDraw(int code, MapNode *node, void *data)
+{
+	MapCProg*	cprog  ;
+	Gfx*		gfxTmp ;
+	Gfx*		gfxPtr ;
+	int			flag   ;
+	char		value  ;
+
+	if (code != MAP_CBACK_EXEC)	{
+
+		gfxPtr = NULL ;
+
+	}else
+	if (code == MAP_CBACK_EXEC)	{
+
+		cprog = (MapCProg *)node ;
+		MapSetRenderMode(cprog, RM_SURF);
+
+		flag = (int)((cprog->refCon) & 0xff);
+
+		if (flag == 0)	{  value = back_pattern_A[6] ;  }else
+		if (flag == 1)	{  value = back_pattern_GV[6];	}
+
+		if (value == 0)	 {
+
+			gfxPtr = (Gfx *)AllocDynamic(3*sizeof(Gfx));
+
+			if (gfxPtr != NULL)	{
+
+				gfxTmp = gfxPtr ;
+
+				gSPDisplayList(gfxTmp++, vibpack_draw);
+			 	gSPEndDisplayList(gfxTmp);
+
+			}
+
+		}else{
+
+			gfxPtr = NULL ;
+
+		}
+
+	}
+
+	return((ulong)gfxPtr);
+}
+@

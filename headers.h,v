@@ -1,0 +1,134 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/********************************************************************************
+	headers.h: Ultra 64 MARIO Brothers include file
+
+	Copyright (c) 1995-1997 Nintendo co., ltd.  All rights reserved
+
+	May 27, 1997
+ ********************************************************************************/
+
+#ifndef	HEADERS_H
+#define	HEADERS_H
+
+#define	UMARIO_PROGRAM
+
+#ifndef ASSEMBLER
+
+
+#include <ultra64.h>
+#include "include/gex.h"
+
+#include "include/project.h"
+#include "include/basis.h"
+#include "include/debug.h"
+
+#include "include/democamera.h"
+
+#include "include/math.h"
+#include "include/memory.h"
+
+#include "include/system.h"
+#include "include/mtrmain.h"
+#include "include/gfxmain.h"
+#include "audio/main_inc.h"
+#include "audio/audio_music.h"
+#include "include/audmain.h"
+
+
+#include "include/hierarchy.h"
+#include "include/maplang.h"
+#include "include/shapedef.h"
+#include "include/funlike.h"
+#include "include/tagfile.h"
+
+#include "include/pathmacs.h"
+#include "include/ymacs.h"
+#include "include/yvars.h"
+#include "include/ystruct.h"
+#include "include/yalcs.h"
+#include "include/yextern.h"
+#include "include/tagdecode.h"
+
+#include "include/wenemy.h"
+
+#include "include/wipe.h"
+#include "include/shade.h"
+#include "include/bgdraw3.h"
+#include "include/water.h"
+#include "include/areamap.h"
+#include "include/wave.h"
+#include "include/tutil.h"
+
+#include "include/dprint.h"
+#include "include/messnum.h"
+#include "include/ienemy.h"
+
+#include "include/camera.h"
+#include "include/scene.h"
+#include "include/seqlang.h"
+#include "include/callback.h"
+#include "include/player.h"
+#include "include/shapename.h"
+
+
+#include "include/skin.h"
+
+#else
+
+#include "include/project.h"
+#include "include/memory.h"
+#include "include/seqlang.h"
+#include "include/messnum.h"
+
+#include "audio/audio_music.h"
+
+#include "include/pathmacs.h"
+#include "include/shapename.h"
+
+#endif
+#endif
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

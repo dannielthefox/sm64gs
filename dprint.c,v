@@ -1,0 +1,626 @@
+head	1.4;
+access;
+symbols
+	iQue_20031010:1.4
+	iQue_release_master_1_0:1.4
+	iQue_08_21_03:1.3
+	iQue_beta_1_0:1.3;
+locks; strict;
+comment	@ * @;
+
+
+1.4
+date	2003.09.09.19.42.08;	author wheeler;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.05.23.06.50;	author tong;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.03.09.01.27.41;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.03.09.00.10.49;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@Fix "Time" texture
+@
+text
+@/***************************************************************************************************
+			Printf Function
+									programed by Iwamoto Daiki		[1995 June 21]
+****************************************************************************************************/
+#include "headers.h"
+
+#define PUSH    1
+#define NOPUSH  0
+#define CHARWIDTH  12
+
+extern unsigned short texDataPtr[]; 
+
+typedef struct {
+	int posx;
+	int posy;
+	short nstrs;
+	char str[50];
+} PString;
+
+static PString *printPtr[50];
+static short nprints = 0;
+
+/***************************************************************************************************
+		Calculate 10^x and return its rsult.
+****************************************************************************************************/
+static unsigned int PowTen(int decimal,int x)
+{
+	unsigned int return_value ;
+	int		i ;
+
+	return_value = 1 ;
+	for ( i = 0 ; i < x ; i++ )	return_value = return_value*decimal ;
+
+	return(return_value) ;
+}
+
+/***************************************************************************************************
+		Change a value to strings by Decimal.
+****************************************************************************************************/
+static void ChangeValueString(int value,int decimal, char	*buffer,int *counter,unsigned char girder,char ox_flag) 
+{
+	unsigned int	beki;
+	int				p = 0;
+	int 			i;
+	int 			k = 0;
+	char			syou;
+	char minus_flag = 0;
+	char space_0;
+
+	if (ox_flag == 1) space_0 = '0';
+	else			 space_0 = -1;
+
+	if (value != 0)		{
+		if (value < 0) {
+			value = -value;
+			minus_flag = 1;
+		}
+
+		while(1)		{
+			beki = PowTen(decimal,p) ;			/*		beki = 10^p		*/
+			if ( beki > value )	break;
+			p++ ;
+		}
+
+
+		if (girder > p) {
+			for (k=0; k<(girder-p); k++) *(buffer+k) = space_0;
+			if (minus_flag == 1) k--;
+		}
+
+		if (minus_flag == 1) { *(buffer+k) = 'M'; k++;}
+
+		for ( i = p-1 ; i >= 0 ; i-- )		{
+			beki = PowTen(decimal,i) ;
+			syou = (char)(value / beki) ;
+			if (syou < 10) *(buffer + k + (p-1) - i) = syou + '0';
+			else		   *(buffer + k + (p-1) - i) = (syou-10) + 'A';
+			value = value - syou*beki ;
+		}
+
+	}
+
+	else	{
+		p = 1;
+		if (girder > p) for (k=0; k<(girder-p); k++) *(buffer+k) = space_0;
+		*(buffer+k) = '0' ;
+	}
+
+	*counter += p+k;
+}
+/***************************************************************************************************
+			%3d is 3 girder
+****************************************************************************************************/
+static void CheckGirder(const char *format,int *fo_counter,unsigned char *girder,char *ox_flag)
+{
+	char str[10];
+	char count = 0;
+	short i;
+
+	if ((format[*fo_counter] - '0') == 0) *ox_flag = 1;
+
+	while (format[*fo_counter] != 'd' && format[*fo_counter] != 'x') {
+		str[count] = format[*fo_counter] - '0';
+		if (str[count] < 0 || str[count] > 9) { *girder = 0; return;}
+		count++;
+		*fo_counter += 1;
+	}
+
+	if (count == 0) return;	
+
+	for (i=0; i<count-1; i++) *girder = *girder + 10*(count-i-1)*str[i];
+	*girder = *girder + str[count-1];
+
+
+}
+/***************************************************************************************************
+			Printf Character
+****************************************************************************************************/
+extern void dprintf(int posx,int posy,const char *format,int value)
+{
+
+	char str = 0;
+	char ox_flag = 0;
+	unsigned char girder = 0; 
+	int decimal = 0;
+	int counter = 0;
+	int fo_counter = 0;
+
+	if ((printPtr[nprints] = (PString *)malloc(sizeof(PString)) ) == NULL) { rmonpf(("malloc error in dprint!!\n")); return;}
+
+
+	printPtr[nprints]->posx = posx;
+	printPtr[nprints]->posy = posy;
+
+	str = format[fo_counter];
+	while (str != NULL) {
+
+		if (str == '%') {
+			fo_counter++;
+			CheckGirder(format, &fo_counter,&girder,&ox_flag);
+			if (format[fo_counter] != 'd' && format[fo_counter] != 'x') break;
+			if (format[fo_counter] == 'd') decimal = 10;
+			if (format[fo_counter] == 'x') decimal = 16; 
+			fo_counter++;
+			ChangeValueString(value,decimal,&printPtr[nprints]->str[counter],&counter,girder,ox_flag); 
+
+		}
+		else {
+			printPtr[nprints]->str[counter] = str;
+			counter++;
+			fo_counter++;
+		}
+		str = format[fo_counter];
+	}		
+
+	printPtr[nprints]->nstrs = counter;
+	nprints++;
+
+}
+/***************************************************************************************************
+			Printf Character Message Only
+****************************************************************************************************/
+extern void dmprintf(int posx,int posy,const char *format)
+{
+
+	char str = 0;
+	int counter = 0;
+	int fo_counter = 0;
+
+	if ((printPtr[nprints] = (PString *)malloc(sizeof(PString)) ) == NULL) { rmonpf(("malloc error in dprint!!\n")); return;}
+
+
+	printPtr[nprints]->posx = posx;
+	printPtr[nprints]->posy = posy;
+
+	str = format[fo_counter];
+	while (str != NULL) {
+
+		printPtr[nprints]->str[counter] = str;
+		counter++;
+		fo_counter++;
+		str = format[fo_counter];
+	}		
+
+	printPtr[nprints]->nstrs = counter;
+	nprints++;
+
+}
+
+/***************************************************************************************************
+			Printf Character Message (Translate Center)
+****************************************************************************************************/
+extern void dcprintf(int posx,int posy,const char *format)
+{
+
+	char str = 0;
+	unsigned char girder = 0; 
+	int decimal = 0;
+	int counter = 0;
+	int fo_counter = 0;
+#if CHINA
+	int width = 0;
+#endif
+
+	if ((printPtr[nprints] = (PString *)malloc(sizeof(PString)) ) == NULL) {rmonpf(("malloc error in dprint!!\n"));  return;}
+
+
+	str = format[fo_counter];
+	while (str != NULL) {
+#if CHINA
+		if ((unsigned char)str==0xB0 || (unsigned char)str==0xC0)
+			width = 16;
+		else 
+			width = 12;
+#endif
+
+		printPtr[nprints]->str[counter] = str;
+		counter++;
+		fo_counter++;
+		str = format[fo_counter];
+	}		
+
+	printPtr[nprints]->nstrs = counter;
+#if CHINA
+	printPtr[nprints]->posx = posx - (width*counter)/2;
+#else
+	printPtr[nprints]->posx = posx - (CHARWIDTH*counter)/2;
+#endif
+	printPtr[nprints]->posy = posy;
+
+	nprints++;
+
+}
+
+
+
+
+
+/**************************************************************************************************/
+/***************************************************************************************************
+			Character Check
+****************************************************************************************************/
+extern char CharacterCheck(char character)
+{
+
+	if (character >= 65 && character <= 90) { return(character - 55); }  //BigCharacter
+	if (character >= 97 && character <= 122){ return(character - 87); }  //SmallCharacter
+	if (character >= 48 && character <= 57) { return(character - 48); }  //Number
+	if (character == 32) return(-1);
+	if (character == 33) return(36);
+	if (character == 35) return(37);
+	if (character == 63) return(38);
+	if (character == 38) return(39);
+	if (character == 37) return(40);
+
+	if (character == 42) return(50);    // batu
+	if (character == 43) return(51);	// coin
+	if (character == 44) return(52);	//mario
+	if (character == 45) return(53);	//star
+	if (character == 46) return(54);	//coin_shadow
+	if (character == 47) return(55);	//key
+
+	return(-1);
+
+}
+/***************************************************************************************************
+			Draw Font Texture
+****************************************************************************************************/
+static void DrawMessageFont(char num)
+{
+	unsigned short **texture = (unsigned short**)SegmentToVirtual(texDataPtr); 
+
+	gDPPipeSync(graphPtr++);
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, texture[(unsigned char)num]);
+	gSPDisplayList(graphPtr++, RCP_tfont_main);	
+
+
+}
+
+/***************************************************************************************************
+			Make Font Texture
+****************************************************************************************************/
+#if 0
+static void MakeVertex(int posx,int posy,int numbers)
+{
+
+    Vtx font_init[] = {
+		{   0 ,   0 ,  0,  0 ,        0 ,            0,    255,255,255,255}, 
+		{  16 ,   0 ,  0,  0 , (16 << 5),            0,    255,255,255,255}, 
+		{  16 ,  16 ,  0,  0 , (16 << 5),    (-15 << 5),   255,255,255,255}, 
+		{   0 ,  16 ,  0,  0 ,         0,    (-15 << 5),   255,255,255,255}, 
+	};
+
+	VtxPtr  vertexp = (VtxPtr) AllocDynamic(sizeof(Vtx)*(4));
+	if (vertexp == NULL)	{ rmonpf(("AllocDynamic error in dprint!!\n")); return;}
+
+	vertexp[0] = font_init[0];
+	(vertexp+0   ) ->v.ob[0] = posx +(numbers*CHARWIDTH) + 0;
+	(vertexp+0   ) ->v.ob[1] = posy +  0;
+	(vertexp+0   ) ->v.ob[2] =  0;
+
+	vertexp[1] = font_init[1];
+	(vertexp+1   ) ->v.ob[0] = posx +(numbers*CHARWIDTH) +16;
+	(vertexp+1   ) ->v.ob[1] = posy +  0;
+	(vertexp+1   ) ->v.ob[2] =  0;
+
+	vertexp[2] = font_init[2];
+	(vertexp+2   ) ->v.ob[0] = posx +(numbers*CHARWIDTH) +16;
+	(vertexp+2   ) ->v.ob[1] = posy + 16;
+	(vertexp+2   ) ->v.ob[2] =  0;
+
+	vertexp[3] = font_init[3];
+	(vertexp+3   ) ->v.ob[0] = posx +(numbers*CHARWIDTH) + 0;
+	(vertexp+3   ) ->v.ob[1] = posy + 16;
+	(vertexp+3   ) ->v.ob[2] =  0;
+
+	gSPVertex(graphPtr++,K0_TO_PHYS((u32) (vertexp)), 4, 0);
+	gSP1Triangle(graphPtr++, 0, 1, 2, 0);
+	gSP1Triangle(graphPtr++, 0, 2, 3, 0);
+
+
+}
+#endif
+/***************************************************************************************************
+		Position X,Y Check
+****************************************************************************************************/
+static void PosXYCheck(int *posx, int *posy)
+{
+
+	if (*posx <  10) *posx =   10;
+	if (*posx > 300) *posx =  300;
+
+	if (*posy <   5) *posy =    5;
+	if (*posy > 220) *posy =  220;
+
+}
+/***************************************************************************************************
+			Make Font Texture
+****************************************************************************************************/
+static void DrawFontToFrame(int posx,int posy,int numbers, int width)
+{
+	int ortho_posix;
+	int ortho_posiy;
+	uint posix;
+	uint posiy;
+
+
+	ortho_posix = (int) (posx + (numbers*width));
+	ortho_posiy = (int) (240 - (posy+16));
+	PosXYCheck(&ortho_posix, &ortho_posiy);
+
+	posix = (uint)ortho_posix;
+	posiy = (uint)ortho_posiy;
+
+
+	
+/* ======== 1 Cycle Mode Copy ===============
+	gSPTextureRectangle(graphPtr++,( ortho_posix << 2), (ortho_posiy << 2), (ortho_posix+16 << 2), (ortho_posiy+16 << 2), 0,
+						 (0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+*/
+
+
+/* ======== Copy Mode Copy ==================*/
+	gSPTextureRectangle(graphPtr++,( posix << 2), (posiy << 2), (posix+15 << 2), (posiy+15 << 2), 0,
+						 (0 << 5), (0 << 5),	 (4 << 10), (1 << 10)  );
+
+
+}
+/***************************************************************************************************
+			Draw Message
+****************************************************************************************************/
+extern void DrawMessage(void)
+{
+
+	int i,k;
+	char num;
+	Mtx *projection;
+
+	if (nprints == 0) return;
+
+	if ( (projection = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL) { nprints = 0; rmonpf(("AllocDynamic error in dprint!!\n")); return; }
+
+	guOrtho(projection, 0., 320., 0., 240.,-10., 10., 1.0);
+
+	gSPPerspNormalize(graphPtr++, 0xffff);
+	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (projection)),G_MTX_PROJECTION|G_MTX_LOAD|G_MTX_NOPUSH);
+
+
+
+	gSPDisplayList(graphPtr++, RCP_tfont_on);	
+
+	for (i=0; i<nprints; i++) {
+
+		for (k=0; k<printPtr[i]->nstrs; k++) {
+#if CHINA
+			if ((unsigned char)(printPtr[i]->str[k]) < 0xA0) {
+				num = CharacterCheck(printPtr[i]->str[k]);
+			} else {
+				if ((unsigned char)(printPtr[i]->str[k])==0xB0) {  // "PRESS"
+					num = 0xb0;
+				} else if ((unsigned char)(printPtr[i]->str[k])==0xC0) {  // "TIME"
+					num = 0xc0;
+				} else {
+					num = -1;
+				}
+			}
+#else
+			num = CharacterCheck(printPtr[i]->str[k]);
+#endif
+			if (num != -1) {
+#if CHINA
+				if ((unsigned char)num==0xb0) {  // "PRESS"
+				    DrawMessageFont(0x92);
+				    DrawFontToFrame(45, 50, 0, 16);	
+				    DrawMessageFont(0x93);
+				    DrawFontToFrame(45, 50, 1, 16);			 
+				    DrawMessageFont(0x94);
+				    DrawFontToFrame(45, 34, 0, 16);			 
+				    DrawMessageFont(0x95);
+				    DrawFontToFrame(45, 34, 1, 16);			 
+				} else if ((unsigned char)num==0xc0) {  // "TIME"
+				    DrawMessageFont(0xae);
+				    DrawFontToFrame(170, 193,0, 16);
+				    DrawMessageFont(0xaf);
+				    DrawFontToFrame(170, 193,1, 16);
+				    DrawMessageFont(0xb0);
+				    DrawFontToFrame(170, 193-16,0, 16);
+				    DrawMessageFont(0xb1);
+				    DrawFontToFrame(170, 193-16,1, 16);
+
+				    DrawMessageFont(0xb2);
+				    DrawFontToFrame(170, 193,2, 16);
+				    DrawMessageFont(0xb3);
+				    DrawFontToFrame(170, 193,3, 16);
+				    DrawMessageFont(0xb4);
+				    DrawFontToFrame(170, 193-16,2, 16);
+				    DrawMessageFont(0xb5);
+				    DrawFontToFrame(170, 193-16,3, 16);
+				} else {
+				DrawMessageFont(num);
+
+				//MakeVertex(printPtr[i]->posx,printPtr[i]->posy,k);
+				DrawFontToFrame(printPtr[i]->posx,printPtr[i]->posy,k, CHARWIDTH);			 
+				}
+
+#else
+				DrawMessageFont(num);
+
+				//MakeVertex(printPtr[i]->posx,printPtr[i]->posy,k);
+				DrawFontToFrame(printPtr[i]->posx,printPtr[i]->posy,k, CHARWIDTH);			 
+#endif
+			}
+		}
+		
+		free(printPtr[i]);
+	}
+
+	gSPDisplayList(graphPtr++, RCP_tfont_off);	
+
+	nprints = 0;
+
+
+
+}
+
+
+@
+
+
+1.3
+log
+@updated 16bit font glyph integration
+@
+text
+@d340 1
+a340 1
+static void DrawFontToFrame(int posx,int posy,int numbers)
+d348 1
+a348 1
+	ortho_posix = (int) (posx + (numbers*CHARWIDTH));
+d414 1
+a414 1
+				    DrawFontToFrame(45, 50, 0);			 
+d416 1
+a416 1
+				    DrawFontToFrame(45, 50, 1);			 
+d418 1
+a418 1
+				    DrawFontToFrame(45, 34, 0);			 
+d420 1
+a420 1
+				    DrawFontToFrame(45, 34, 1);			 
+d423 1
+a423 1
+				    DrawFontToFrame(170, 185,0);
+d425 6
+a430 1
+				    DrawFontToFrame(170, 185,1);
+d432 1
+a432 1
+				    DrawFontToFrame(170, 185,2);
+d434 1
+a434 5
+				    DrawFontToFrame(170, 185,3);
+				    DrawMessageFont(0xb0);
+				    DrawFontToFrame(170, 185-16,0);
+				    DrawMessageFont(0xb1);
+				    DrawFontToFrame(170, 185-16,1);
+d436 1
+a436 1
+				    DrawFontToFrame(170, 185-16,2);
+d438 1
+a438 1
+				    DrawFontToFrame(170, 185-16,3);
+d443 1
+a443 1
+				DrawFontToFrame(printPtr[i]->posx,printPtr[i]->posy,k);			 
+d450 1
+a450 1
+				DrawFontToFrame(printPtr[i]->posx,printPtr[i]->posy,k);			 
+@
+
+
+1.2
+log
+@incorporated iQue's texture, modified encoding for 8bit font glyph.
+@
+text
+@d413 1
+a413 1
+				    DrawMessageFont(0xba);
+d415 1
+a415 1
+				    DrawMessageFont(0xbb);
+d417 1
+a417 1
+				    DrawMessageFont(0xbc);
+d419 1
+a419 1
+				    DrawMessageFont(0xbd);
+d422 1
+a422 1
+				    DrawMessageFont(0xe2);
+d424 1
+a424 1
+				    DrawMessageFont(0xe3);
+d426 1
+a426 1
+				    DrawMessageFont(0xe6);
+d428 1
+a428 1
+				    DrawMessageFont(0xe7);
+d430 1
+a430 1
+				    DrawMessageFont(0xe4);
+d432 1
+a432 1
+				    DrawMessageFont(0xe5);
+d434 1
+a434 1
+				    DrawMessageFont(0xe8);
+d436 1
+a436 1
+				    DrawMessageFont(0xe9);
+@
+
+
+1.1
+log
+@more source code from Nintendo.
+@
+text
+@d201 3
+d210 6
+d224 3
+d228 1
+d274 1
+a274 1
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, texture[num]);
+d395 13
+d409 1
+d411 35
+d450 1
+@
+

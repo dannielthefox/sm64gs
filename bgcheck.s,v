@@ -1,0 +1,2020 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.04.59;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.04.59;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@	.verstamp	3 19
+	.option	pic0
+	.lcomm	move_mapplane 40
+	.lcomm	hit_mapplane 40
+	.lcomm	hit_roofplane 40
+	.lcomm	Xwall 208
+	.lcomm	static_bgdata 56
+	.extern	bgcheck_arealist 6144
+	.extern	movebg_head 24
+	.extern	DBF_BGnull 4
+	.extern	waterline 4
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.loc	2 75
+ #  75	{
+	.ent	BG_WallCheck 2
+BG_WallCheck:
+	.option	O1
+	subu	$sp, 80
+	.frame	$sp, 80, $31
+	.loc	2 75
+	.loc	2 81
+ #  76	
+ #  77	//	int	counter;
+ #  78		float	A,B,C,D,dR,dRf;
+ #  79		float	x1,x2,x3,y1,y2,y3;
+ #  80	
+ #  81		float	px	=  wallcheckp->wx;
+	l.s	$f4, 0($5)
+	s.s	$f4, 28($sp)
+	.loc	2 82
+ #  82		float	py	= (wallcheckp->wy) + (wallcheckp->offsetY);
+	l.s	$f6, 4($5)
+	l.s	$f8, 12($5)
+	add.s	$f10, $f6, $f8
+	s.s	$f10, 24($sp)
+	.loc	2 83
+ #  83		float	pz	=  wallcheckp->wz;
+	l.s	$f16, 8($5)
+	s.s	$f16, 20($sp)
+	.loc	2 84
+ #  84		float	r	=  wallcheckp->r;
+	l.s	$f18, 16($5)
+	s.s	$f18, 16($sp)
+	.loc	2 86
+ #  85	
+ #  86		int		wallflag = 0;			/* hit OFF/ON 0/1 */
+	sw	$0, 12($sp)
+	.loc	2 92
+ #  87		int		g_flag;
+ #  88		BGCheckData		*wall;				/* bgcheck data */
+ #  89	
+ #  90	
+ #  91	
+ #  92		while( bgcheck_list != NULL ){
+	beq	$4, 0, $46
+$32:
+	.loc	2 92
+	.loc	2 96
+ #  93	
+ #  94	//		counter++;
+ #  95	
+ #  96			wall 		 = bgcheck_list->data;
+	lw	$14, 4($4)
+	sw	$14, 4($sp)
+	.loc	2 97
+ #  97			bgcheck_list = bgcheck_list->next;
+	lw	$4, 0($4)
+	.loc	2 99
+ #  98	
+ #  99			if ( wall->a < -0.707 || 0.707 < wall->a){
+	lw	$15, 4($sp)
+	l.s	$f4, 36($15)
+	cvt.d.s	$f6, $f4
+	li.d	$f8, -7.0699999999999996e-01
+	c.lt.d	$f6, $f8
+	bc1t	$33
+	li.d	$f10, 0.707
+	c.lt.d	$f10, $f6
+	bc1f	$37
+$33:
+	.loc	2 99
+	.loc	2 100
+ # 100				x1 = -(wall->z1);	x2 = -(wall->z2);	x3 = -(wall->z3);
+	lw	$24, 4($sp)
+	lh	$25, 20($24)
+	negu	$8, $25
+	mtc1	$8, $f16
+	cvt.s.w	$f18, $f16
+	s.s	$f18, 52($sp)
+	.loc	2 100
+	lh	$9, 26($24)
+	negu	$10, $9
+	mtc1	$10, $f4
+	cvt.s.w	$f8, $f4
+	s.s	$f8, 48($sp)
+	.loc	2 100
+	lh	$11, 32($24)
+	negu	$12, $11
+	mtc1	$12, $f10
+	cvt.s.w	$f6, $f10
+	s.s	$f6, 44($sp)
+	.loc	2 101
+ # 101				y1 =   wall->y1;	y2 =   wall->y2;	y3 =   wall->y3;
+	lh	$13, 18($24)
+	mtc1	$13, $f16
+	cvt.s.w	$f4, $f16
+	s.s	$f4, 40($sp)
+	.loc	2 101
+	lh	$14, 24($24)
+	mtc1	$14, $f10
+	cvt.s.w	$f6, $f10
+	s.s	$f6, 36($sp)
+	.loc	2 101
+	lh	$15, 30($24)
+	mtc1	$15, $f16
+	cvt.s.w	$f10, $f16
+	s.s	$f10, 32($sp)
+	.loc	2 102
+ # 102				g_flag = 0;
+	sw	$0, 8($sp)
+	.loc	2 103
+ # 103				if ( gaiseki(-pz,py,x1,y1,x2,y2) > 0 ) 	g_flag++;
+	l.s	$f16, 24($sp)
+	sub.s	$f10, $f4, $f16
+	sub.s	$f16, $f8, $f18
+	mul.s	$f8, $f10, $f16
+	l.s	$f10, 20($sp)
+	neg.s	$f16, $f10
+	sub.s	$f10, $f18, $f16
+	sub.s	$f18, $f6, $f4
+	mul.s	$f16, $f10, $f18
+	sub.s	$f6, $f8, $f16
+	li.s	$f4, 0.0000000000000000e+00
+	c.lt.s	$f4, $f6
+	bc1f	$34
+	.loc	2 103
+	li	$25, 1
+	sw	$25, 8($sp)
+$34:
+	.loc	2 104
+ # 104				if ( gaiseki(-pz,py,x2,y2,x3,y3) > 0 ) 	g_flag++;
+	l.s	$f10, 36($sp)
+	l.s	$f18, 24($sp)
+	sub.s	$f8, $f10, $f18
+	l.s	$f16, 44($sp)
+	l.s	$f6, 48($sp)
+	sub.s	$f4, $f16, $f6
+	mul.s	$f18, $f8, $f4
+	l.s	$f16, 20($sp)
+	neg.s	$f8, $f16
+	sub.s	$f4, $f6, $f8
+	l.s	$f16, 32($sp)
+	sub.s	$f6, $f16, $f10
+	mul.s	$f8, $f4, $f6
+	sub.s	$f16, $f18, $f8
+	li.s	$f10, 0.0000000000000000e+00
+	c.lt.s	$f10, $f16
+	bc1f	$35
+	.loc	2 104
+	lw	$8, 8($sp)
+	addu	$9, $8, 1
+	sw	$9, 8($sp)
+$35:
+	.loc	2 105
+ # 105				if ( gaiseki(-pz,py,x3,y3,x1,y1) > 0 ) 	g_flag++;
+	l.s	$f4, 32($sp)
+	l.s	$f6, 24($sp)
+	sub.s	$f18, $f4, $f6
+	l.s	$f8, 52($sp)
+	l.s	$f16, 44($sp)
+	sub.s	$f10, $f8, $f16
+	mul.s	$f6, $f18, $f10
+	l.s	$f8, 20($sp)
+	neg.s	$f18, $f8
+	sub.s	$f10, $f16, $f18
+	l.s	$f8, 40($sp)
+	sub.s	$f16, $f8, $f4
+	mul.s	$f18, $f10, $f16
+	sub.s	$f8, $f6, $f18
+	li.s	$f4, 0.0000000000000000e+00
+	c.lt.s	$f4, $f8
+	bc1f	$36
+	.loc	2 105
+	lw	$10, 8($sp)
+	addu	$11, $10, 1
+	sw	$11, 8($sp)
+$36:
+	.loc	2 106
+ # 106				if ( g_flag == 1 || g_flag == 2 ) continue;
+	lw	$12, 8($sp)
+	beq	$12, 1, $45
+	bne	$12, 2, $41
+	.loc	2 106
+	b	$45
+$37:
+	.loc	2 108
+ # 107	
+ # 108			} else {
+	.loc	2 109
+ # 109				x1 = wall->x1;		x2 = wall->x2;		x3 = wall->x3;
+	lw	$13, 4($sp)
+	lh	$14, 16($13)
+	mtc1	$14, $f10
+	cvt.s.w	$f16, $f10
+	s.s	$f16, 52($sp)
+	.loc	2 109
+	lh	$24, 22($13)
+	mtc1	$24, $f6
+	cvt.s.w	$f18, $f6
+	s.s	$f18, 48($sp)
+	.loc	2 109
+	lh	$15, 28($13)
+	mtc1	$15, $f8
+	cvt.s.w	$f4, $f8
+	s.s	$f4, 44($sp)
+	.loc	2 110
+ # 110				y1 = wall->y1;		y2 = wall->y2;		y3 = wall->y3;
+	lh	$25, 18($13)
+	mtc1	$25, $f10
+	cvt.s.w	$f6, $f10
+	s.s	$f6, 40($sp)
+	.loc	2 110
+	lh	$8, 24($13)
+	mtc1	$8, $f8
+	cvt.s.w	$f4, $f8
+	s.s	$f4, 36($sp)
+	.loc	2 110
+	lh	$9, 30($13)
+	mtc1	$9, $f10
+	cvt.s.w	$f8, $f10
+	s.s	$f8, 32($sp)
+	.loc	2 111
+ # 111				g_flag = 0;
+	sw	$0, 8($sp)
+	.loc	2 112
+ # 112				if ( gaiseki(px,py,x1,y1,x2,y2) > 0 ) g_flag++;
+	l.s	$f10, 24($sp)
+	sub.s	$f8, $f6, $f10
+	sub.s	$f10, $f18, $f16
+	mul.s	$f18, $f8, $f10
+	l.s	$f8, 28($sp)
+	sub.s	$f10, $f16, $f8
+	sub.s	$f16, $f4, $f6
+	mul.s	$f8, $f10, $f16
+	sub.s	$f4, $f18, $f8
+	li.s	$f6, 0.0000000000000000e+00
+	c.lt.s	$f6, $f4
+	bc1f	$38
+	.loc	2 112
+	li	$10, 1
+	sw	$10, 8($sp)
+$38:
+	.loc	2 113
+ # 113				if ( gaiseki(px,py,x2,y2,x3,y3) > 0 ) g_flag++; 
+	l.s	$f10, 36($sp)
+	l.s	$f16, 24($sp)
+	sub.s	$f18, $f10, $f16
+	l.s	$f8, 44($sp)
+	l.s	$f4, 48($sp)
+	sub.s	$f6, $f8, $f4
+	mul.s	$f16, $f18, $f6
+	l.s	$f8, 28($sp)
+	sub.s	$f18, $f4, $f8
+	l.s	$f6, 32($sp)
+	sub.s	$f4, $f6, $f10
+	mul.s	$f8, $f18, $f4
+	sub.s	$f6, $f16, $f8
+	li.s	$f10, 0.0000000000000000e+00
+	c.lt.s	$f10, $f6
+	bc1f	$39
+	.loc	2 113
+	lw	$11, 8($sp)
+	addu	$12, $11, 1
+	sw	$12, 8($sp)
+$39:
+	.loc	2 114
+ # 114				if ( gaiseki(px,py,x3,y3,x1,y1) > 0 ) g_flag++;
+	l.s	$f18, 32($sp)
+	l.s	$f4, 24($sp)
+	sub.s	$f16, $f18, $f4
+	l.s	$f8, 52($sp)
+	l.s	$f6, 44($sp)
+	sub.s	$f10, $f8, $f6
+	mul.s	$f4, $f16, $f10
+	l.s	$f8, 28($sp)
+	sub.s	$f16, $f6, $f8
+	l.s	$f10, 40($sp)
+	sub.s	$f6, $f10, $f18
+	mul.s	$f8, $f16, $f6
+	sub.s	$f10, $f4, $f8
+	li.s	$f18, 0.0000000000000000e+00
+	c.lt.s	$f18, $f10
+	bc1f	$40
+	.loc	2 114
+	lw	$14, 8($sp)
+	addu	$24, $14, 1
+	sw	$24, 8($sp)
+$40:
+	.loc	2 115
+ # 115				if ( g_flag == 1 || g_flag == 2 ) continue;
+	lw	$15, 8($sp)
+	beq	$15, 1, $45
+	beq	$15, 2, $45
+	.loc	2 115
+$41:
+	.loc	2 118
+ # 116			}
+ # 117	
+ # 118			A = wall->a;
+	lw	$25, 4($sp)
+	l.s	$f16, 36($25)
+	s.s	$f16, 76($sp)
+	.loc	2 119
+ # 119			B = wall->b;
+	l.s	$f6, 40($25)
+	s.s	$f6, 72($sp)
+	.loc	2 120
+ # 120			C = wall->c;
+	l.s	$f4, 44($25)
+	s.s	$f4, 68($sp)
+	.loc	2 121
+ # 121			D = wall->d;
+	l.s	$f8, 48($25)
+	s.s	$f8, 64($sp)
+	.loc	2 123
+ # 122	
+ # 123			dR  = A*px+B*py+C*pz+D;
+	l.s	$f10, 28($sp)
+	mul.s	$f18, $f16, $f10
+	l.s	$f16, 24($sp)
+	mul.s	$f10, $f6, $f16
+	add.s	$f6, $f18, $f10
+	l.s	$f16, 20($sp)
+	mul.s	$f18, $f4, $f16
+	add.s	$f10, $f6, $f18
+	add.s	$f4, $f10, $f8
+	s.s	$f4, 60($sp)
+	.loc	2 124
+ # 124			dRf = Mabs(dR);
+	li.s	$f16, 0.0000000000000000e+00
+	c.le.s	$f16, $f4
+	bc1f	$42
+	s.s	$f4, 56($sp)
+	b	$43
+$42:
+	l.s	$f6, 60($sp)
+	neg.s	$f18, $f6
+	s.s	$f18, 56($sp)
+$43:
+	.loc	2 127
+ # 125	
+ # 126	
+ # 127			if ( dRf < r ){
+	l.s	$f10, 56($sp)
+	l.s	$f8, 16($sp)
+	c.lt.s	$f10, $f8
+	bc1f	$45
+	.loc	2 127
+	.loc	2 132
+ # 128	
+ # 129	//			dbPrint("dr %d",(int)dR );
+ # 130	//			rmonPrintf("A%f,B%f,C%f,%f\n",A,B,C,dR);
+ # 131	
+ # 132				wallcheckp->wx += A*(r-dR);		/* Xposition offset 	*/
+	l.s	$f16, 60($sp)
+	sub.s	$f4, $f8, $f16
+	l.s	$f6, 76($sp)
+	mul.s	$f18, $f6, $f4
+	l.s	$f10, 0($5)
+	add.s	$f8, $f10, $f18
+	s.s	$f8, 0($5)
+	.loc	2 133
+ # 133				wallcheckp->wz += C*(r-dR); 	/* Zposition offset		*/
+	l.s	$f16, 16($sp)
+	l.s	$f6, 60($sp)
+	sub.s	$f4, $f16, $f6
+	l.s	$f10, 68($sp)
+	mul.s	$f18, $f10, $f4
+	l.s	$f8, 8($5)
+	add.s	$f16, $f8, $f18
+	s.s	$f16, 8($5)
+	.loc	2 135
+ # 134	
+ # 135				if ( wallcheckp->walllistptr < WALLPLANELIST_MAX ){
+	lh	$8, 22($5)
+	bge	$8, 4, $44
+	.loc	2 135
+	.loc	2 137
+ # 136	
+ # 137					wallcheckp->wall[wallcheckp->walllistptr] = &Xwall[wallcheckp->walllistptr];
+	lh	$13, 22($5)
+	mul	$9, $13, 52
+	la	$10, Xwall
+	addu	$11, $9, $10
+	lh	$12, 22($5)
+	mul	$14, $12, 4
+	addu	$24, $5, $14
+	sw	$11, 24($24)
+	.loc	2 138
+ # 138					Xwall[wallcheckp->walllistptr].a = wall->a;
+	lw	$15, 4($sp)
+	l.s	$f6, 36($15)
+	lh	$25, 22($5)
+	mul	$8, $25, 52
+	s.s	$f6, Xwall+24($8)
+	.loc	2 139
+ # 139					Xwall[wallcheckp->walllistptr].b = wall->b;
+	lw	$13, 4($sp)
+	l.s	$f10, 40($13)
+	lh	$9, 22($5)
+	mul	$10, $9, 52
+	s.s	$f10, Xwall+28($10)
+	.loc	2 140
+ # 140					Xwall[wallcheckp->walllistptr].c = wall->c;
+	lw	$12, 4($sp)
+	l.s	$f4, 44($12)
+	lh	$14, 22($5)
+	mul	$11, $14, 52
+	s.s	$f4, Xwall+32($11)
+	.loc	2 141
+ # 141					Xwall[wallcheckp->walllistptr].d = wall->d;
+	lw	$24, 4($sp)
+	l.s	$f8, 48($24)
+	lh	$15, 22($5)
+	mul	$25, $15, 52
+	s.s	$f8, Xwall+36($25)
+	.loc	2 143
+ # 142	
+ # 143					(wallcheckp->walllistptr)++;
+	lh	$8, 22($5)
+	addu	$13, $8, 1
+	sh	$13, 22($5)
+$44:
+	.loc	2 147
+ # 144	
+ # 145				}
+ # 146	
+ # 147				wallflag++;
+	lw	$9, 12($sp)
+	addu	$10, $9, 1
+	sw	$10, 12($sp)
+$45:
+	bne	$4, 0, $32
+$46:
+	.loc	2 155
+ # 155		return(wallflag);
+	lw	$2, 12($sp)
+	.livereg	0x2000FF0E,0x00000FFF
+	addu	$sp, 80
+	j	$31
+	.end	BG_WallCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	WallCheck
+	.loc	2 172
+ # 172	{
+	.ent	WallCheck 2
+WallCheck:
+	.option	O1
+	subu	$sp, 72
+	sw	$31, 20($sp)
+	sw	$4, 72($sp)
+	sw	$5, 76($sp)
+	sw	$6, 80($sp)
+	sw	$7, 84($sp)
+	.mask	0x80000000, -52
+	.frame	$sp, 72, $31
+	.loc	2 172
+	.loc	2 175
+ # 173	
+ # 174		WallCheckRecord	wall;
+ # 175		int		wallcount 	= 0;
+	sw	$0, 28($sp)
+	.loc	2 177
+ # 176	
+ # 177		wall.offsetY	= offsetY;
+	l.s	$f4, 84($sp)
+	s.s	$f4, 44($sp)
+	.loc	2 178
+ # 178		wall.r	= r;
+	l.s	$f6, 88($sp)
+	s.s	$f6, 48($sp)
+	.loc	2 179
+ # 179		wall.wx = *wX;	wall.wy = *wY;	wall.wz = *wZ;
+	lw	$14, 72($sp)
+	l.s	$f8, 0($14)
+	s.s	$f8, 32($sp)
+	.loc	2 179
+	lw	$15, 76($sp)
+	l.s	$f10, 0($15)
+	s.s	$f10, 36($sp)
+	.loc	2 179
+	lw	$24, 80($sp)
+	l.s	$f16, 0($24)
+	s.s	$f16, 40($sp)
+	.loc	2 181
+ # 180	
+ # 181		wallcount = mcWallCheck(&wall);
+	addu	$4, $sp, 32
+	.livereg	0x0800000E,0x00000000
+	jal	mcWallCheck
+	sw	$2, 28($sp)
+	.loc	2 183
+ # 182	
+ # 183		*wX	= wall.wx;	*wY	= wall.wy;	*wZ	= wall.wz;
+	l.s	$f18, 32($sp)
+	lw	$25, 72($sp)
+	s.s	$f18, 0($25)
+	.loc	2 183
+	l.s	$f4, 36($sp)
+	lw	$8, 76($sp)
+	s.s	$f4, 0($8)
+	.loc	2 183
+	l.s	$f6, 40($sp)
+	lw	$9, 80($sp)
+	s.s	$f6, 0($9)
+	.loc	2 185
+ # 184	
+ # 185		return(wallcount);
+	lw	$2, 28($sp)
+	.livereg	0x2000FF0E,0x00000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 72
+	j	$31
+	.end	WallCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcWallCheck
+	.loc	2 190
+ # 186	
+ # 187	}
+ # 188	/*-------------------------------------------------------------------------------*/
+ # 189	extern int	mcWallCheck(WallCheckRecord *wall)
+ # 190	{
+	.ent	mcWallCheck 2
+mcWallCheck:
+	.option	O1
+	subu	$sp, 48
+	sw	$31, 28($sp)
+	sw	$4, 48($sp)
+	sw	$16, 24($sp)
+	.mask	0x80010000, -20
+	.frame	$sp, 48, $31
+	.loc	2 190
+	.loc	2 194
+ # 191	
+ # 192		BGCheckList	*bgcheck_list;
+ # 193		short	area_x,area_z;
+ # 194		int		wallcount 	= 0;
+	sw	$0, 36($sp)
+	.loc	2 195
+ # 195		wall->walllistptr 	= 0;	/* Walllist pointer Reset!! */
+	lw	$14, 48($sp)
+	sh	$0, 22($14)
+	.loc	2 197
+ # 196	
+ # 197		if ( wall->wx < MAP_LIMIT_MIN || MAP_LIMIT_MAX < wall->wx ) return( wallcount );
+	lw	$15, 48($sp)
+	l.s	$f4, 0($15)
+	li.s	$f6, -8.1910000000000000e+03
+	c.lt.s	$f4, $f6
+	bc1t	$47
+	li.s	$f8, 8.1920000000000000e+03
+	c.lt.s	$f8, $f4
+	bc1f	$48
+$47:
+	.loc	2 197
+	lw	$2, 36($sp)
+	b	$51
+$48:
+	.loc	2 198
+ # 198		if ( wall->wz < MAP_LIMIT_MIN || MAP_LIMIT_MAX < wall->wz ) return( wallcount );
+	lw	$24, 48($sp)
+	l.s	$f10, 8($24)
+	li.s	$f16, -8.1910000000000000e+03
+	c.lt.s	$f10, $f16
+	bc1t	$49
+	li.s	$f18, 8.1920000000000000e+03
+	c.lt.s	$f18, $f10
+	bc1f	$50
+$49:
+	.loc	2 198
+	lw	$2, 36($sp)
+	b	$51
+$50:
+	.loc	2 202
+ # 199	
+ # 200	#if 1
+ # 201		/*--- static ----*/
+ # 202		area_x 			= ( (wall->wx) + MAP_HALF_SIZE ) / 1024;
+	lw	$25, 48($sp)
+	l.s	$f6, 0($25)
+	li.s	$f8, 8.1920000000000000e+03
+	add.s	$f4, $f6, $f8
+	li.s	$f16, 1.0240000000000000e+03
+	div.s	$f18, $f4, $f16
+	trunc.w.s	$f10, $f18, $8
+	mfc1	$9, $f10
+	sh	$9, 42($sp)
+	.loc	2 203
+ # 203		area_z 			= ( (wall->wz) + MAP_HALF_SIZE ) / 1024;
+	l.s	$f6, 8($25)
+	li.s	$f8, 8.1920000000000000e+03
+	add.s	$f4, $f6, $f8
+	li.s	$f16, 1.0240000000000000e+03
+	div.s	$f18, $f4, $f16
+	trunc.w.s	$f10, $f18, $10
+	mfc1	$11, $f10
+	sh	$11, 40($sp)
+	.loc	2 204
+ # 204		bgcheck_list 	= bgcheck_arealist[area_z][area_x].root[_CHECK_WALL].next;
+	sll	$12, $11, 16
+	sra	$13, $12, 16
+	mul	$14, $13, 384
+	sll	$15, $9, 16
+	sra	$24, $15, 16
+	mul	$8, $24, 24
+	addu	$10, $14, $8
+	lw	$11, bgcheck_arealist+16($10)
+	sw	$11, 44($sp)
+	.loc	2 205
+ # 205		wallcount 		+= BG_WallCheck(bgcheck_list,wall);
+	move	$4, $11
+	move	$5, $25
+	.livereg	0x0C00000E,0x00000000
+	jal	BG_WallCheck
+	move	$16, $2
+	lw	$12, 36($sp)
+	addu	$13, $12, $16
+	sw	$13, 36($sp)
+	.loc	2 209
+ # 206	#endif
+ # 207	
+ # 208		/*--- dynamic ---*/
+ # 209		bgcheck_list	= movebg_head.root[_CHECK_WALL].next;
+	la	$9, movebg_head
+	lw	$15, 16($9)
+	sw	$15, 44($sp)
+	.loc	2 210
+ # 210		wallcount		+= BG_WallCheck(bgcheck_list,wall);
+	move	$4, $15
+	lw	$5, 48($sp)
+	.livereg	0x0C00000E,0x00000000
+	jal	BG_WallCheck
+	move	$16, $2
+	lw	$24, 36($sp)
+	addu	$14, $24, $16
+	sw	$14, 36($sp)
+	.loc	2 213
+ # 211	
+ # 212	
+ # 213		return(wallcount);
+	move	$2, $14
+$51:
+	.livereg	0x2000FF0E,0x00000FFF
+	lw	$16, 24($sp)
+	lw	$31, 28($sp)
+	addu	$sp, 48
+	j	$31
+	.end	mcWallCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.loc	2 233
+ # 233	{
+	.ent	BG_RoofCheck 2
+BG_RoofCheck:
+	.option	O1
+	subu	$sp, 56
+	sw	$5, 60($sp)
+	sw	$6, 64($sp)
+	sw	$7, 68($sp)
+	.frame	$sp, 56, $31
+	.loc	2 233
+	.loc	2 239
+ # 234	
+ # 235		BGCheckData		*bgcheck_data, *bgcheck_hitdata;
+ # 236		float	x1,z1,x2,z2,x3,z3;		/*	polygon pointdata */
+ # 237		float	A,B,C,D,roofY;
+ # 238	
+ # 239		bgcheck_hitdata = NULL;
+	sw	$0, 48($sp)
+	.loc	2 241
+ # 240	
+ # 241		while ( bgcheck_list != NULL ){
+	beq	$4, 0, $54
+$52:
+	.loc	2 241
+	.loc	2 243
+ # 242	
+ # 243			bgcheck_data = bgcheck_list->data;		/* Next DataCheck !! */
+	lw	$14, 4($4)
+	sw	$14, 52($sp)
+	.loc	2 244
+ # 244			bgcheck_list = bgcheck_list->next;		/* next BGcheck !!   */
+	lw	$4, 0($4)
+	.loc	2 246
+ # 245	
+ # 246			x1 = bgcheck_data->x1; x2 = bgcheck_data->x2; x3 = bgcheck_data->x3;
+	lw	$15, 52($sp)
+	lh	$24, 16($15)
+	mtc1	$24, $f4
+	cvt.s.w	$f6, $f4
+	s.s	$f6, 44($sp)
+	.loc	2 246
+	lh	$25, 22($15)
+	mtc1	$25, $f8
+	cvt.s.w	$f10, $f8
+	s.s	$f10, 36($sp)
+	.loc	2 246
+	lh	$8, 28($15)
+	mtc1	$8, $f16
+	cvt.s.w	$f18, $f16
+	s.s	$f18, 28($sp)
+	.loc	2 247
+ # 247			z1 = bgcheck_data->z1; z2 = bgcheck_data->z2; z3 = bgcheck_data->z3;
+	lh	$9, 20($15)
+	mtc1	$9, $f4
+	cvt.s.w	$f8, $f4
+	s.s	$f8, 40($sp)
+	.loc	2 247
+	lh	$10, 26($15)
+	mtc1	$10, $f16
+	cvt.s.w	$f18, $f16
+	s.s	$f18, 32($sp)
+	.loc	2 247
+	lh	$11, 32($15)
+	mtc1	$11, $f4
+	cvt.s.w	$f16, $f4
+	s.s	$f16, 24($sp)
+	.loc	2 249
+ # 248	
+ # 249			if ( gaiseki(x,z,x1,z1,x2,z2) > 0 ) continue;
+	l.s	$f4, 68($sp)
+	sub.s	$f16, $f8, $f4
+	sub.s	$f4, $f10, $f6
+	mul.s	$f10, $f16, $f4
+	l.s	$f16, 60($sp)
+	sub.s	$f4, $f6, $f16
+	sub.s	$f6, $f18, $f8
+	mul.s	$f16, $f4, $f6
+	sub.s	$f18, $f10, $f16
+	li.s	$f8, 0.0000000000000000e+00
+	c.lt.s	$f8, $f18
+	bc1t	$53
+	.loc	2 249
+	.loc	2 250
+ # 250			if ( gaiseki(x,z,x2,z2,x3,z3) > 0 ) continue; 
+	l.s	$f4, 32($sp)
+	l.s	$f6, 68($sp)
+	sub.s	$f10, $f4, $f6
+	l.s	$f16, 28($sp)
+	l.s	$f18, 36($sp)
+	sub.s	$f8, $f16, $f18
+	mul.s	$f6, $f10, $f8
+	l.s	$f16, 60($sp)
+	sub.s	$f10, $f18, $f16
+	l.s	$f8, 24($sp)
+	sub.s	$f18, $f8, $f4
+	mul.s	$f16, $f10, $f18
+	sub.s	$f8, $f6, $f16
+	li.s	$f4, 0.0000000000000000e+00
+	c.lt.s	$f4, $f8
+	bc1t	$53
+	.loc	2 250
+	.loc	2 251
+ # 251			if ( gaiseki(x,z,x3,z3,x1,z1) > 0 ) continue;
+	l.s	$f10, 24($sp)
+	l.s	$f18, 68($sp)
+	sub.s	$f6, $f10, $f18
+	l.s	$f16, 44($sp)
+	l.s	$f8, 28($sp)
+	sub.s	$f4, $f16, $f8
+	mul.s	$f18, $f6, $f4
+	l.s	$f16, 60($sp)
+	sub.s	$f6, $f8, $f16
+	l.s	$f4, 40($sp)
+	sub.s	$f8, $f4, $f10
+	mul.s	$f16, $f6, $f8
+	sub.s	$f4, $f18, $f16
+	li.s	$f10, 0.0000000000000000e+00
+	c.lt.s	$f10, $f4
+	bc1t	$53
+	.loc	2 251
+	.loc	2 253
+ # 252	
+ # 253			A = bgcheck_data->a;
+	lw	$12, 52($sp)
+	l.s	$f6, 36($12)
+	s.s	$f6, 20($sp)
+	.loc	2 254
+ # 254			B = bgcheck_data->b;
+	l.s	$f8, 40($12)
+	s.s	$f8, 16($sp)
+	.loc	2 255
+ # 255			C = bgcheck_data->c;
+	l.s	$f18, 44($12)
+	s.s	$f18, 12($sp)
+	.loc	2 256
+ # 256			D = bgcheck_data->d;
+	l.s	$f16, 48($12)
+	s.s	$f16, 8($sp)
+	.loc	2 257
+ # 257			roofY = -(A*x+C*z+D)/B;
+	l.s	$f4, 60($sp)
+	mul.s	$f10, $f6, $f4
+	l.s	$f6, 68($sp)
+	mul.s	$f4, $f18, $f6
+	add.s	$f18, $f10, $f4
+	add.s	$f6, $f18, $f16
+	neg.s	$f10, $f6
+	div.s	$f4, $f10, $f8
+	s.s	$f4, 4($sp)
+	.loc	2 259
+ # 258	
+ # 259			if ( y-(roofY-(MAX_speedY)) > 0 ) 	continue;
+	li.s	$f18, -1.5000000000000000e+02
+	sub.s	$f16, $f4, $f18
+	l.s	$f6, 64($sp)
+	sub.s	$f10, $f6, $f16
+	li.s	$f8, 0.0000000000000000e+00
+	c.lt.s	$f8, $f10
+	bc1t	$53
+	.loc	2 259
+	.loc	2 261
+ # 260	
+ # 261			*planeY = roofY;
+	l.s	$f4, 4($sp)
+	lw	$13, 72($sp)
+	s.s	$f4, 0($13)
+	.loc	2 262
+ # 262			bgcheck_hitdata = bgcheck_data;
+	lw	$14, 52($sp)
+	sw	$14, 48($sp)
+	.loc	2 263
+ # 263			break;									/* Hakken Shita !! */
+	b	$54
+$53:
+	bne	$4, 0, $52
+$54:
+	.loc	2 267
+ # 264			  						  
+ # 265		} 
+ # 266	
+ # 267		return(bgcheck_hitdata);		
+	lw	$2, 48($sp)
+	.livereg	0x2000FF0E,0x00000FFF
+	addu	$sp, 56
+	j	$31
+	.end	BG_RoofCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	RoofCheck
+	.loc	2 277
+ # 277	{
+	.ent	RoofCheck 2
+RoofCheck:
+	.option	O1
+	subu	$sp, 32
+	sw	$31, 20($sp)
+	sw	$6, 40($sp)
+	sw	$7, 44($sp)
+	s.s	$f12, 32($sp)
+	s.s	$f14, 36($sp)
+	.mask	0x80000000, -12
+	.frame	$sp, 32, $31
+	.loc	2 277
+	.loc	2 279
+ # 278	
+ # 279		float	planeY		= roofnull_height;			/* initialize	*/
+	li.s	$f4, 2.0000000000000000e+04
+	s.s	$f4, 28($sp)
+	.loc	2 280
+ # 280		*hitplane  			= NULL;						/* initilaize 	*/
+	lw	$14, 44($sp)
+	sw	$0, 0($14)
+	.loc	2 281
+ # 281		planeY = mcRoofCheck(px,py,pz,hitplane);
+	l.s	$f12, 32($sp)
+	l.s	$f14, 36($sp)
+	lw	$6, 40($sp)
+	lw	$7, 44($sp)
+	.livereg	0x0300000E,0x000A0000
+	jal	mcRoofCheck
+	s.s	$f0, 28($sp)
+	.loc	2 282
+ # 282		return(planeY);
+	l.s	$f0, 28($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 32
+	j	$31
+	.end	RoofCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcBGRoofCheck
+	.loc	2 288
+ # 283	
+ # 284	}
+ # 285	
+ # 286	/*-----------------------------------------------------------------------------*/
+ # 287	extern float mcBGRoofCheck(float px, float py, float pz,BGCheckData **bgdata)
+ # 288	{
+	.ent	mcBGRoofCheck 2
+mcBGRoofCheck:
+	.option	O1
+	subu	$sp, 56
+	sw	$31, 28($sp)
+	sw	$6, 64($sp)
+	sw	$7, 68($sp)
+	s.s	$f12, 56($sp)
+	s.s	$f14, 60($sp)
+	.mask	0x80000000, -28
+	.frame	$sp, 56, $31
+	.loc	2 288
+	.loc	2 294
+ # 289	
+ # 290		short 		area_z,area_x;
+ # 291		BGCheckData *bgcheck_data;
+ # 292		BGCheckData *bgcheck_data_dynamic;
+ # 293		BGCheckList *bgcheck_list;
+ # 294		float		planeY			= roofnull_height;	/* initialize	*/
+	li.s	$f4, 2.0000000000000000e+04
+	s.s	$f4, 36($sp)
+	.loc	2 295
+ # 295		float		planeY_dynamic	= roofnull_height;	/* initialize	*/
+	li.s	$f6, 2.0000000000000000e+04
+	s.s	$f6, 32($sp)
+	.loc	2 296
+ # 296		*bgdata 	= NULL;
+	lw	$14, 68($sp)
+	sw	$0, 0($14)
+	.loc	2 301
+ # 297	
+ # 298	
+ # 299		/*--- Map OverFlow Check ---*/
+ # 300	
+ # 301		if ( px < MAP_LIMIT_MIN || MAP_LIMIT_MAX < px ) return( planeY );
+	l.s	$f8, 56($sp)
+	li.s	$f10, -8.1910000000000000e+03
+	c.lt.s	$f8, $f10
+	bc1t	$55
+	li.s	$f16, 8.1920000000000000e+03
+	c.lt.s	$f16, $f8
+	bc1f	$56
+$55:
+	.loc	2 301
+	l.s	$f0, 36($sp)
+	b	$60
+$56:
+	.loc	2 302
+ # 302		if ( pz < MAP_LIMIT_MIN || MAP_LIMIT_MAX < pz ) return( planeY );
+	l.s	$f18, 64($sp)
+	li.s	$f4, -8.1910000000000000e+03
+	c.lt.s	$f18, $f4
+	bc1t	$57
+	li.s	$f6, 8.1920000000000000e+03
+	c.lt.s	$f6, $f18
+	bc1f	$58
+$57:
+	.loc	2 302
+	l.s	$f0, 36($sp)
+	b	$60
+$58:
+	.loc	2 305
+ # 303	
+ # 304		/*--- dynamic ---*/
+ # 305		bgcheck_list		 = movebg_head.root[_CHECK_ROOF].next;
+	la	$15, movebg_head
+	lw	$24, 8($15)
+	sw	$24, 40($sp)
+	.loc	2 306
+ # 306		bgcheck_data_dynamic = BG_RoofCheck(bgcheck_list,px,py,pz,&planeY_dynamic);
+	move	$4, $24
+	lw	$5, 56($sp)
+	lw	$6, 60($sp)
+	lw	$7, 64($sp)
+	addu	$25, $sp, 32
+	sw	$25, 16($sp)
+	.livereg	0x0F00000E,0x00000000
+	jal	BG_RoofCheck
+	sw	$2, 44($sp)
+	.loc	2 309
+ # 307	
+ # 308		/*--- static ----*/
+ # 309		area_x 				= (short)( ( px + MAP_HALF_SIZE ) / MAP_AREA_SIZE );
+	l.s	$f10, 56($sp)
+	li.s	$f16, 8.1920000000000000e+03
+	add.s	$f8, $f10, $f16
+	li.s	$f4, 1.0240000000000000e+03
+	div.s	$f6, $f8, $f4
+	trunc.w.s	$f18, $f6, $8
+	mfc1	$9, $f18
+	sh	$9, 52($sp)
+	.loc	2 310
+ # 310		area_z 				= (short)( ( pz + MAP_HALF_SIZE ) / MAP_AREA_SIZE );
+	l.s	$f16, 64($sp)
+	li.s	$f8, 8.1920000000000000e+03
+	add.s	$f4, $f16, $f8
+	li.s	$f6, 1.0240000000000000e+03
+	div.s	$f18, $f4, $f6
+	trunc.w.s	$f8, $f18, $10
+	mfc1	$11, $f8
+	sh	$11, 54($sp)
+	.loc	2 311
+ # 311		bgcheck_list 		= bgcheck_arealist[area_z][area_x].root[_CHECK_ROOF].next;
+	sll	$12, $11, 16
+	sra	$13, $12, 16
+	mul	$14, $13, 384
+	sll	$15, $9, 16
+	sra	$24, $15, 16
+	mul	$25, $24, 24
+	addu	$8, $14, $25
+	lw	$10, bgcheck_arealist+8($8)
+	sw	$10, 40($sp)
+	.loc	2 312
+ # 312		bgcheck_data 		= BG_RoofCheck(bgcheck_list,px,py,pz,&planeY);
+	move	$4, $10
+	mfc1	$5, $f10
+	lw	$6, 60($sp)
+	mfc1	$7, $f16
+	addu	$11, $sp, 36
+	sw	$11, 16($sp)
+	.livereg	0x0F00000E,0x00000000
+	jal	BG_RoofCheck
+	sw	$2, 48($sp)
+	.loc	2 315
+ # 313	
+ # 314		/*---- height check !! ---*/
+ # 315		if ( planeY_dynamic < planeY ){
+	l.s	$f4, 32($sp)
+	l.s	$f6, 36($sp)
+	c.lt.s	$f4, $f6
+	bc1f	$59
+	.loc	2 315
+	.loc	2 316
+ # 316			bgcheck_data	= bgcheck_data_dynamic;
+	lw	$12, 44($sp)
+	sw	$12, 48($sp)
+	.loc	2 317
+ # 317			planeY			= planeY_dynamic;
+	s.s	$f4, 36($sp)
+$59:
+	.loc	2 320
+ # 318		}
+ # 319	
+ # 320		*bgdata = bgcheck_data;
+	lw	$13, 48($sp)
+	lw	$9, 68($sp)
+	sw	$13, 0($9)
+	.loc	2 322
+ # 321	
+ # 322		return(planeY);
+	l.s	$f0, 36($sp)
+$60:
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 28($sp)
+	addu	$sp, 56
+	j	$31
+	.end	mcBGRoofCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcRoofCheck
+	.loc	2 328
+ # 323	
+ # 324	}
+ # 325	
+ # 326	/*-----------------------------------------------------------------------------*/
+ # 327	extern float mcRoofCheck(float px, float py, float pz,Plane **hitplane)
+ # 328	{
+	.ent	mcRoofCheck 2
+mcRoofCheck:
+	.option	O1
+	subu	$sp, 32
+	sw	$31, 20($sp)
+	sw	$6, 40($sp)
+	sw	$7, 44($sp)
+	s.s	$f12, 32($sp)
+	s.s	$f14, 36($sp)
+	.mask	0x80000000, -12
+	.frame	$sp, 32, $31
+	.loc	2 328
+	.loc	2 332
+ # 329	
+ # 330		float planeY;
+ # 331		BGCheckData	*bgcheck_data;
+ # 332		*hitplane  					= NULL;				/* initilaize 	*/
+	lw	$14, 44($sp)
+	sw	$0, 0($14)
+	.loc	2 334
+ # 333	
+ # 334		planeY = mcBGRoofCheck(px,py,pz,&bgcheck_data);
+	l.s	$f12, 32($sp)
+	l.s	$f14, 36($sp)
+	lw	$6, 40($sp)
+	addu	$7, $sp, 24
+	.livereg	0x0300000E,0x000A0000
+	jal	mcBGRoofCheck
+	s.s	$f0, 28($sp)
+	.loc	2 336
+ # 335	
+ # 336		if ( bgcheck_data != NULL ){
+	lw	$15, 24($sp)
+	beq	$15, 0, $61
+	.loc	2 336
+	.loc	2 337
+ # 337			hit_roofplane.a = bgcheck_data->a;
+	l.s	$f4, 36($15)
+	s.s	$f4, hit_roofplane+16
+	.loc	2 338
+ # 338			hit_roofplane.b = bgcheck_data->b;
+	l.s	$f6, 40($15)
+	s.s	$f6, hit_roofplane+20
+	.loc	2 339
+ # 339			hit_roofplane.c = bgcheck_data->c;
+	l.s	$f8, 44($15)
+	s.s	$f8, hit_roofplane+24
+	.loc	2 340
+ # 340			hit_roofplane.d = bgcheck_data->d;
+	l.s	$f10, 48($15)
+	s.s	$f10, hit_roofplane+28
+	.loc	2 341
+ # 341			*hitplane = &hit_roofplane;
+	la	$24, hit_roofplane
+	lw	$25, 44($sp)
+	sw	$24, 0($25)
+$61:
+	.loc	2 344
+ # 342		} 
+ # 343	
+ # 344		return(planeY);
+	l.s	$f0, 28($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 32
+	j	$31
+	.end	mcRoofCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.loc	2 367
+ # 367	{
+	.ent	BG_GroundCheck 2
+BG_GroundCheck:
+	.option	O1
+	subu	$sp, 56
+	sw	$5, 60($sp)
+	sw	$6, 64($sp)
+	sw	$7, 68($sp)
+	.frame	$sp, 56, $31
+	.loc	2 367
+	.loc	2 374
+ # 374		bgcheck_hitdata = NULL;
+	sw	$0, 48($sp)
+	.loc	2 376
+ # 375	
+ # 376		while ( bgcheck_list != NULL ){
+	beq	$4, 0, $64
+$62:
+	.loc	2 376
+	.loc	2 378
+ # 377	
+ # 378			bgcheck_data = bgcheck_list->data;		/* Next DataCheck !! */
+	lw	$14, 4($4)
+	sw	$14, 52($sp)
+	.loc	2 379
+ # 379			bgcheck_list = bgcheck_list->next;		/* next BGcheck !!   */
+	lw	$4, 0($4)
+	.loc	2 381
+ # 380	
+ # 381			x1 = bgcheck_data->x1; x2 = bgcheck_data->x2; x3 = bgcheck_data->x3;
+	lw	$15, 52($sp)
+	lh	$24, 16($15)
+	mtc1	$24, $f4
+	cvt.s.w	$f6, $f4
+	s.s	$f6, 44($sp)
+	.loc	2 381
+	lh	$25, 22($15)
+	mtc1	$25, $f8
+	cvt.s.w	$f10, $f8
+	s.s	$f10, 36($sp)
+	.loc	2 381
+	lh	$8, 28($15)
+	mtc1	$8, $f16
+	cvt.s.w	$f18, $f16
+	s.s	$f18, 28($sp)
+	.loc	2 382
+ # 382			z1 = bgcheck_data->z1; z2 = bgcheck_data->z2; z3 = bgcheck_data->z3;
+	lh	$9, 20($15)
+	mtc1	$9, $f4
+	cvt.s.w	$f8, $f4
+	s.s	$f8, 40($sp)
+	.loc	2 382
+	lh	$10, 26($15)
+	mtc1	$10, $f16
+	cvt.s.w	$f18, $f16
+	s.s	$f18, 32($sp)
+	.loc	2 382
+	lh	$11, 32($15)
+	mtc1	$11, $f4
+	cvt.s.w	$f16, $f4
+	s.s	$f16, 24($sp)
+	.loc	2 384
+ # 383	
+ # 384			if ( gaiseki(x,z,x1,z1,x2,z2) < 0 ) continue;
+	l.s	$f4, 68($sp)
+	sub.s	$f16, $f8, $f4
+	sub.s	$f4, $f10, $f6
+	mul.s	$f10, $f16, $f4
+	l.s	$f16, 60($sp)
+	sub.s	$f4, $f6, $f16
+	sub.s	$f6, $f18, $f8
+	mul.s	$f16, $f4, $f6
+	sub.s	$f18, $f10, $f16
+	li.s	$f8, 0.0000000000000000e+00
+	c.lt.s	$f18, $f8
+	bc1t	$63
+	.loc	2 384
+	.loc	2 385
+ # 385			if ( gaiseki(x,z,x2,z2,x3,z3) < 0 ) continue; 
+	l.s	$f4, 32($sp)
+	l.s	$f6, 68($sp)
+	sub.s	$f10, $f4, $f6
+	l.s	$f16, 28($sp)
+	l.s	$f18, 36($sp)
+	sub.s	$f8, $f16, $f18
+	mul.s	$f6, $f10, $f8
+	l.s	$f16, 60($sp)
+	sub.s	$f10, $f18, $f16
+	l.s	$f8, 24($sp)
+	sub.s	$f18, $f8, $f4
+	mul.s	$f16, $f10, $f18
+	sub.s	$f8, $f6, $f16
+	li.s	$f4, 0.0000000000000000e+00
+	c.lt.s	$f8, $f4
+	bc1t	$63
+	.loc	2 385
+	.loc	2 386
+ # 386			if ( gaiseki(x,z,x3,z3,x1,z1) < 0 ) continue;
+	l.s	$f10, 24($sp)
+	l.s	$f18, 68($sp)
+	sub.s	$f6, $f10, $f18
+	l.s	$f16, 44($sp)
+	l.s	$f8, 28($sp)
+	sub.s	$f4, $f16, $f8
+	mul.s	$f18, $f6, $f4
+	l.s	$f16, 60($sp)
+	sub.s	$f6, $f8, $f16
+	l.s	$f4, 40($sp)
+	sub.s	$f8, $f4, $f10
+	mul.s	$f16, $f6, $f8
+	sub.s	$f4, $f18, $f16
+	li.s	$f10, 0.0000000000000000e+00
+	c.lt.s	$f4, $f10
+	bc1t	$63
+	.loc	2 386
+	.loc	2 388
+ # 387	
+ # 388			A = bgcheck_data->a;
+	lw	$12, 52($sp)
+	l.s	$f6, 36($12)
+	s.s	$f6, 20($sp)
+	.loc	2 389
+ # 389			B = bgcheck_data->b;
+	l.s	$f8, 40($12)
+	s.s	$f8, 16($sp)
+	.loc	2 390
+ # 390			C = bgcheck_data->c;
+	l.s	$f18, 44($12)
+	s.s	$f18, 12($sp)
+	.loc	2 391
+ # 391			D = bgcheck_data->d;
+	l.s	$f16, 48($12)
+	s.s	$f16, 8($sp)
+	.loc	2 392
+ # 392			groundY = -(A*x+C*z+D)/B;
+	l.s	$f4, 60($sp)
+	mul.s	$f10, $f6, $f4
+	l.s	$f6, 68($sp)
+	mul.s	$f4, $f18, $f6
+	add.s	$f18, $f10, $f4
+	add.s	$f6, $f18, $f16
+	neg.s	$f10, $f6
+	div.s	$f4, $f10, $f8
+	s.s	$f4, 4($sp)
+	.loc	2 394
+ # 393	
+ # 394			if ( y-(groundY+MAX_speedY) < 0 ) 	continue;
+	li.s	$f18, -1.5000000000000000e+02
+	add.s	$f16, $f4, $f18
+	l.s	$f6, 64($sp)
+	sub.s	$f10, $f6, $f16
+	li.s	$f8, 0.0000000000000000e+00
+	c.lt.s	$f10, $f8
+	bc1t	$63
+	.loc	2 394
+	.loc	2 396
+ # 395	
+ # 396			*planeY = groundY;
+	l.s	$f4, 4($sp)
+	lw	$13, 72($sp)
+	s.s	$f4, 0($13)
+	.loc	2 397
+ # 397			bgcheck_hitdata = bgcheck_data;
+	lw	$14, 52($sp)
+	sw	$14, 48($sp)
+	.loc	2 398
+ # 398			break;				/* Hakken Shita !! */
+	b	$64
+$63:
+	bne	$4, 0, $62
+$64:
+	.loc	2 402
+ # 399			  						  
+ # 400		} 
+ # 401	
+ # 402		return(bgcheck_hitdata);		
+	lw	$2, 48($sp)
+	.livereg	0x2000FF0E,0x00000FFF
+	addu	$sp, 56
+	j	$31
+	.end	BG_GroundCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	BGcheck
+	.loc	2 413
+ # 413	{
+	.ent	BGcheck 2
+BGcheck:
+	.option	O1
+	subu	$sp, 32
+	sw	$31, 20($sp)
+	sw	$6, 40($sp)
+	s.s	$f12, 32($sp)
+	s.s	$f14, 36($sp)
+	.mask	0x80000000, -12
+	.frame	$sp, 32, $31
+	.loc	2 413
+	.loc	2 416
+ # 414		BGCheckData	*bgdata;
+ # 415		float	planeY;	
+ # 416		planeY = mcBGGroundCheck(px,py,pz,&bgdata);
+	l.s	$f12, 32($sp)
+	l.s	$f14, 36($sp)
+	lw	$6, 40($sp)
+	addu	$7, $sp, 28
+	.livereg	0x0300000E,0x000A0000
+	jal	mcBGGroundCheck
+	s.s	$f0, 24($sp)
+	.loc	2 417
+ # 417		return(planeY);	
+	l.s	$f0, 24($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 32
+	j	$31
+	.end	BGcheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	GroundCheck
+	.loc	2 423
+ # 418	
+ # 419	}
+ # 420	
+ # 421	/*-----------------------------------------------------------------------------*/
+ # 422	extern float GroundCheck(float px, float py, float pz,Plane **hitplane)
+ # 423	{
+	.ent	GroundCheck 2
+GroundCheck:
+	.option	O1
+	subu	$sp, 32
+	sw	$31, 20($sp)
+	sw	$6, 40($sp)
+	sw	$7, 44($sp)
+	s.s	$f12, 32($sp)
+	s.s	$f14, 36($sp)
+	.mask	0x80000000, -12
+	.frame	$sp, 32, $31
+	.loc	2 423
+	.loc	2 425
+ # 424	
+ # 425		float	planeY		= null_height;				/* initialize	*/
+	li.s	$f4, -1.1000000000000000e+04
+	s.s	$f4, 28($sp)
+	.loc	2 426
+ # 426		*hitplane  			= NULL;						/* initilaize 	*/
+	lw	$14, 44($sp)
+	sw	$0, 0($14)
+	.loc	2 427
+ # 427		planeY = mcGroundCheck(px,py,pz,hitplane);
+	l.s	$f12, 32($sp)
+	l.s	$f14, 36($sp)
+	lw	$6, 40($sp)
+	lw	$7, 44($sp)
+	.livereg	0x0300000E,0x000A0000
+	jal	mcGroundCheck
+	s.s	$f0, 28($sp)
+	.loc	2 428
+ # 428		return(planeY);
+	l.s	$f0, 28($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 32
+	j	$31
+	.end	GroundCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcMoveGroundCheck
+	.loc	2 434
+ # 429	
+ # 430	}
+ # 431	
+ # 432	/*-----------------------------------------------------------------------------*/
+ # 433	extern float mcMoveGroundCheck(float px, float py, float pz,BGCheckData **bgcheck_data)
+ # 434	{
+	.ent	mcMoveGroundCheck 2
+mcMoveGroundCheck:
+	.option	O1
+	subu	$sp, 48
+	sw	$31, 28($sp)
+	sw	$6, 56($sp)
+	sw	$7, 60($sp)
+	s.s	$f12, 48($sp)
+	s.s	$f14, 52($sp)
+	.mask	0x80000000, -20
+	.frame	$sp, 48, $31
+	.loc	2 434
+	.loc	2 438
+ # 435	
+ # 436		BGCheckList *bgcheck_list;	
+ # 437		BGCheckData *bgcheck_data_dynamic;
+ # 438		float		planeY			= null_height;				/* initialize	*/
+	li.s	$f4, -1.1000000000000000e+04
+	s.s	$f4, 36($sp)
+	.loc	2 441
+ # 439	
+ # 440		/*--- dynamic ---*/
+ # 441		bgcheck_list		 = movebg_head.root[_CHECK_GROUND].next;
+	la	$14, movebg_head
+	lw	$15, 0($14)
+	sw	$15, 44($sp)
+	.loc	2 442
+ # 442		bgcheck_data_dynamic = BG_GroundCheck(bgcheck_list,px,py,pz,&planeY);
+	move	$4, $15
+	lw	$5, 48($sp)
+	lw	$6, 52($sp)
+	lw	$7, 56($sp)
+	addu	$24, $sp, 36
+	sw	$24, 16($sp)
+	.livereg	0x0F00000E,0x00000000
+	jal	BG_GroundCheck
+	sw	$2, 40($sp)
+	.loc	2 444
+ # 443	
+ # 444		*bgcheck_data = bgcheck_data_dynamic;
+	lw	$25, 40($sp)
+	lw	$8, 60($sp)
+	sw	$25, 0($8)
+	.loc	2 446
+ # 445	
+ # 446		return(planeY);
+	l.s	$f0, 36($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 28($sp)
+	addu	$sp, 48
+	j	$31
+	.end	mcMoveGroundCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcBGGroundCheck
+	.loc	2 453
+ # 453	{
+	.ent	mcBGGroundCheck 2
+mcBGGroundCheck:
+	.option	O1
+	subu	$sp, 56
+	sw	$31, 28($sp)
+	sw	$6, 64($sp)
+	sw	$7, 68($sp)
+	s.s	$f12, 56($sp)
+	s.s	$f14, 60($sp)
+	.mask	0x80000000, -28
+	.frame	$sp, 56, $31
+	.loc	2 453
+	.loc	2 459
+ # 454	
+ # 455		short 		area_z,area_x;	
+ # 456		BGCheckData *bgcheck_data;
+ # 457		BGCheckData *bgcheck_data_dynamic;	
+ # 458		BGCheckList *bgcheck_list;	
+ # 459		float		planeY			= null_height;				/* initialize	*/
+	li.s	$f4, -1.1000000000000000e+04
+	s.s	$f4, 36($sp)
+	.loc	2 460
+ # 460		float		planeY_dynamic	= null_height;				/* initialize	*/
+	li.s	$f6, -1.1000000000000000e+04
+	s.s	$f6, 32($sp)
+	.loc	2 461
+ # 461		*bgdata 	= NULL;
+	lw	$14, 68($sp)
+	sw	$0, 0($14)
+	.loc	2 463
+ # 462	
+ # 463		if ( px < MAP_LIMIT_MIN || MAP_LIMIT_MAX < px ) return( planeY );
+	l.s	$f8, 56($sp)
+	li.s	$f10, -8.1910000000000000e+03
+	c.lt.s	$f8, $f10
+	bc1t	$65
+	li.s	$f16, 8.1920000000000000e+03
+	c.lt.s	$f16, $f8
+	bc1f	$66
+$65:
+	.loc	2 463
+	l.s	$f0, 36($sp)
+	b	$71
+$66:
+	.loc	2 464
+ # 464		if ( pz < MAP_LIMIT_MIN || MAP_LIMIT_MAX < pz ) return( planeY );
+	l.s	$f18, 64($sp)
+	li.s	$f4, -8.1910000000000000e+03
+	c.lt.s	$f18, $f4
+	bc1t	$67
+	li.s	$f6, 8.1920000000000000e+03
+	c.lt.s	$f6, $f18
+	bc1f	$68
+$67:
+	.loc	2 464
+	l.s	$f0, 36($sp)
+	b	$71
+$68:
+	.loc	2 467
+ # 465	
+ # 466		/*--- dynamic ---*/
+ # 467		bgcheck_list		 = movebg_head.root[_CHECK_GROUND].next;
+	la	$15, movebg_head
+	lw	$24, 0($15)
+	sw	$24, 40($sp)
+	.loc	2 468
+ # 468		bgcheck_data_dynamic = BG_GroundCheck(bgcheck_list,px,py,pz,&planeY_dynamic);
+	move	$4, $24
+	lw	$5, 56($sp)
+	lw	$6, 60($sp)
+	lw	$7, 64($sp)
+	addu	$25, $sp, 32
+	sw	$25, 16($sp)
+	.livereg	0x0F00000E,0x00000000
+	jal	BG_GroundCheck
+	sw	$2, 44($sp)
+	.loc	2 471
+ # 469	
+ # 470		/*---- static ---*/
+ # 471		area_x 				 = (short)( ( px + MAP_HALF_SIZE ) / MAP_AREA_SIZE );
+	l.s	$f10, 56($sp)
+	li.s	$f16, 8.1920000000000000e+03
+	add.s	$f8, $f10, $f16
+	li.s	$f4, 1.0240000000000000e+03
+	div.s	$f6, $f8, $f4
+	trunc.w.s	$f18, $f6, $8
+	mfc1	$9, $f18
+	sh	$9, 52($sp)
+	.loc	2 472
+ # 472		area_z 				 = (short)( ( pz + MAP_HALF_SIZE ) / MAP_AREA_SIZE );
+	l.s	$f16, 64($sp)
+	li.s	$f8, 8.1920000000000000e+03
+	add.s	$f4, $f16, $f8
+	li.s	$f6, 1.0240000000000000e+03
+	div.s	$f18, $f4, $f6
+	trunc.w.s	$f8, $f18, $10
+	mfc1	$11, $f8
+	sh	$11, 54($sp)
+	.loc	2 473
+ # 473		bgcheck_list 		 = bgcheck_arealist[area_z][area_x].root[_CHECK_GROUND].next;
+	sll	$12, $11, 16
+	sra	$13, $12, 16
+	mul	$14, $13, 384
+	sll	$15, $9, 16
+	sra	$24, $15, 16
+	mul	$25, $24, 24
+	addu	$8, $14, $25
+	lw	$10, bgcheck_arealist($8)
+	sw	$10, 40($sp)
+	.loc	2 474
+ # 474		bgcheck_data		 = BG_GroundCheck(bgcheck_list,px,py,pz,&planeY);
+	move	$4, $10
+	mfc1	$5, $f10
+	lw	$6, 60($sp)
+	mfc1	$7, $f16
+	addu	$11, $sp, 36
+	sw	$11, 16($sp)
+	.livereg	0x0F00000E,0x00000000
+	jal	BG_GroundCheck
+	sw	$2, 48($sp)
+	.loc	2 477
+ # 475	
+ # 476		/*== ERR CHECK ==*/
+ # 477		if ( bgcheck_data == NULL	)	DBF_BGnull++;
+	lw	$12, 48($sp)
+	bne	$12, 0, $69
+	.loc	2 477
+	lw	$13, DBF_BGnull
+	addu	$9, $13, 1
+	sw	$9, DBF_BGnull
+$69:
+	.loc	2 480
+ # 478	
+ # 479		/*---- height check !! ---*/
+ # 480		if ( planeY_dynamic > planeY ){
+	l.s	$f4, 32($sp)
+	l.s	$f6, 36($sp)
+	c.lt.s	$f6, $f4
+	bc1f	$70
+	.loc	2 480
+	.loc	2 481
+ # 481			bgcheck_data	= bgcheck_data_dynamic;
+	lw	$15, 44($sp)
+	sw	$15, 48($sp)
+	.loc	2 482
+ # 482			planeY			= planeY_dynamic;
+	s.s	$f4, 36($sp)
+$70:
+	.loc	2 485
+ # 483		}
+ # 484	
+ # 485		*bgdata = bgcheck_data;
+	lw	$24, 48($sp)
+	lw	$14, 68($sp)
+	sw	$24, 0($14)
+	.loc	2 497
+ # 497		return(planeY);
+	l.s	$f0, 36($sp)
+$71:
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 28($sp)
+	addu	$sp, 56
+	j	$31
+	.end	mcBGGroundCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcGroundCheck
+	.loc	2 503
+ # 498	
+ # 499	}
+ # 500	
+ # 501	/*-----------------------------------------------------------------------------*/
+ # 502	extern float mcGroundCheck(float px, float py, float pz,Plane **hitplane)
+ # 503	{
+	.ent	mcGroundCheck 2
+mcGroundCheck:
+	.option	O1
+	subu	$sp, 32
+	sw	$31, 20($sp)
+	sw	$6, 40($sp)
+	sw	$7, 44($sp)
+	s.s	$f12, 32($sp)
+	s.s	$f14, 36($sp)
+	.mask	0x80000000, -12
+	.frame	$sp, 32, $31
+	.loc	2 503
+	.loc	2 507
+ # 504	
+ # 505		float planeY;
+ # 506		BGCheckData	*bgcheck_data;
+ # 507		*hitplane  	= NULL;						/* initilaize 	*/
+	lw	$14, 44($sp)
+	sw	$0, 0($14)
+	.loc	2 508
+ # 508		planeY = mcBGGroundCheck(px,py,pz,&bgcheck_data);
+	l.s	$f12, 32($sp)
+	l.s	$f14, 36($sp)
+	lw	$6, 40($sp)
+	addu	$7, $sp, 24
+	.livereg	0x0300000E,0x000A0000
+	jal	mcBGGroundCheck
+	s.s	$f0, 28($sp)
+	.loc	2 510
+ # 509	
+ # 510		if ( bgcheck_data != NULL ){
+	lw	$15, 24($sp)
+	beq	$15, 0, $72
+	.loc	2 510
+	.loc	2 512
+ # 511			/* Set Normal Vector */
+ # 512			hit_mapplane.a = bgcheck_data->a;
+	l.s	$f4, 36($15)
+	s.s	$f4, hit_mapplane+16
+	.loc	2 513
+ # 513			hit_mapplane.b = bgcheck_data->b;
+	l.s	$f6, 40($15)
+	s.s	$f6, hit_mapplane+20
+	.loc	2 514
+ # 514			hit_mapplane.c = bgcheck_data->c;
+	l.s	$f8, 44($15)
+	s.s	$f8, hit_mapplane+24
+	.loc	2 515
+ # 515			hit_mapplane.d = bgcheck_data->d;
+	l.s	$f10, 48($15)
+	s.s	$f10, hit_mapplane+28
+	.loc	2 516
+ # 516			*hitplane = &hit_mapplane;	
+	la	$24, hit_mapplane
+	lw	$25, 44($sp)
+	sw	$24, 0($25)
+$72:
+	.loc	2 519
+ # 517		} 
+ # 518	
+ # 519		return(planeY);
+	l.s	$f0, 28($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 32
+	j	$31
+	.end	mcGroundCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcWaterCheck
+	.loc	2 538
+ # 538	{
+	.ent	mcWaterCheck 2
+mcWaterCheck:
+	.option	O1
+	subu	$sp, 40
+	.frame	$sp, 40, $31
+	.loc	2 538
+	.loc	2 543
+ # 539	
+ # 540		int		i,loop;
+ # 541		short	code;
+ # 542		float	Xmin,Xmax,Zmin,Zmax;
+ # 543		float 	waterY = -11000;
+	li.s	$f4, -1.1000000000000000e+04
+	s.s	$f4, 8($sp)
+	.loc	2 544
+ # 544		short	*water = waterline;
+	lw	$14, waterline
+	sw	$14, 4($sp)
+	.loc	2 546
+ # 545		
+ # 546		if ( water != NULL ){
+	beq	$14, 0, $75
+	.loc	2 546
+	.loc	2 548
+ # 547	
+ # 548			loop = *water++;
+	lh	$15, 0($14)
+	sw	$15, 32($sp)
+	addu	$24, $14, 2
+	sw	$24, 4($sp)
+	.loc	2 550
+ # 549	
+ # 550			for(i=0;i<loop;i++){
+	sw	$0, 36($sp)
+	ble	$15, 0, $75
+$73:
+	.loc	2 550
+	.loc	2 552
+ # 551	
+ # 552				code = *water++;
+	lw	$25, 4($sp)
+	lh	$8, 0($25)
+	sh	$8, 30($sp)
+	addu	$9, $25, 2
+	sw	$9, 4($sp)
+	.loc	2 553
+ # 553				Xmin = *water++;
+	lh	$10, 0($9)
+	mtc1	$10, $f6
+	cvt.s.w	$f8, $f6
+	s.s	$f8, 24($sp)
+	addu	$11, $9, 2
+	sw	$11, 4($sp)
+	.loc	2 554
+ # 554				Zmin = *water++;
+	lh	$12, 2($9)
+	mtc1	$12, $f10
+	cvt.s.w	$f16, $f10
+	s.s	$f16, 16($sp)
+	addu	$13, $11, 2
+	sw	$13, 4($sp)
+	.loc	2 555
+ # 555				Xmax = *water++;
+	lh	$14, 2($11)
+	mtc1	$14, $f18
+	cvt.s.w	$f4, $f18
+	s.s	$f4, 20($sp)
+	addu	$24, $13, 2
+	sw	$24, 4($sp)
+	.loc	2 556
+ # 556				Zmax = *water++;
+	lh	$15, 2($13)
+	mtc1	$15, $f6
+	cvt.s.w	$f8, $f6
+	s.s	$f8, 12($sp)
+	addu	$8, $24, 2
+	sw	$8, 4($sp)
+	.loc	2 558
+ # 557	
+ # 558				if ( (Xmin<wx) && (wx<Xmax) && (Zmin<wz) && (wz<Zmax) ){
+	l.s	$f10, 24($sp)
+	c.lt.s	$f10, $f12
+	bc1f	$74
+	l.s	$f16, 20($sp)
+	c.lt.s	$f12, $f16
+	bc1f	$74
+	l.s	$f18, 16($sp)
+	c.lt.s	$f18, $f14
+	bc1f	$74
+	l.s	$f4, 12($sp)
+	c.lt.s	$f14, $f4
+	bc1f	$74
+	.loc	2 558
+	.loc	2 559
+ # 559					waterY = *water;
+	lh	$25, 0($8)
+	mtc1	$25, $f6
+	cvt.s.w	$f8, $f6
+	s.s	$f8, 8($sp)
+	.loc	2 560
+ # 560					break;
+	b	$75
+$74:
+	.loc	2 562
+ # 561				}
+ # 562				water++;
+	lw	$10, 4($sp)
+	addu	$9, $10, 2
+	sw	$9, 4($sp)
+	.loc	2 550
+ # 550			for(i=0;i<loop;i++){
+	lw	$12, 36($sp)
+	addu	$11, $12, 1
+	sw	$11, 36($sp)
+	lw	$14, 32($sp)
+	blt	$11, $14, $73
+$75:
+	.loc	2 566
+ # 566		return(waterY);
+	l.s	$f0, 8($sp)
+	.livereg	0x0000FF0E,0xA0000FFF
+	addu	$sp, 40
+	j	$31
+	.end	mcWaterCheck
+	.text	
+	.align	2
+	.file	2 "bgcheck.c"
+	.globl	mcPlaneCheck
+	.loc	2 588
+ # 588	{
+	.ent	mcPlaneCheck 2
+mcPlaneCheck:
+	.option	O1
+	subu	$sp, 32
+	sw	$31, 20($sp)
+	sw	$6, 40($sp)
+	sw	$7, 44($sp)
+	s.s	$f12, 32($sp)
+	s.s	$f14, 36($sp)
+	.mask	0x80000000, -12
+	.frame	$sp, 32, $31
+	.loc	2 588
+	.loc	2 591
+ # 589	
+ # 590		Plane	*hitplane;
+ # 591		float	bgY = mcGroundCheck(px,py,pz,&hitplane);
+	l.s	$f12, 32($sp)
+	l.s	$f14, 36($sp)
+	lw	$6, 40($sp)
+	addu	$7, $sp, 28
+	.livereg	0x0300000E,0x000A0000
+	jal	mcGroundCheck
+	s.s	$f0, 24($sp)
+	.loc	2 593
+ # 592	
+ # 593		plane->counter = 0;
+	lw	$14, 44($sp)
+	sh	$0, 0($14)
+	.loc	2 595
+ # 594	
+ # 595		if ( hitplane != NULL ){
+	lw	$15, 28($sp)
+	beq	$15, 0, $76
+	.loc	2 595
+	.loc	2 597
+ # 596	
+ # 597			plane->counter	  = 1;
+	li	$24, 1
+	lw	$25, 44($sp)
+	sh	$24, 0($25)
+	.loc	2 598
+ # 598			plane->plane[0].a = hitplane->a;
+	lw	$8, 28($sp)
+	l.s	$f4, 16($8)
+	lw	$9, 44($sp)
+	s.s	$f4, 4($9)
+	.loc	2 599
+ # 599			plane->plane[0].b = hitplane->b;
+	lw	$10, 28($sp)
+	l.s	$f6, 20($10)
+	lw	$11, 44($sp)
+	s.s	$f6, 8($11)
+	.loc	2 600
+ # 600			plane->plane[0].c = hitplane->c;
+	lw	$12, 28($sp)
+	l.s	$f8, 24($12)
+	lw	$13, 44($sp)
+	s.s	$f8, 12($13)
+	.loc	2 601
+ # 601			plane->plane[0].d = -(  (hitplane->a)*px + (hitplane->b)*bgY + (hitplane->c)*pz );
+	lw	$14, 28($sp)
+	l.s	$f10, 16($14)
+	l.s	$f16, 32($sp)
+	mul.s	$f18, $f10, $f16
+	l.s	$f4, 20($14)
+	l.s	$f6, 24($sp)
+	mul.s	$f8, $f4, $f6
+	add.s	$f10, $f18, $f8
+	l.s	$f16, 24($14)
+	l.s	$f4, 40($sp)
+	mul.s	$f6, $f16, $f4
+	add.s	$f18, $f10, $f6
+	neg.s	$f8, $f18
+	lw	$15, 44($sp)
+	s.s	$f8, 16($15)
+	b	$77
+$76:
+	.loc	2 603
+ # 602	
+ # 603		} else {
+	.loc	2 605
+ # 604	
+ # 605			plane->plane[0].a = 0.0;
+	li.s	$f16, 0.0000000000000000e+00
+	lw	$24, 44($sp)
+	s.s	$f16, 4($24)
+	.loc	2 606
+ # 606			plane->plane[0].b = 1.0;
+	li.s	$f4, 1.0000000000000000e+00
+	lw	$25, 44($sp)
+	s.s	$f4, 8($25)
+	.loc	2 607
+ # 607			plane->plane[0].c = 0.0;
+	li.s	$f10, 0.0000000000000000e+00
+	lw	$8, 44($sp)
+	s.s	$f10, 12($8)
+	.loc	2 608
+ # 608			plane->plane[0].d = 11000;
+	li.s	$f6, 1.1000000000000000e+04
+	lw	$9, 44($sp)
+	s.s	$f6, 16($9)
+	.loc	2 613
+ # 609	
+ # 610		}
+ # 611	
+ # 612	
+ # 613	}
+$77:
+	.livereg	0x2000FF0E,0x00000FFF
+	lw	$31, 20($sp)
+	addu	$sp, 32
+	j	$31
+	.end	mcPlaneCheck
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

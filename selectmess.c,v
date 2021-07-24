@@ -1,0 +1,1742 @@
+head	1.11;
+access;
+symbols
+	iQue_20031010:1.11
+	iQue_release_master_1_0:1.11
+	iQue_08_21_03:1.9
+	iQue_beta_1_0:1.7
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.11
+date	2003.09.14.00.23.39;	author wheeler;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2003.09.09.02.31.37;	author wheeler;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2003.08.19.06.51.02;	author wheeler;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.08.15.01.18.30;	author wheeler;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.06.12.00.15.27;	author tong;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.05.05.23.06.50;	author tong;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.04.01.04.28.48;	author tong;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.03.09.01.27.41;	author tong;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.12.20.01.46.36;	author tong;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.12.19.23.45.25;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.11
+log
+@Realign text on delete file page
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+						File Select Stage Strategy & main
+
+			Copyright 1995 Nintendo co., ltd.  All rights reserved
+
+							Junary 8, 1996
+ ********************************************************************************/
+
+#define   PUSH      1
+#define NOPUSH      2
+
+#define MODORU8		se8_font1
+#define SCOREMIRU8	se8_font2
+#define COPYSURU8	se8_font3
+#define KESU8		se8_font4
+
+#define MYSCORE 0
+#define HISCORE 1
+
+
+#if ENGLISH
+static unsigned char se8_font1[] = {f8_R, f8_E, f8_T, f8_U, f8_R, f8_N, 0xff};  // modoru
+static unsigned char se8_font2[] = {f8_C, f8_H, f8_E, f8_C, f8_K, 0x9e, f8_S, f8_C, f8_O, f8_R, f8_E, 0xff}; 				//score miru
+static unsigned char se8_font3[] = {f8_C, f8_O, f8_P, f8_Y, 0x9e, f8_F, f8_I, f8_L, f8_E, 0xff};        //file copy
+static unsigned char se8_font4[] = {f8_E, f8_R, f8_A, f8_S, f8_E, 0x9e, f8_F, f8_I, f8_L, f8_E, 0xff};	//file remove
+#elif CHINA
+static unsigned char se8_font1[] = {0x1, 0x16, 0x1, 0x17, 0xff, 0xff, }; // RETURN 
+static unsigned char se8_font2[] = {0x1, 0x18, 0x1, 0x19, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff, }; // check score
+static unsigned char se8_font3[] =  {0x1, 0x1a, 0x1, 0x1b, 0x1, 0x1c, 0x1, 0x1d, 0xff, 0xff, }; //file copy
+static unsigned char se8_font4[] = {0x1, 0x1e, 0x1, 0x1f, 0x1, 0x1c, 0x1, 0x1d, 0xff, 0xff, };//file remove
+#else
+static unsigned char se8_font1[] = {0x62, 0xf0, 0x53, 0x68, 0xff};  // modoru
+static unsigned char se8_font2[] = {0x7c, 0x79, 0x70, 0x6c, 0x5f, 0x68,0xff}; 				//score miru
+static unsigned char se8_font3[] = {0x8b, 0xd5, 0x71, 0x98, 0x79, 0xf1, 0x8a, 0x9f, 0xff};  //file copy
+static unsigned char se8_font4[] = {0x8b, 0xd5, 0x71, 0x98, 0x48, 0x4c, 0xff};		        //file remove
+#endif
+
+
+#if ENGLISH
+static unsigned char se8_SuFont[][8] = {
+	{f8_S, f8_T, f8_E, f8_R, f8_E, f8_O, 0xff},
+	{f8_M, f8_O, f8_N, f8_O, 0xff},
+	{f8_H, f8_E, f8_A, f8_D, f8_S, f8_E, f8_T, 0xff},
+};
+#elif CHINA
+static unsigned char se8_SuFont[][8] = {
+	{0x1, 0x20, 0x1, 0x21, 0x1, 0x22, 0xff, 0xff, },  // stereo
+	{0x1, 0x23, 0x1, 0x22, 0x1, 0x24, 0xff, 0xff, },  // mono
+	{0x1, 0x25, 0x1, 0x26, 0xff, 0xff, }, // headset
+};
+#else
+static unsigned char se8_SuFont[][8] = {
+	{k8_su, k8_te,k8_re,k8_o ,0xff},
+	{k8_mo, k8_no,k8_ra,k8_ru,0xff},
+	{k8_he,sk8_tu, 0xf0,k8_to,k8_ho,k8_n,0xff},
+};
+#endif
+
+#if ENGLISH
+static unsigned char s88_marioA[] = {f8_M, f8_A, f8_R, f8_I, f8_O, 0x9e, 0x0a, 0xff};		//marioA
+static unsigned char s88_marioB[] = {f8_M, f8_A, f8_R, f8_I, f8_O, 0x9e, 0x0b, 0xff};		//marioB
+static unsigned char s88_marioC[] = {f8_M, f8_A, f8_R, f8_I, f8_O, 0x9e, 0x0c, 0xff};		//marioC
+static unsigned char s88_marioD[] = {f8_M, f8_A, f8_R, f8_I, f8_O, 0x9e, 0x0d, 0xff};		//marioD
+#elif CHINA
+static unsigned char s88_marioA[] = {0x1, 0x3d, 0x1, 0x3e, 0x1, 0x3f,0xff, 0x9e, 0x00, 0x0a, 0xff, 0xff};		//marioA
+static unsigned char s88_marioB[] = {0x1, 0x3d, 0x1, 0x3e, 0x1, 0x3f, 0xff, 0x9e, 0x00, 0x0b, 0xff, 0xff};		//marioB
+static unsigned char s88_marioC[] = {0x1, 0x3d, 0x1, 0x3e, 0x1, 0x3f, 0xff, 0x9e, 0x00, 0x0c, 0xff, 0xff};		//marioC
+static unsigned char s88_marioD[] = {0x1, 0x3d, 0x1, 0x3e, 0x1, 0x3f, 0xff, 0x9e, 0x00, 0x0d, 0xff, 0xff};		//marioD
+#else
+static unsigned char s88_marioA[] = {0x8e, 0x97, 0x74, 0x0a, 0xff};		//marioA
+static unsigned char s88_marioB[] = {0x8e, 0x97, 0x74, 0x0b, 0xff};		//marioB
+static unsigned char s88_marioC[] = {0x8e, 0x97, 0x74, 0x0c, 0xff};		//marioC
+static unsigned char s88_marioD[] = {0x8e, 0x97, 0x74, 0x0d, 0xff};		//marioD
+#endif
+
+#if CHINA
+static unsigned char se16_new[]	 = {0x7e, 0x7f, 0x82, 0x83, 0xfe, 0x80, 0x81, 0x84, 0x85, 0xff};		//new
+#else
+static unsigned char se16_new[] 	 = {23, 14, 32, 0xff};		//new
+#endif
+
+/*------------------------------------------------------------------------------*/
+/*	Cursol																		*/
+/*------------------------------------------------------------------------------*/
+/********************************************************************************/
+/*	Controllar Button Event .  														*/
+/********************************************************************************/
+static void ContButton(void) 
+{
+	if (selectNo == 7 ||selectNo == 8 ||selectNo == 9 ||selectNo == 10 ) {
+
+		if (contOr->trigger & (CONT_START+CONT_B)  ) {
+			cursol_ptr[0] = (short)cursol_pos[0];
+			cursol_ptr[1] = (short)cursol_pos[1];
+			cursol_flag = 1;
+		}
+		else if (contOr->trigger & CONT_A) {
+			score_flag = (1 - score_flag);
+			Na_FixSeFlagEntry(NA_SYS_CLICK);
+//			SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+		} 
+#if CHINA
+                else if ((contOr->trigger & CONT_L) || (contOr->trigger & CONT_R)) {
+			pageNo = 1 - pageNo;	
+			Na_FixSeFlagEntry(NA_SYS_CLICK);
+//			SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+		}
+#endif
+
+	}
+	else {
+
+		if (contOr->trigger & (CONT_A+CONT_START+CONT_B)  ) {
+			cursol_ptr[0] = (short)cursol_pos[0];
+			cursol_ptr[1] = (short)cursol_pos[1];
+			cursol_flag = 1;
+		}
+
+	}
+
+}
+/********************************************************************************/
+/*	Cursol Move Event .  														*/
+/********************************************************************************/
+static void CursolMove(void) 
+{
+	short stickx = (short)(contOr->stickx);
+	short sticky = (short)(contOr->sticky);
+
+	if (sticky > -2 && sticky < 2)  sticky = 0;
+	if (stickx > -2 && stickx < 2)  stickx = 0;
+
+	cursol_pos[0] += (float)(stickx/8);
+	cursol_pos[1] += (float)(sticky/8);
+
+//	if (cursol_pos[0] >  120) cursol_pos[0] =  120;
+//	if (cursol_pos[0] < -150) cursol_pos[0] = -150;
+//	if (cursol_pos[1] >  110) cursol_pos[1] =  110;
+//	if (cursol_pos[1] <  -90) cursol_pos[1] =  -90;
+
+	if (cursol_pos[0] >  132) cursol_pos[0] =  132;
+	if (cursol_pos[0] < -132) cursol_pos[0] = -132;
+	if (cursol_pos[1] >   90) cursol_pos[1] =   90;
+	if (cursol_pos[1] <  -90) cursol_pos[1] =  -90;
+
+	if (cursol_flag == 0) {
+		ContButton();
+	}
+
+//	rmonpf(("x %d\n",  cursol_ptr[0]));
+//	rmonpf(("y %d\n\n",cursol_ptr[1]));
+
+//	rmonpf(("x %d\n", (int)(cursol_pos[0])+160));
+//	rmonpf(("y %d\n\n",(int)(cursol_pos[1])+120));
+
+//	rmonpf(("x %d\n", (int)(cursol_pos[0])));
+//	rmonpf(("y %d\n\n",(int)(cursol_pos[1])));
+}
+/********************************************************************************/
+/*	Cursol Move Event .  														*/
+/********************************************************************************/
+static void DrawCursolEvent(void) 
+{
+	CursolMove();
+
+	iTranslate(PUSH,(float)((cursol_pos[0]+160) - 5.),(float)((cursol_pos[1]+120) - 25.),0);
+	if (cursol_flag == 0) gSPDisplayList(graphPtr++, RCP_se_cursolA);
+	if (cursol_flag != 0) gSPDisplayList(graphPtr++, RCP_se_cursolB);
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+	if (cursol_flag != 0) {
+		cursol_flag++;
+		if (cursol_flag == 5) cursol_flag = 0;
+	}
+
+}
+/*==============================================================================*/
+/*	File Select Message															*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Draw 16bits Special Font .  														*/
+/********************************************************************************/
+static void Draw16SpecialFont(char code,short posx,short posy,unsigned char* font) 
+{
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value - click_alpha); 
+	Draw16bitFont(code, posx, posy,font);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+}
+/********************************************************************************/
+/*	Draw 8bits Special Font .  														*/
+/********************************************************************************/
+static void Draw8SpecialFont(short posx,short posy,unsigned char* font) 
+{
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value - click_alpha); 
+	Draw8bitFont(posx,posy,font);
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+}
+/*==============================================================================*/
+/********************************************************************************/
+/*	Special Font Alpha .  														*/
+/********************************************************************************/
+static char SpecialFontAlpha(void) 
+{
+	if (click_flag == 1) {
+		click_alpha += 50;
+		if (click_alpha == 250) {click_flag = 0;  return(1);}
+	} else {
+		if (click_alpha > 0) click_alpha -= 50;
+	}
+
+	return(0);
+}
+/*==============================================================================*/
+
+
+
+
+/*==============================================================================*/
+/*	Common Function .															*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Draw Course Star Number .  													*/
+/********************************************************************************/
+static void DrawFileStarNum(char player,short posx,short posy) 
+{
+	static unsigned char se16_starnum1[] = {0x35, 0xff};		//star num
+	static unsigned char se16_starnum2[] = {0x32, 0xff};		//star num
+	unsigned char star_num[8];
+	char flag = 0;
+
+	if (BuIsActive(player) == 1) {
+		short starNum = BuGetTotalStars(player);
+
+		Draw16bitFont(2,posx   ,posy,se16_starnum1);
+		if (starNum < 100) {
+			Draw16bitFont(2,posx+16,posy,se16_starnum2);
+			flag = 16;
+		}
+#if CHINA
+			I_itochar_16(starNum,star_num);
+#else
+			I_itochar(starNum,star_num);
+#endif
+			Draw16bitFont(2,posx+(16+flag),posy,star_num);
+	}
+
+	else 
+#if CHINA
+		Draw16bitFont(2,posx-2,posy-5,se16_new);
+#else
+		Draw16bitFont(2,posx,posy,se16_new);
+#endif
+
+}
+
+/*==============================================================================*/
+/*==============================================================================*/
+/*	Print File SelectScene .													*/
+/*==============================================================================*/
+//********************************************************************************/
+/*	Course Select Scene .  														*/
+/********************************************************************************/
+static void PrintCourseSelectScene(void) 
+{
+#if ENGLISH
+	static unsigned char se16_font1[] = {f16_S, f16_E, f16_L, f16_E, f16_C, f16_T, 0x9e, f16_F, f16_I, f16_L, f16_E, 0xff};		//file Select
+
+	static unsigned char se8_font1[] = {f8_S, f8_C, f8_O, f8_R, f8_E, 0xff}; 		//score 
+	static unsigned char se8_font2[] = {f8_C, f8_O, f8_P, f8_Y, 0xff};  			//copy
+	static unsigned char se8_font3[] = {f8_E, f8_R, f8_A, f8_S, f8_E, 0xff};		//remove
+	static short ce_posx;
+#elif CHINA
+	static unsigned char se16_font1[] = {0x96, 0x97, 0x9a, 0x9b, 0x9e, 0x9f, 0xfe, 0x98, 0x99, 0x9c, 0x9d, 0xa0, 0xa1, 0xff};		//file Select
+
+	static unsigned char se8_font1[] = {0x1, 0x2, 0x1, 0x3, 0xff, 0xff,}; //score 
+	static unsigned char se8_font2[] = {0x1, 0x1a, 0x1, 0x1b, 0xff, 0xff,}; //copy
+	static unsigned char se8_font3[] = {0x1, 0x1e, 0x1, 0x1f, 0xff, 0xff,}; //remove
+	static short ce_posx;
+#else
+	static unsigned char se16_font1[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,  0x07, 0xff};		//file Select
+
+	static unsigned char se8_font1[] = {0x7c, 0x79, 0x70, 0xff}; 		//score 
+	static unsigned char se8_font2[] = {0x79, 0xf1, 0x8a, 0x9f, 0xff};  //copy
+	static unsigned char se8_font3[] = {0x48, 0x4c, 0xff};		        //remove
+	static short ce_posx;
+#endif
+
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH
+	Draw16bitFont(2,  93,  35,se16_font1);
+#elif CHINA
+	Draw16bitFont(1,  106,  25,se16_font1);
+#else
+	Draw16bitFont(1,  96,  35,se16_font1);
+#endif
+
+	DrawFileStarNum(0,  92,  78);
+	DrawFileStarNum(1, 209,  78);
+	DrawFileStarNum(2,  92, 118);
+	DrawFileStarNum(3, 209 ,118);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH || CHINA
+	Draw8bitFont( 50+2,39,se8_font1);
+#if CHINA
+	Draw8bitFont(113,39,se8_font2);
+#else
+	Draw8bitFont(115+2,39,se8_font2);
+#endif
+	Draw8bitFont(180-3,39,se8_font3);
+	ce_posx = CharCentering(254,se8_SuFont[sound_flag],10);
+	Draw8bitFont(ce_posx,39,se8_SuFont[sound_flag]);
+#else
+	Draw8bitFont( 50,39,se8_font1);
+	Draw8bitFont(115,39,se8_font2);
+	Draw8bitFont(180,39,se8_font3);
+	ce_posx = CharCentering(254,se8_SuFont[sound_flag],10);
+	Draw8bitFont(ce_posx,39,se8_SuFont[sound_flag]);
+#endif
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+#if CHINA
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	Draw8bitFont( 92, 164,s88_marioA);
+	Draw8bitFont(207, 164,s88_marioB);
+	Draw8bitFont( 92, 124,s88_marioC);
+	Draw8bitFont(207, 124,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#else
+	gSPDisplayList(graphPtr++, RCP_s88font_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawS88Font( 92, 65,s88_marioA);
+	DrawS88Font(207, 65,s88_marioB);
+	DrawS88Font( 92,105,s88_marioC);
+	DrawS88Font(207,105,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_s88font_off);	
+#endif
+
+//	rmonpf(("x->%d  y->%d\n",(int)(cursol_pos[0]+160),(int)(cursol_pos[1]+120)));
+}
+/*==============================================================================*/
+/*				Score Scene Data												*/
+/*																				*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Course Score Scene .  														*/
+/********************************************************************************/
+static void ChangeMessageInScoreScene(char message) 
+{
+
+#if ENGLISH
+	static unsigned char se16_font1[] = {f16_C, f16_H, f16_E, f16_C, f16_K, 0x9e, f16_F, f16_I, f16_L, f16_E, 0xff};		//Check Score
+	static unsigned char se8_font1[] = {f8_N, f8_O, 0x9e, f8_S, f8_A, f8_V, f8_E, f8_D, 0x9e, f8_D, f8_A, f8_T, f8_A, 0x9e, f8_E, f8_X, f8_I, f8_S, f8_T, f8_S, 0xff};  //file ni Data ga arimasen
+
+	switch (message) {
+		case 0:		Draw16SpecialFont(2,90+5,35,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(99,190,se8_font1);
+					break;
+	}
+#elif CHINA
+	static unsigned char se16_font1[] = {0x46, 0x47, 0x4a, 0x4b, 0x4e, 0x4f, 0xfe, 0x48, 0x49, 0x4c, 0x4d, 0x50, 0x51, 0xff};		//Check Score
+	static unsigned char se8_font1[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x1, 0x1, 0x2d, 0x1, 0x2e, 0xff, 0xff,};  //no saved data exits
+
+	switch (message) {
+		case 0:		Draw16SpecialFont(2,106,25,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(99,190,se8_font1);
+					break;
+	}
+#else
+	static unsigned char se16_font1[] = {0x15,0x16,0x12, 0x09, 0x13, 0x08, 0x14, 0x0d, 0x17, 0xff};		//Score
+	static unsigned char se8_font1[] = {0x8b, 0xd5, 0x71, 0x98, 0x55, 0xf0, 0x82, 0x9f, 0x7f, 0xf0, 0x45, 0x40, 0x67, 0x5e, 0x4d, 0x6d, 0xff};  //file ni Data ga arimasen
+
+	switch (message) {
+		case 0:		Draw16SpecialFont(1,90,35,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(90,190,se8_font1);
+					break;
+	}
+
+#endif
+}
+/********************************************************************************/
+/*	Course Score Scene .  														*/
+/********************************************************************************/
+static void PrintCourseScoreScene(void) 
+{
+
+
+	if (click_counter == 20) click_flag = 1;
+
+	if (SpecialFontAlpha() == 1) {
+		if (click_mess == 0) click_mess = 1;
+		else				 click_mess = 0;
+	}
+
+	ChangeMessageInScoreScene(click_mess);
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawFileStarNum(0,  90,  76);
+	DrawFileStarNum(1, 211,  76);
+	DrawFileStarNum(2,  90, 119);
+	DrawFileStarNum(3, 211 ,119);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH || CHINA
+	Draw8bitFont( 44,35,MODORU8);
+	Draw8bitFont(135,35,COPYSURU8);
+	Draw8bitFont(231,35,KESU8);
+#else
+	Draw8bitFont( 45,35,MODORU8);
+	Draw8bitFont(128,35,COPYSURU8);
+	Draw8bitFont(228,35,KESU8);
+#endif
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+#if CHINA
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	Draw8bitFont( 89, 164,s88_marioA);
+	Draw8bitFont(211, 164,s88_marioB);
+	Draw8bitFont( 89, 121,s88_marioC);
+	Draw8bitFont(211, 121,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#else
+	gSPDisplayList(graphPtr++, RCP_s88font_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawS88Font( 89, 62,s88_marioA);
+	DrawS88Font(211, 62,s88_marioB);
+	DrawS88Font( 89,105,s88_marioC);
+	DrawS88Font(211,105,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_s88font_off);	
+#endif
+
+//	rmonpf(("x->%d  y->%d\n",(int)(cursol_pos[0]+160),(int)(cursol_pos[1]+120)));
+
+}
+/*==============================================================================*/
+/*				Copy Scene Data												*/
+/*																				*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Course Copy Scene .  														*/
+/********************************************************************************/
+static void ChangeMessageInCopyScene(char message) 
+{
+
+#if ENGLISH
+	static unsigned char se16_font1[] = {f16_C,  f16_O,  f16_P,  f16_Y,  0x9e,  f16_F,  f16_I,  f16_L,  f16_E,  0xff};	//COPY FILE
+
+	static unsigned char se8_font1[] = {f8_C, f8_O, f8_P, f8_Y, 0x9e, f8_I, f8_T, 0x9e, f8_T, f8_O, 0x9e, f8_W, f8_H, f8_E, f8_R, f8_E, 0xf4, 0xff};	//COPY IT TO WHERE?
+	static unsigned char se8_font2[] = {f8_N, f8_O, 0x9e, f8_S, f8_A, f8_V, f8_E, f8_D, 0x9e, f8_D, f8_A, f8_T, f8_A, 0x9e, f8_E, f8_X,  f8_I, f8_S, f8_T, f8_S, 0xff};  //file ni Data ga arimasen
+	static unsigned char se8_font3[] = {f8_C, f8_O, f8_P, f8_Y, f8_I, f8_N, f8_G, 0x9e, f8_C, f8_O, f8_M, f8_P, f8_L, f8_E, f8_T, f8_E, f8_D, 0xff}; 	 //copy owarimasita
+	static unsigned char se8_font4[] = {f8_S, f8_A, f8_V, f8_E, f8_D, 0x9e, f8_D, f8_A, f8_T, f8_A, 0x9e,  f8_E, f8_X, f8_I, f8_T, f8_S, 0xff};  		//file ni Data ga haittemasu
+	static unsigned char se8_font5[] = {f8_N, f8_O, 0x9e, f8_E, f8_M, f8_P, f8_T, f8_Y, 0x9e, f8_F, f8_I, f8_L, f8_E, 0xff};  //NO EMPTY FILE
+#elif CHINA
+	static unsigned char se16_font1[] = {0x52, 0x53, 0x56, 0x57, 0x5a, 0x5b, 0xfe, 0x54, 0x55, 0x58, 0x59, 0x5c, 0x5d, 0xff};	//COPY FILE
+
+	static unsigned char se8_font1[] = {0x1, 0x1a, 0x1, 0x1b, 0x1, 0x2f, 0x1, 0x30, 0x1, 0x31, 0xff, 0xff, };	//COPY IT TO WHERE?
+	static unsigned char se8_font2[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x1, 0x1, 0x2d, 0x1, 0x2e, 0xff, 0xff,};  //no saved data exists
+	static unsigned char se8_font3[] = {0x1, 0x1a, 0x1, 0x1b, 0x1, 0x32, 0x1, 0x33, 0xff, 0xff,}; 	 //copying completed
+	static unsigned char se8_font4[] = {0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x1, 0x1, 0x2d, 0x1, 0x2e, 0xff, 0xff, }; //saved data exists
+	static unsigned char se8_font5[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x34, 0x1, 0x1c, 0x1, 0x1d, 0xff, 0xff, };  //NO EMPTY FILE
+#else
+	static unsigned char se16_font1[] = {0x00, 0x01, 0x02, 0x03, 0x09,0x0a, 0x0b, 0x0c, 0x0d, 0xff};	//file Copy suru
+
+	static unsigned char se8_font1[] = {0xf0, 0x53, 0x49, 0x55, 0x79, 0xf1,0x8a, 0x9f, 0x4b, 0x5e, 0x4c, 0x45, 0xf4, 0xff};						//dokoni copy suru?
+	static unsigned char se8_font2[] = {0x8b, 0xd5, 0x71, 0x98, 0x55, 0xf0, 0x82, 0x9f, 0x7f, 0xf0, 0x45, 0x40, 0x67, 0x5e, 0x4d, 0x6d, 0xff};  //file ni Data ga arimasen
+	static unsigned char se8_font3[] = {0x79, 0xf1, 0x8a, 0x9f, 0x44, 0x6b, 0x67, 0x5e, 0x4b, 0x4f, 0xff}; 											 //copy owarimasita
+	static unsigned char se8_font4[] = {0x8b, 0xd5, 0x71, 0x98, 0x55, 0xf0, 0x82, 0x9f, 0x7f, 0xf0, 0x45, 0x59, 0x41, 0xa1, 0x52, 0x5e, 0x4c, 0xff};  //file ni Data ga haittemasu
+	static unsigned char se8_font5[] = {0x45, 0x66, 0x58, 0x8b, 0xd5, 0x71, 0x98, 0xf0, 0x45, 0x40, 0x67, 0x5e, 0x4d, 0x6d, 0xff};  //karano file ga arimasen
+#endif
+
+
+#if ENGLISH || CHINA
+	switch (message) { 
+		case 0:		if (fileFlow_flag == 1)	Draw8SpecialFont(119,190,se8_font5);
+				else					
+#if CHINA
+					Draw16SpecialFont(2,104,25,se16_font1);
+#else
+					Draw16SpecialFont(2,104,35,se16_font1);
+#endif
+					break;
+		case 1:		Draw8SpecialFont(109,190,se8_font1);
+					break;
+		case 2:		Draw8SpecialFont(101,190,se8_font2);
+					break;
+		case 3:		Draw8SpecialFont(110,190,se8_font3);
+					break;
+		case 4:		Draw8SpecialFont(110,190,se8_font4);
+					break;
+	}
+#else
+	switch (message) { 
+		case 0:		if (fileFlow_flag == 1)	Draw8SpecialFont(90,190,se8_font5);
+					else					Draw16SpecialFont(1,90,35,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(90,190,se8_font1);
+					break;
+		case 2:		Draw8SpecialFont(90,190,se8_font2);
+					break;
+		case 3:		Draw8SpecialFont(90,190,se8_font3);
+					break;
+		case 4:		Draw8SpecialFont(90,190,se8_font4);
+					break;
+	}
+
+#endif
+
+
+}
+/********************************************************************************/
+/*	Course Copy Scene .  														*/
+/********************************************************************************/
+static void CopySceneMessageEvent(void) 
+{
+
+	switch(buttonData[5]->bu_mode) {
+
+		case 0: if (click_counter == 20) click_flag = 1;
+
+				if (SpecialFontAlpha() == 1) {
+					if (click_mess == 0) click_mess = 2;
+					else				 click_mess = 0;
+				}
+
+				break;
+
+		case 1: if (click_counter == 20 && click_mess == 4 ) click_flag = 1;	
+
+				if (SpecialFontAlpha() == 1) { 
+					if (click_mess != 1) click_mess = 1;
+					else				 click_mess = 4;
+				}
+				break;
+
+
+		case 2: if (click_counter == 20) click_flag = 1;
+
+				if (SpecialFontAlpha() == 1) {
+					if (click_mess != 3) click_mess = 3;
+					else				  click_mess = 0;
+				}
+				break;
+
+
+	}
+}
+/********************************************************************************/
+/*	File Copy Scene .   														*/
+/********************************************************************************/
+static void PrintFileCopyScene(void) 
+{
+
+	
+	CopySceneMessageEvent(); 
+	ChangeMessageInCopyScene(click_mess); 
+
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawFileStarNum(0,  90,  76);
+	DrawFileStarNum(1, 211,  76);
+	DrawFileStarNum(2,  90, 119);
+	DrawFileStarNum(3, 211 ,119);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH || CHINA
+	Draw8bitFont( 44,35,MODORU8);
+	Draw8bitFont(128,35,SCOREMIRU8);
+	Draw8bitFont(230,35,KESU8);
+#else
+	Draw8bitFont( 45,35,MODORU8);
+	Draw8bitFont(133,35,SCOREMIRU8);
+	Draw8bitFont(230,35,KESU8);
+#endif
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+#if CHINA
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	Draw8bitFont( 89, 164,s88_marioA);
+	Draw8bitFont(211, 164,s88_marioB);
+	Draw8bitFont( 89, 121,s88_marioC);
+	Draw8bitFont(211, 121,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#else
+	gSPDisplayList(graphPtr++, RCP_s88font_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawS88Font( 89, 62,s88_marioA);
+	DrawS88Font(211, 62,s88_marioB);
+	DrawS88Font( 89,105,s88_marioC);
+	DrawS88Font(211,105,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_s88font_off);	
+#endif
+
+//	rmonpf(("x->%d  y->%d\n",(int)(cursol_pos[0]+160),(int)(cursol_pos[1]+120)));
+}
+/*==============================================================================*/
+/*				Remove Scene Data												*/
+/*																				*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Draw Yes No .  														*/
+/********************************************************************************/
+static void DrawYesNo(short posx,short posy) 
+{
+	short delta = (short)(frameCounter*0x1000);
+	short cur_posx = cursol_pos[0] + (posx+70);
+	short cur_posy = cursol_pos[1] + 120;
+
+#if ENGLISH
+	static unsigned char se8_font1[] = {f8_Y, f8_E, f8_S, 0xff};	//hai
+	static unsigned char se8_font2[] = {f8_N, f8_O, 0xff};  //iie
+#elif CHINA
+	static unsigned char se8_font1[] = {0x1, 0x36, 0xff, 0xff};	//yes
+	static unsigned char se8_font2[] = {0x1, 0x37, 0xff, 0xff};  //no
+#else
+	static unsigned char se8_font1[] = {0x59, 0x41, 0xff};	//hai
+	static unsigned char se8_font2[] = {0x41, 0x41, 0x43, 0xff};  //iie
+#endif
+
+
+#if ENGLISH || CHINA
+
+#if CHINA
+	if (((cur_posx < 158+15) && (cur_posx > 158-15)) && ((cur_posy < 200+10) && (cur_posy > 200-10))) {
+#else
+	if (((cur_posx < 154+15) && (cur_posx > 154-15)) && ((cur_posy < 200+10) && (cur_posy > 200-10))) {
+#endif 
+		blink_alpha[0] = 205+sin(delta)*50;
+		blink_alpha[1] = 150;
+		yesNo_flag = 1;
+	}
+
+	else if (((cur_posx < 203+15) && (cur_posx > 203-15)) && ((cur_posy < 200+10) && (cur_posy > 200-10))) {
+		blink_alpha[0] = 150;
+		blink_alpha[1] = 205+sin(delta)*50;
+		yesNo_flag = 2;
+	}
+#else
+	if (((cur_posx < 154+10) && (cur_posx > 154-10)) && ((cur_posy < 200+10) && (cur_posy > 200-10))) {
+		blink_alpha[0] = 205+sin(delta)*50;
+		blink_alpha[1] = 150;
+		yesNo_flag = 1;
+	}
+
+	else if (((cur_posx < 203+10) && (cur_posx > 203-10)) && ((cur_posy < 200+10) && (cur_posy > 200-10))) {
+		blink_alpha[0] = 150;
+		blink_alpha[1] = 205+sin(delta)*50;
+		yesNo_flag = 2;
+	}
+#endif
+
+	else {
+		blink_alpha[0] = 150;
+		blink_alpha[1] = 150;
+		yesNo_flag = 0;
+	}
+
+	if (cursol_flag == 2) {
+		if (yesNo_flag == 1) {
+			Na_FixSeFlagEntry(NA_VC1_DOWN);
+			SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+			buttonData[6]->bu_mode = 2;
+			click_flag = 1;
+			click_counter = 0;
+			BuClearStorage(click_file);   							//Main Copy Function
+			buttonData[click_file+21]->map.shape = stageShapes[S_bg08];  	//Change Shape 
+			buttonData[click_file]->map.shape = stageShapes[S_bg08];  	//Change Shape 
+			yesNo_flag = 0;
+		}
+		else if (yesNo_flag == 2) {
+			Na_FixSeFlagEntry(NA_SYS_CLICK);
+			SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+			buttonData[click_file+21]->s[state_flag].d = 6;
+			buttonData[6]->bu_mode = 0;
+			click_flag = 1;
+			click_counter = 0;
+			yesNo_flag = 0;
+		}		
+	}
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+
+	gDPSetEnvColor(graphPtr++,blink_alpha[0],blink_alpha[0],blink_alpha[0],alpha_value); 
+#if CHINA
+	Draw8bitFont(posx+60,posy,se8_font1);
+#else
+	Draw8bitFont(posx+56,posy,se8_font1);
+#endif
+
+	gDPSetEnvColor(graphPtr++,blink_alpha[1],blink_alpha[1],blink_alpha[1],alpha_value); 
+	Draw8bitFont(posx+98,posy,se8_font2);
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+	
+
+}
+/********************************************************************************/
+/*	Remove Data Scene .  														*/
+/********************************************************************************/
+static void ChangeMessageInRemoveScene(char message) 
+{
+
+#if ENGLISH
+
+	unsigned char se16_font1[] = {f16_E, f16_R, f16_A, f16_S, f16_E, 0x9e, f16_F, f16_I, f16_L, f16_E, 0xff};		//ERASE FILE
+
+	unsigned char se8_font1[] = {f8_S, f8_U, f8_R, f8_E, 0xf4, 0xff};	//SURE?
+	unsigned char se8_font2[] = {f8_N, f8_O, 0x9e, f8_S, f8_A, f8_V, f8_E, f8_D, 0x9e, f8_D, f8_A, f8_T, f8_A, 0x9e, f8_E, f8_X,  f8_I, f8_S, f8_T, f8_S, 0xff};  //file ni Data ga arimasen
+	unsigned char se8_font3[] = {f8_M, f8_A, f8_R, f8_I, f8_O, 0x9e, f8_A, 0x9e, f8_J, f8_U, f8_S, f8_T, 0x9e, f8_E, f8_R, f8_A, f8_S, f8_E, f8_D, 0xff};  //mario x wo kesimasita 
+	unsigned char se8_font4[] = {f8_S, f8_A, f8_V, f8_E, f8_D, 0x9e, f8_D, f8_A, f8_T, f8_A, 0x9e, f8_E, f8_X, f8_I, f8_T, f8_S, 0xff};  //file ni Data ga haittemasu
+
+	switch (message) { 
+		case 0:		Draw16SpecialFont(2,98,35,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(90,190,se8_font1);
+					DrawYesNo(90,190);
+					break;
+		case 2:		Draw8SpecialFont(100,190,se8_font2);
+					break;
+		case 3:		se8_font3[6] = click_file + 10;
+					Draw8SpecialFont(100,190,se8_font3);
+					break;
+		case 4:		Draw8SpecialFont(100,190,se8_font4);
+					break;
+	}
+#elif CHINA
+
+	unsigned char se16_font1[] = {0x5e, 0x5f, 0x62, 0x63, 0x66, 0x67, 0xfe, 0x60, 0x61, 0x64, 0x65, 0x68, 0x69, 0xff};		//ERASE FILE
+
+	unsigned char se8_font1[] = {0x1, 0x38, 0x1, 0xe, 0x1, 0x39, 0x1, 0x3a, 0xff, 0xff,};	//SURE?
+	unsigned char se8_font2[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x1, 0x1, 0x2d, 0x1, 0x2e, 0xff, 0xff,};  //no saved data exists
+	unsigned char se8_font3[] = {0x1, 0x1c, 0x1, 0x1d, 0x1, 0x3b, 0x1, 0x1e, 0x1, 0x1f, 0xff, 0xff,};  //mario a erased
+	unsigned char se8_font4[] = {0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x1, 0x1, 0x2d, 0x1, 0x2e, 0xff, 0xff,};  //saved data exists
+
+	switch (message) { 
+		case 0:		Draw16SpecialFont(2,106,25,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(90,190,se8_font1);
+					DrawYesNo(90,190);
+					break;
+		case 2:		Draw8SpecialFont(100,190,se8_font2);
+					break;
+		case 3:		se8_font3[15] = click_file + 10;
+					Draw8SpecialFont(100,190,se8_font3);
+					break;
+		case 4:		Draw8SpecialFont(100,190,se8_font4);
+					break;
+	}
+#else
+	unsigned char se16_font1[] = {0x00, 0x01, 0x02, 0x03, 0x0e, 0x0c, 0xff};		//file Kesu
+
+	unsigned char se8_font1[] = {0x5d, 0x6d, 0x53, 0xf4, 0xff};	//hont?
+	unsigned char se8_font2[] = {0x8b, 0xd5, 0x71, 0x98, 0x55, 0xf0, 0x82, 0x9f, 0x7f, 0xf0, 0x45, 0x40, 0x67, 0x5e, 0x4d, 0x6d, 0xff};  //file ni Data ga arimasen
+	unsigned char se8_font3[] = {0x8e, 0x97, 0x74, 0x0a, 0x6c, 0x48, 0x4b, 0x5e, 0x4b, 0x4f, 0xff};  //mario x wo kesimasita 
+	unsigned char se8_font4[] = {0x8b, 0xd5, 0x71, 0x98, 0x55, 0xf0, 0x82, 0x9f, 0x7f, 0xf0, 0x45, 0x59, 0x41, 0xa1, 0x52, 0x5e, 0x4c, 0xff};  //file ni Data ga haittemasu
+
+	switch (message) { 
+		case 0:		Draw16SpecialFont(1,111,35,se16_font1);
+					break;
+		case 1:		Draw8SpecialFont(90,190,se8_font1);
+					DrawYesNo(90,190);
+					break;
+		case 2:		Draw8SpecialFont(90,190,se8_font2);
+					break;
+		case 3:		se8_font3[3] = click_file + 10;
+					Draw8SpecialFont(90,190,se8_font3);
+					break;
+		case 4:		Draw8SpecialFont(90,190,se8_font4);
+					break;
+	}
+#endif
+
+}
+/********************************************************************************/
+/*	Remove Data Message Event .													*/
+/********************************************************************************/
+static void RemoveSceneMessageEvent(void) 
+{
+
+	switch(buttonData[6]->bu_mode) {
+
+		case 0: if (click_counter == 20 && click_mess == 2) click_flag = 1;
+
+				if (SpecialFontAlpha() == 1) {
+				if (click_mess == 0) click_mess = 2;
+				else				 click_mess = 0;
+				}
+				break;
+
+		case 1: if (SpecialFontAlpha() == 1) { 
+					if (click_mess != 1) click_mess = 1;
+					cursol_pos[0] = 43;
+					cursol_pos[1] = 80;
+				}
+				break;
+
+
+		case 2: if (click_counter == 20) click_flag = 1;
+
+				if (SpecialFontAlpha() == 1) {
+					if (click_mess != 3) click_mess = 3;
+					else				 click_mess = 0;
+				}
+				break;
+
+
+	}
+}
+/********************************************************************************/
+/*	File Remove Scene .   														*/
+/********************************************************************************/
+static void PrintFileRemoveScene(void) 
+{
+
+	RemoveSceneMessageEvent(); 
+	ChangeMessageInRemoveScene(click_mess); 
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawFileStarNum(0,  90,  76);
+	DrawFileStarNum(1, 211,  76);
+	DrawFileStarNum(2,  90, 119);
+	DrawFileStarNum(3, 211 ,119);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH
+	Draw8bitFont( 44,35,MODORU8);
+	Draw8bitFont(127,35,SCOREMIRU8);
+	Draw8bitFont(233,35,COPYSURU8);
+#elif CHINA
+	Draw8bitFont( 45,35,MODORU8);
+	Draw8bitFont(129,35,SCOREMIRU8);
+	Draw8bitFont(228,35,COPYSURU8);
+#else
+	Draw8bitFont( 45,35,MODORU8);
+	Draw8bitFont(133,35,SCOREMIRU8);
+	Draw8bitFont(223,35,COPYSURU8);
+#endif
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+#if CHINA
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	Draw8bitFont( 89, 164,s88_marioA);
+	Draw8bitFont(211, 164,s88_marioB);
+	Draw8bitFont( 89, 121,s88_marioC);
+	Draw8bitFont(211, 121,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#else
+	gSPDisplayList(graphPtr++, RCP_s88font_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+	DrawS88Font( 89, 62,s88_marioA);
+	DrawS88Font(211, 62,s88_marioB);
+	DrawS88Font( 89,105,s88_marioC);
+	DrawS88Font(211,105,s88_marioD);
+	gSPDisplayList(graphPtr++, RCP_s88font_off);	
+#endif
+
+
+//	rmonpf(("x->%d  y->%d\n",(int)(cursol_pos[0]+160),(int)(cursol_pos[1]+120)));
+
+}
+
+/*==============================================================================*/
+/*	Print Sound Select .														*/
+/*==============================================================================*/
+//********************************************************************************/
+/*	Sound Select Scene .  														*/
+/********************************************************************************/
+static void PrintSoundSelect(void) 
+{
+	int i;
+	short ce_posx;
+	unsigned char alpha_tmp;
+
+#if ENGLISH
+	unsigned char se16_font1[] = {f16_S, f16_O, f16_U, f16_N, f16_D, 0x9e, f16_S, f16_E, f16_L, f16_E, f16_C, f16_T, 0xff};	//Sound Select
+#elif CHINA
+	unsigned char se16_font1[] = {0xa2, 0xa3, 0xa6, 0xa7, 0xaa, 0xab, 0xfe, 0xa4, 0xa5, 0xa8, 0xa9, 0xac, 0xad, 0xff};	//Sound Select
+#else
+	unsigned char se16_font1[] = {0x18, 0x19, 0x1a, 0x1b, 0x04, 0x05, 0x06,  0x07, 0xff};		//Sound Select
+#endif
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH 
+	Draw16bitFont(2,  88,  35,se16_font1);
+#elif CHINA
+	Draw16bitFont(2,  106,  55,se16_font1);
+#else
+	Draw16bitFont(1,  96,  35,se16_font1);
+#endif
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	for (i=0; i<3; i++) {
+		if (sound_flag == i) {  gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); }
+		else 				 {  gDPSetEnvColor(graphPtr++,  0,  0,  0,alpha_value); }
+		ce_posx = CharCentering(87+74*i,se8_SuFont[i],10);
+		Draw8bitFont(ce_posx, 87,se8_SuFont[i]);
+	}
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+}
+
+/*==============================================================================*/
+/********************************************************************************/
+/*	Print 88 ExStar Number .   														*/
+/********************************************************************************/
+static void DrawExstarNum(char player,short posx,short posy) 
+{
+	unsigned char chara_num[40];
+#if CHINA
+	unsigned char s88_Star[] = { 0x00, 0xfa, 0x00, 0xfb, 0xff, 0xff };
+#else
+	static unsigned char s88_Star[] = { 0xfa, 0xfb, 0xff,};
+#endif
+
+#if CHINA
+	Draw8bitFont(posx,posy ,s88_Star);
+	I_itochar(BuGetExtraStars(player),chara_num);
+	Draw8bitFont(posx+16,posy ,chara_num);
+#else
+	DrawS88Font(posx,posy ,s88_Star);
+	I_itochar(BuGetExtraStars(player),chara_num);
+	DrawS88Font(posx+16,posy ,chara_num);
+#endif
+
+}
+/********************************************************************************/
+/*	Print 88 Coin Number .   														*/
+/********************************************************************************/
+static void Draw88CoinNum(char player,short course,short posx,short posy) 
+{
+	unsigned char chara_num[40];
+	unsigned char get_starFlag = BuGetStarFlag(player,course);
+#if CHINA
+	unsigned char s88_Coin[] = { 0x00, 0xf9, 0x00, 0xfb, 0xff, 0xff,};
+	unsigned char s88_star[] = { 0x00, 0xfa, 0xff, 0xff };
+#else
+	unsigned char s88_Coin[] = { 0xf9, 0xfb, 0xff,};
+	unsigned char s88_star[] = { 0xfa,0xff };
+#endif
+
+#if ENGLISH
+	unsigned char se88_font[][8] = {    //Mario
+		{0x9f, 0x9f, 0x9f, 0x9f, 0xff},
+		{0x40, 0x41, 0x0a, 0xff},
+		{0x40, 0x41, 0x0b, 0xff},
+		{0x40, 0x41, 0x0c, 0xff},
+		{0x40, 0x41, 0x0d, 0xff},
+	};
+#elif CHINA
+	unsigned char se88_font[][16] = {    //Mario
+		{0x00, 0x9f, 0x00, 0x9f, 0x00, 0x9f, 0x00, 0x9f, 0xff, 0xff},
+		{0x00, 0x40, 0x00, 0x41, 0x00, 0x0a, 0xff, 0xff},
+		{0x00, 0x40, 0x00, 0x41, 0x00, 0x0b, 0xff, 0xff},
+		{0x00, 0x40, 0x00, 0x41, 0x00, 0x0c, 0xff, 0xff},
+		{0x00, 0x40, 0x00, 0x41, 0x00, 0x0d, 0xff, 0xff},
+	};
+#else	
+	unsigned char se88_font[][5] = {    //Mario
+		{0x9f, 0x9f, 0x9f, 0x9f,0xff},
+		{0x8e, 0x97, 0x74, 0x0a,0xff},
+		{0x8e, 0x97, 0x74, 0x0b,0xff},
+		{0x8e, 0x97, 0x74, 0x0c,0xff},
+		{0x8e, 0x97, 0x74, 0x0d,0xff},
+	};
+#endif	
+
+	
+
+	if (score_flag == MYSCORE) {
+#if CHINA
+		Draw8bitFont(25+posx,posy ,s88_Coin);
+		I_itochar(BuGetNumCoins(player,course),chara_num);
+		Draw8bitFont(25+posx+16,posy ,chara_num);
+		if (get_starFlag & (0x01<<6)) {
+			Draw8bitFont(posx+70,posy,s88_star);
+		}
+#else
+                DrawS88Font(25+posx,posy ,s88_Coin);
+                I_itochar(BuGetNumCoins(player,course),chara_num);
+                DrawS88Font(25+posx+16,posy ,chara_num);
+                if (get_starFlag & (0x01<<6)) {
+                        DrawS88Font(posx+70,posy,s88_star);
+                }
+#endif
+
+	}
+	else {
+#if ENGLISH 
+		DrawS88Font(posx+18,posy ,s88_Coin);
+		I_itochar(BuGetHiScore(course),chara_num);
+		DrawS88Font(posx+16+18,posy ,chara_num);
+
+		DrawS88Font(posx+45+15,posy ,se88_font[BuGetWinner(course)]);	
+#elif CHINA
+                Draw8bitFont(posx+18,posy ,s88_Coin);
+                I_itochar(BuGetHiScore(course),chara_num);
+                Draw8bitFont(posx+16+18,posy ,chara_num);
+
+                Draw8bitFont(posx+45+15,posy ,se88_font[BuGetWinner(course)]);
+#else	
+		DrawS88Font(posx,posy ,s88_Coin);
+		I_itochar(BuGetHiScore(course),chara_num);
+		DrawS88Font(posx+16,posy ,chara_num);
+
+		DrawS88Font(posx+45,posy ,se88_font[BuGetWinner(course)]);	
+#endif	
+	}
+
+
+}
+
+/********************************************************************************/
+/*	Print 88 Star .		   														*/
+/********************************************************************************/
+#if CHINA
+static void DrawCourseStar(char player,short course,short posx,short posy)
+{
+
+        short i = 0;
+        unsigned char star[40];
+        unsigned char get_starFlag = BuGetStarFlag(player,course);
+        char star_num = BuGetCourseStars(player,course);
+
+        if (get_starFlag & (0x01<<6))   { star_num--; }
+
+        for (i=0; i<star_num; i++) {
+                star[2*i] = 0x00;
+                star[2*i+1] = 0xfa;
+        }
+        star[2*i] = 0xff; star[2*i+1] = 0xff;
+
+        Draw8bitFont(posx,posy ,star);
+}
+#else
+static void DrawCourseStar(char player,short course,short posx,short posy) 
+{
+
+	short i = 0;
+	unsigned char star[20];
+	unsigned char get_starFlag = BuGetStarFlag(player,course);
+	char star_num = BuGetCourseStars(player,course);
+	
+	if (get_starFlag & (0x01<<6)) 	{ star_num--; }
+
+	for (i=0; i<star_num; i++) {
+		star[i] = 0xfa;
+	}
+	star[i] = 0xff;
+
+	DrawS88Font(posx,posy ,star);
+
+
+}
+#endif
+/********************************************************************************/
+/*	Print File Score .   														*/
+/********************************************************************************/
+static void PrintFileScore(char player) 
+{
+#if ENGLISH
+	unsigned char se16_font1[] = {f16_M, f16_A, f16_R, f16_I, f16_O, 0xff};			//Mario
+	unsigned char s88_fontHI[] = {f8_H, f8_I, 0x9e, f8_S, f8_C, f8_O, f8_R, f8_E, 0xff};  //HISCORE
+	unsigned char s88_fontMY[] = {f8_M, f8_Y, 0x9e, f8_S, f8_C, f8_O, f8_R, f8_E, 0xff};  //MYSCORE
+#elif CHINA
+	unsigned char se16_font1[] = {0x76, 0x77, 0x7a, 0x7b, 0xfe, 0x78, 0x79, 0x7c, 0x7d, 0xff};			//Mario
+	unsigned char s88_fontHI[] = {0x1, 0x40, 0x1, 0x41, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff,};  //HISCORE
+	unsigned char s88_fontMY[] = {0x1, 0x0, 0x1, 0x1, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff,};  //MYSCORE
+        unsigned char s88_L[] = {0x00, 0x52, 0xff, 0x9e, 0x00, f8_L, 0xff, 0xff, };
+        unsigned char s88_R[] = {0x00, f8_R, 0xff, 0x9e, 0x00, 0x53, 0xff, 0xff, };
+#else
+	unsigned char se16_font1[] = {0x0f, 0x10, 0x11, 0xff};					//Mario
+	unsigned char s88_fontHI[] = { 0x89 , 0x71, 0x7c, 0x79, 0x70, 0xff,}; 	//HISCORE
+	unsigned char s88_fontMY[] = { k8_ma, k8_i, 0x7c, 0x79, 0x70, 0xff,}; 	//MYSCORE
+#endif
+	unsigned char  se16_Player[] = {0x00,0xff};
+	unsigned char **crsname  = (unsigned char**)(SegmentToVirtual(crsNamePtr));
+
+	se16_Player[0] = player + 10;   //Convert Player to A,B,C,D
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH
+	Draw16bitFont(2,  25    , 15,se16_font1);
+	Draw16bitFont(2,  28+67 , 15,se16_Player);
+#elif CHINA
+	Draw16bitFont(2,  25    ,  9,se16_font1);
+	Draw16bitFont(2,  28+67 , 15,se16_Player);
+#else
+	Draw16bitFont(1,  28    , 15,se16_font1);
+	Draw16bitFont(2,  28+58 , 15,se16_Player);
+#endif
+	DrawFileStarNum(player, 28+96 ,15);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+#if CHINA
+        gSPDisplayList(graphPtr++, RCP_mess_font_on);
+        gDPSetEnvColor(graphPtr++,255,255,255,alpha_value);
+
+        if (pageNo == 0) {
+        Draw8bitFont(23+3, 35    ,SegmentToVirtual(crsname[ 7]));  
+        Draw8bitFont(23+3, 55 +1 ,SegmentToVirtual(crsname[ 6]));  
+        Draw8bitFont(23+3, 75 +2 ,SegmentToVirtual(crsname[ 5]));  
+        Draw8bitFont(23+3, 95 +3 ,SegmentToVirtual(crsname[ 4]));  
+        Draw8bitFont(23+3, 115+4 ,SegmentToVirtual(crsname[ 3]));  
+        Draw8bitFont(23+3, 135+5 ,SegmentToVirtual(crsname[ 2]));  
+        Draw8bitFont(23+3, 155+6 ,SegmentToVirtual(crsname[ 1]));  
+        Draw8bitFont(23+3, 175+7 ,SegmentToVirtual(crsname[ 0]));  
+
+        DrawCourseStar(player, 7,23+129+19, 35+  0); Draw88CoinNum(player, 7,23+190, 35+ 0);
+        DrawCourseStar(player, 6,23+129+19, 55+  1); Draw88CoinNum(player, 6,23+190, 55+ 1);
+        DrawCourseStar(player, 5,23+129+19, 75+  2); Draw88CoinNum(player, 5,23+190, 75+ 2);
+        DrawCourseStar(player, 4,23+129+19, 95+  3); Draw88CoinNum(player, 4,23+190, 95+ 3);
+        DrawCourseStar(player, 3,23+129+19, 115+ 4); Draw88CoinNum(player, 3,23+190, 115+ 4);
+        DrawCourseStar(player, 2,23+129+19, 135+ 5); Draw88CoinNum(player, 2,23+190, 135+ 5);
+        DrawCourseStar(player, 1,23+129+19, 155+ 6); Draw88CoinNum(player, 1,23+190, 155+ 6);
+        DrawCourseStar(player, 0,23+129+19, 175+ 7); Draw88CoinNum(player, 0,23+190, 175+ 7);
+        } else if (pageNo==1) {
+        Draw8bitFont(23+3, 35    ,SegmentToVirtual(crsname[25]));
+        Draw8bitFont(23+3, 55 +1 ,SegmentToVirtual(crsname[14]));
+        Draw8bitFont(23+3, 75 +2 ,SegmentToVirtual(crsname[13]));
+        Draw8bitFont(23+3, 95 +3 ,SegmentToVirtual(crsname[12]));
+        Draw8bitFont(23+3, 115+4 ,SegmentToVirtual(crsname[11]));
+        Draw8bitFont(23+3, 135+5 ,SegmentToVirtual(crsname[10]));
+        Draw8bitFont(23+3, 155+6 ,SegmentToVirtual(crsname[ 9]));
+        Draw8bitFont(23+3, 175+7 ,SegmentToVirtual(crsname[ 8]));
+
+	DrawExstarNum(player,23+129+19,35); 
+        //DrawCourseStar(player, 25,23+129+19, 35+  0); Draw88CoinNum(player, 25,23+190, 35+ 0);
+        DrawCourseStar(player, 14,23+129+19, 55+  1); Draw88CoinNum(player, 14,23+190, 55+ 1);
+        DrawCourseStar(player, 13,23+129+19, 75+  2); Draw88CoinNum(player, 13,23+190, 75+ 2);
+        DrawCourseStar(player, 12,23+129+19, 95+  3); Draw88CoinNum(player, 12,23+190, 95+ 3);
+        DrawCourseStar(player, 11,23+129+19, 115+ 4); Draw88CoinNum(player, 11,23+190, 115+ 4);
+        DrawCourseStar(player, 10,23+129+19, 135+ 5); Draw88CoinNum(player, 10,23+190, 135+ 5);
+        DrawCourseStar(player, 9,23+129+19, 155+ 6); Draw88CoinNum(player, 9,23+190, 155+ 6);
+        DrawCourseStar(player, 8,23+129+19, 175+ 7); Draw88CoinNum(player, 8,23+190, 175+ 7);
+        }
+
+        if (score_flag == MYSCORE) Draw8bitFont(28+210, 200, s88_fontMY);
+        else  Draw8bitFont(28+203, 200,s88_fontHI);
+
+        Draw8bitFont(30, 17, s88_L);
+        Draw8bitFont(270, 17, s88_R);
+        gSPDisplayList(graphPtr++, RCP_mess_font_off);
+#else
+	gSPDisplayList(graphPtr++, RCP_s88font_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,alpha_value); 
+#if ENGLISH 
+	{DrawS88Font(23+3, 35    ,SegmentToVirtual(crsname[ 0]));  DrawCourseStar(player, 0,23+129+19, 35+  0); Draw88CoinNum(player, 0,23+190, 35+  0);}
+	{DrawS88Font(23+3, 45+ 2 ,SegmentToVirtual(crsname[ 1]));  DrawCourseStar(player, 1,23+129+19, 45+  2); Draw88CoinNum(player, 1,23+190, 45+  2);}
+	{DrawS88Font(23+3, 55+ 4 ,SegmentToVirtual(crsname[ 2]));  DrawCourseStar(player, 2,23+129+19, 55+  4); Draw88CoinNum(player, 2,23+190, 55+  4);}
+	{DrawS88Font(23+3, 65+ 6 ,SegmentToVirtual(crsname[ 3]));  DrawCourseStar(player, 3,23+129+19, 65+  6); Draw88CoinNum(player, 3,23+190, 65+  6);}
+	{DrawS88Font(23+3, 75+ 8 ,SegmentToVirtual(crsname[ 4]));  DrawCourseStar(player, 4,23+129+19, 75+  8); Draw88CoinNum(player, 4,23+190, 75+  8);}
+	{DrawS88Font(23+3, 85+10 ,SegmentToVirtual(crsname[ 5]));  DrawCourseStar(player, 5,23+129+19, 85+ 10); Draw88CoinNum(player, 5,23+190, 85+ 10);}
+	{DrawS88Font(23+3, 95+12 ,SegmentToVirtual(crsname[ 6]));  DrawCourseStar(player, 6,23+129+19, 95+ 12); Draw88CoinNum(player, 6,23+190, 95+ 12);}
+	{DrawS88Font(23+3,105+14 ,SegmentToVirtual(crsname[ 7]));  DrawCourseStar(player, 7,23+129+19,105+ 14); Draw88CoinNum(player, 7,23+190,105+ 14);}
+	{DrawS88Font(23+3,115+16 ,SegmentToVirtual(crsname[ 8]));  DrawCourseStar(player, 8,23+129+19,115+ 16); Draw88CoinNum(player, 8,23+190,115+ 16);}
+	{DrawS88Font(23  ,125+18 ,SegmentToVirtual(crsname[ 9]));  DrawCourseStar(player, 9,23+129+19,125+ 18); Draw88CoinNum(player, 9,23+190,125+ 18);}
+	{DrawS88Font(23  ,135+20 ,SegmentToVirtual(crsname[10]));  DrawCourseStar(player,10,23+129+19,135+ 20); Draw88CoinNum(player,10,23+190,135+ 20);}
+	{DrawS88Font(23  ,145+22 ,SegmentToVirtual(crsname[11]));  DrawCourseStar(player,11,23+129+19,145+ 22); Draw88CoinNum(player,11,23+190,145+ 22);}
+	{DrawS88Font(23  ,155+24 ,SegmentToVirtual(crsname[12]));  DrawCourseStar(player,12,23+129+19,155+ 24); Draw88CoinNum(player,12,23+190,155+ 24);}
+	{DrawS88Font(23  ,165+26 ,SegmentToVirtual(crsname[13]));  DrawCourseStar(player,13,23+129+19,165+ 26); Draw88CoinNum(player,13,23+190,165+ 26);}
+	{DrawS88Font(23  ,175+28 ,SegmentToVirtual(crsname[14]));  DrawCourseStar(player,14,23+129+19,175+ 28); Draw88CoinNum(player,14,23+190,175+ 28);}
+	{DrawS88Font(23+6,185+30 ,SegmentToVirtual(crsname[25]));  DrawExstarNum(player,23+129+19,185+30);} 
+	if (score_flag == MYSCORE) DrawS88Font(28+210,24 ,s88_fontMY);
+	else				 	   DrawS88Font(28+203,24 ,s88_fontHI);   
+#else
+	{DrawS88Font(23+5, 35    ,SegmentToVirtual(crsname[ 0]));  DrawCourseStar(player, 0,23+129, 35+  0); Draw88CoinNum(player, 0,23+190, 35+  0);}
+	{DrawS88Font(23+5, 45+ 2 ,SegmentToVirtual(crsname[ 1]));  DrawCourseStar(player, 1,23+129, 45+  2); Draw88CoinNum(player, 1,23+190, 45+  2);}
+	{DrawS88Font(23+5, 55+ 4 ,SegmentToVirtual(crsname[ 2]));  DrawCourseStar(player, 2,23+129, 55+  4); Draw88CoinNum(player, 2,23+190, 55+  4);}
+	{DrawS88Font(23+5, 65+ 6 ,SegmentToVirtual(crsname[ 3]));  DrawCourseStar(player, 3,23+129, 65+  6); Draw88CoinNum(player, 3,23+190, 65+  6);}
+	{DrawS88Font(23+5, 75+ 8 ,SegmentToVirtual(crsname[ 4]));  DrawCourseStar(player, 4,23+129, 75+  8); Draw88CoinNum(player, 4,23+190, 75+  8);}
+	{DrawS88Font(23+5, 85+10 ,SegmentToVirtual(crsname[ 5]));  DrawCourseStar(player, 5,23+129, 85+ 10); Draw88CoinNum(player, 5,23+190, 85+ 10);}
+	{DrawS88Font(23+5, 95+12 ,SegmentToVirtual(crsname[ 6]));  DrawCourseStar(player, 6,23+129, 95+ 12); Draw88CoinNum(player, 6,23+190, 95+ 12);}
+	{DrawS88Font(23+5,105+14 ,SegmentToVirtual(crsname[ 7]));  DrawCourseStar(player, 7,23+129,105+ 14); Draw88CoinNum(player, 7,23+190,105+ 14);}
+	{DrawS88Font(23+5,115+16 ,SegmentToVirtual(crsname[ 8]));  DrawCourseStar(player, 8,23+129,115+ 16); Draw88CoinNum(player, 8,23+190,115+ 16);}
+	{DrawS88Font(23  ,125+18 ,SegmentToVirtual(crsname[ 9]));  DrawCourseStar(player, 9,23+129,125+ 18); Draw88CoinNum(player, 9,23+190,125+ 18);}
+	{DrawS88Font(23  ,135+20 ,SegmentToVirtual(crsname[10]));  DrawCourseStar(player,10,23+129,135+ 20); Draw88CoinNum(player,10,23+190,135+ 20);}
+	{DrawS88Font(23  ,145+22 ,SegmentToVirtual(crsname[11]));  DrawCourseStar(player,11,23+129,145+ 22); Draw88CoinNum(player,11,23+190,145+ 22);}
+	{DrawS88Font(23  ,155+24 ,SegmentToVirtual(crsname[12]));  DrawCourseStar(player,12,23+129,155+ 24); Draw88CoinNum(player,12,23+190,155+ 24);}
+	{DrawS88Font(23  ,165+26 ,SegmentToVirtual(crsname[13]));  DrawCourseStar(player,13,23+129,165+ 26); Draw88CoinNum(player,13,23+190,165+ 26);}
+	{DrawS88Font(23  ,175+28 ,SegmentToVirtual(crsname[14]));  DrawCourseStar(player,14,23+129,175+ 28); Draw88CoinNum(player,14,23+190,175+ 28);}
+	{DrawS88Font(23+10,185+30 ,SegmentToVirtual(crsname[25]));  DrawExstarNum(player,23+129,185+30);} 
+	if (score_flag == MYSCORE) DrawS88Font(28+209,24 ,s88_fontMY);
+	else				 	   DrawS88Font(28+209,24 ,s88_fontHI);   
+#endif
+	gSPDisplayList(graphPtr++, RCP_s88font_off);	
+#endif
+
+}
+
+/*================================================================================================*/
+/**************************************************************************************************/
+/*	SelectMessage Event .  																		  */
+/**************************************************************************************************/
+static void SelectSceneFont(void) 
+{
+	unsigned char* kk;
+
+	MakeSelectProjection();
+
+	switch (selectNo) {
+		case -1:	PrintCourseSelectScene(); break;
+		case  4:	PrintCourseScoreScene(); 
+					score_flag = 0;
+					break;
+		case  5:	PrintFileCopyScene(); break;
+		case  6:	PrintFileRemoveScene(); break;
+
+		case   7:	PrintFileScore(0); break;
+		case   8:	PrintFileScore(1); break;
+		case   9:	PrintFileScore(2); break;
+		case  10:	PrintFileScore(3); break;
+
+		case  28:	PrintSoundSelect(); break;
+
+	}
+	
+	if (BuIsActive(0) == 1 && BuIsActive(1) == 1 && BuIsActive(2) == 1 && BuIsActive(3) == 1) fileFlow_flag = 1;
+	else fileFlow_flag = 0;
+
+	if (alpha_value < 250) alpha_value += 10;
+
+	if (click_counter < 1000) click_counter++;
+
+}
+
+/*===================================================================================*/
+
+
+
+
+
+
+
+
+
+
+
+
+/********************************************************************************/
+/*	Select Scene Message process.												*/
+/********************************************************************************/
+extern ulong SelectSceneMessProc(int code, MapNode *node, void *data)
+{
+	if (code == MAP_CBACK_EXEC) {
+		SelectSceneFont();
+		DrawCursolEvent();
+	}
+
+	return(0);
+}
+
+
+
+
+
+
+
+@
+
+
+1.10
+log
+@Align "Mario" with letter on "Score" page.
+Draw castle secret star count correctly.
+Fix code for drawing mario's head.
+@
+text
+@d852 1
+a852 1
+#if ENGLISH || CHINA
+d856 4
+@
+
+
+1.9
+log
+@Fix bug where only half of the stars are reported on the
+chinese version of the "Score" screen.
+@
+text
+@d935 3
+d939 1
+a940 1
+	DrawS88Font(posx,posy ,s88_Star);
+d942 3
+a944 1
+	I_itochar_16(BuGetExtraStars(player),chara_num);
+d946 1
+d948 1
+a949 1
+	DrawS88Font(posx+16,posy ,chara_num);
+d1108 1
+a1108 1
+#if ENGLISH || CHINA
+d1111 3
+d1153 2
+a1154 1
+        DrawCourseStar(player, 25,23+129+19, 35+  0); Draw88CoinNum(player, 25,23+190, 35+ 0);
+@
+
+
+1.8
+log
+@Align text
+@
+text
+@d1046 3
+a1048 3
+        for (i=0; i<star_num; i+=2) {
+                star[i] = 0x00;
+                star[i+1] = 0xfa;
+d1050 1
+a1050 1
+        star[i] = 0xff; star[i+1] = 0xff;
+@
+
+
+1.7
+log
+@updated message files.
+@
+text
+@d315 3
+d319 1
+@
+
+
+1.6
+log
+@updated 16bit font glyph integration
+@
+text
+@d67 4
+a70 4
+static unsigned char s88_marioA[] = {0x1, 0x3b, 0x1, 0x3c, 0x1, 0x3d, 0xff, 0x9e, 0x00, 0x0a, 0xff, 0xff};		//marioA
+static unsigned char s88_marioB[] = {0x1, 0x3b, 0x1, 0x3c, 0x1, 0x3d, 0xff, 0x9e, 0x00, 0x0b, 0xff, 0xff};		//marioB
+static unsigned char s88_marioC[] = {0x1, 0x3b, 0x1, 0x3c, 0x1, 0x3d, 0xff, 0x9e, 0x00, 0x0c, 0xff, 0xff};		//marioC
+static unsigned char s88_marioD[] = {0x1, 0x3b, 0x1, 0x3c, 0x1, 0x3d, 0xff, 0x9e, 0x00, 0x0d, 0xff, 0xff};		//marioD
+d370 1
+a370 1
+	static unsigned char se8_font1[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff,};  //no saved data exits
+d471 5
+a475 5
+	static unsigned char se8_font1[] = {0x1, 0x1a, 0x1, 0x1b, 0x1, 0x2d, 0x1, 0x2e, 0x1, 0x2f, 0xff, 0xff, };	//COPY IT TO WHERE?
+	static unsigned char se8_font2[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff,};  //no saved data exists
+	static unsigned char se8_font3[] = {0x1, 0x1a, 0x1, 0x1b, 0x1, 0x30, 0x1, 0x31, 0xff, 0xff,}; 	 //copying completed
+	static unsigned char se8_font4[] = {0x1, 0x34, 0x1, 0x2c, 0x1, 0x30, 0x1, 0x31, 0xff, 0xff,}; //saved data exists
+	static unsigned char se8_font5[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x32, 0x1, 0x33, 0x1, 0x1c, 0x1, 0x1d, 0xff, 0xff,};  //NO EMPTY FILE
+d632 2
+a633 2
+	static unsigned char se8_font1[] = {0x1, 0x35, 0xff, 0xff};	//yes
+	static unsigned char se8_font2[] = {0x1, 0x36, 0xff, 0xff};  //no
+d749 4
+a752 4
+	unsigned char se8_font1[] = {0x1, 0x37, 0x1, 0xe, 0x1, 0x38, 0x1, 0x39, 0xff, 0xff,};	//SURE?
+	unsigned char se8_font2[] = {0x1, 0x29, 0x1, 0x2a, 0x1, 0x2b, 0x1, 0x2c, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff,};  //no saved data exists
+	unsigned char se8_font3[] = {0x1, 0x1e, 0x1, 0x1f, 0x1, 0x3a, 0x1, 0x3b, 0x1, 0x3c, 0x1, 0x3d, 0xff, 0xff,};  //mario a erased
+	unsigned char se8_font4[] = {0x1, 0x34, 0x1, 0x2c, 0x1, 0x30, 0x1, 0x31, 0xff, 0xff,};  //saved data exists
+d1082 1
+a1082 1
+	unsigned char s88_fontHI[] = {0x1, 0x3f, 0x1, 0x40, 0x1, 0x3, 0xff, 0xff,};  //HISCORE
+@
+
+
+1.5
+log
+@fixed English build.
+@
+text
+@d79 1
+a79 1
+static unsigned char se16_new[]	 = {0x9e, 0x9f, 0xa2, 0xa3, 0xfe, 0xa0, 0xa1, 0xa4, 0xa5,  0xff};		//new
+d278 1
+a278 2
+	static unsigned char se16_font1[] = {0xca, 0xcb, 0xce, 0xcf, 0xd2, 0xd3, 0xfe, 0xcc, 0xcd, 0xd0, 0xd1, 0xd4, 0xd5, 0xff};		//file Select
+
+d369 1
+a369 1
+	static unsigned char se16_font1[] = {0x3a, 0x3b, 0x3e, 0x3f, 0x42, 0x43, 0xfe, 0x3c, 0x3d, 0x40, 0x41, 0x44, 0x45, 0xff};		//Check Score
+d469 1
+a469 1
+	static unsigned char se16_font1[] = {0x46, 0x47, 0x4a, 0x4b, 0x4e, 0x4f, 0xfe, 0x48, 0x49, 0x4c, 0x4d, 0x50, 0x51,  0xff};	//COPY FILE
+d747 1
+a747 1
+	unsigned char se16_font1[] = {0x52, 0x53, 0x56, 0x57, 0x5a, 0x5b, 0xfe, 0x54, 0x55, 0x58, 0x59, 0x5c, 0x5d, 0xff};		//ERASE FILE
+a761 1
+#if CHINA
+a764 5
+#else
+		case 3:		se8_font3[6] = click_file + 10;
+					Draw8SpecialFont(100,190,se8_font3);
+					break;
+#endif
+d897 1
+a897 1
+	unsigned char se16_font1[] = {0xd6, 0xd7, 0xda, 0xdb, 0xde, 0xdf, 0xfe, 0xd8, 0xd9, 0xdc, 0xdd, 0xe0, 0xe1, 0xff};	//Sound Select
+d1081 1
+a1081 1
+	unsigned char se16_font1[] = {0x5e, 0x5f, 0x62, 0x63, 0x66, 0x67, 0x6a, 0x6b, 0xfe, 0x60, 0x61, 0x64, 0x65, 0x68, 0x69, 0x6c, 0x6d, 0xff};			//Mario
+@
+
+
+1.4
+log
+@incorporated iQue's texture, modified encoding for 8bit font glyph.
+@
+text
+@a79 2
+#elif ENGLISH
+static unsigned char se16_new[]	 = {0x4a, 0x4b, 0xfe, 0x4c, 0x4d, 0xff};		//new
+d495 1
+a495 1
+					Draw16SpecialFont(2,106,35,se16_font1);
+@
+
+
+1.3
+log
+@fixed I_itochar function for English build.
+@
+text
+@d29 4
+a32 4
+static unsigned char se8_font1[] = {0x2, 0x22, 0x1, 0xab, 0xff, 0xff,};  // RETURN 
+static unsigned char se8_font2[] = {0x2, 0x23, 0x2, 0x24, 0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff,}; // check score
+static unsigned char se8_font3[] = {0x1, 0x99, 0x1, 0x27, 0x2, 0x25, 0x2, 0x26, 0xff, 0xff,};        //file copy
+static unsigned char se8_font4[] = {0x2, 0x27, 0x2, 0x28, 0x2, 0x25, 0x2, 0x26, 0xff, 0xff,};	//file remove
+d49 3
+a51 3
+	{0x2, 0x29, 0x2, 0x2a, 0x1, 0x7b, 0xff, 0xff,},  // stereo
+	{0x1, 0x2d, 0x1, 0x7b, 0x1, 0x25, 0xff, 0xff,},  // mono
+	{0x2, 0x2b, 0x1, 0x79, 0xff, 0xff}, // headset
+d67 4
+a70 4
+static unsigned char s88_marioA[] = {0x1, 0x3, 0x1, 0x4, 0x1, 0x5, 0xff, 0x9e, 0x00, 0x0a, 0xff, 0xff};		//marioA
+static unsigned char s88_marioB[] = {0x1, 0x3, 0x1, 0x4, 0x1, 0x5, 0xff, 0x9e, 0x00, 0x0b, 0xff, 0xff};		//marioB
+static unsigned char s88_marioC[] = {0x1, 0x3, 0x1, 0x4, 0x1, 0x5, 0xff, 0x9e, 0x00, 0x0c, 0xff, 0xff};		//marioC
+static unsigned char s88_marioD[] = {0x1, 0x3, 0x1, 0x4, 0x1, 0x5, 0xff, 0x9e, 0x00, 0x0d, 0xff, 0xff};		//marioD
+d79 2
+d254 6
+a259 1
+	else Draw16bitFont(2,posx,posy,se16_new);
+d280 1
+a280 2
+	//static unsigned char se16_font1[] = {f16_S, f16_E, f16_L, f16_E, f16_C, f16_T, 0x9e, f16_F, f16_I, f16_L, f16_E, 0xff};		//file Select
+	static unsigned char se16_font1[] = {0x3a, 0x3b, 0x3e, 0x3f, 0x42, 0x43, 0x46, 0x47, 0xfe, 0x3c, 0x3d, 0x40, 0x41, 0x44, 0x45, 0x48, 0x49, 0xff};		//file Select
+d282 4
+a285 3
+	static unsigned char se8_font1[] = {0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff,}; //score 
+	static unsigned char se8_font2[] = {0x1, 0x99, 0x1, 0x27, 0xff, 0xff,}; //copy
+	static unsigned char se8_font3[] = {0x2, 0x27, 0x2, 0x28, 0xff, 0xff,}; //remove
+d302 1
+a302 1
+	Draw16bitFont(1,  106,  30,se16_font1);
+d372 2
+a373 2
+	static unsigned char se16_font1[] = {f16_C, f16_H, f16_E, f16_C, f16_K, 0x9e, f16_F, f16_I, f16_L, f16_E, 0xff};		//Check Score
+	static unsigned char se8_font1[] = {0x1, 0xa5, 0x1, 0x96, 0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff};  //no saved data exits
+d376 1
+a376 1
+		case 0:		Draw16SpecialFont(2,90+5,35,se16_font1);
+d472 1
+a472 1
+	static unsigned char se16_font1[] = {f16_C,  f16_O,  f16_P,  f16_Y,  0x9e,  f16_F,  f16_I,  f16_L,  f16_E,  0xff};	//COPY FILE
+d474 5
+a478 5
+	static unsigned char se8_font1[] = {0x1, 0x99, 0x1, 0x27, 0x1, 0x8, 0x2, 0x2c, 0x1, 0xa4, 0x2, 0x2d, 0xff, 0xff};	//COPY IT TO WHERE?
+	static unsigned char se8_font2[] = {0x1, 0xa5, 0x1, 0x96, 0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff};  //no saved data exists
+	static unsigned char se8_font3[] = {0x1, 0x99, 0x1, 0x27, 0x2, 0x2e, 0x2, 0x2f, 0xff, 0xff}; 	 //copying completed
+	static unsigned char se8_font4[] = {0x2, 0x30, 0x2, 0x31, 0x2, 0x2e, 0x2, 0x2f, 0xff, 0xff}; //saved data exists
+	static unsigned char se8_font5[] = {0x1, 0xa5, 0x1, 0x96, 0x2, 0x6, 0x2, 0x25, 0x2, 0x26, 0xff, 0xff};  //NO EMPTY FILE
+d493 6
+a498 1
+					else					Draw16SpecialFont(2,104,35,se16_font1);
+d635 2
+a636 2
+	static unsigned char se8_font1[] = {0x1, 0x50, 0xff, 0xff};	//yes
+	static unsigned char se8_font2[] = {0x2, 0x32, 0xff, 0xff};  //no
+d750 1
+a750 1
+	unsigned char se16_font1[] = {f16_E, f16_R, f16_A, f16_S, f16_E, 0x9e, f16_F, f16_I, f16_L, f16_E, 0xff};		//ERASE FILE
+d752 4
+a755 4
+	unsigned char se8_font1[] = {0x1, 0xe0, 0x1, 0xe1, 0x2, 0x33, 0x2, 0x2d, 0xff, 0xff};	//SURE?
+	unsigned char se8_font2[] = {0x1, 0xa5, 0x1, 0x96, 0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff};  //no saved data exists
+	unsigned char se8_font3[] = {0x2, 0x27, 0x2, 0x28, 0x1, 0x13, 0x1, 0x3, 0x1, 0x4, 0x1, 0x5, 0xff, 0x9e, 0x00, 0x0a, 0xff , 0xff, };  //mario a erased
+	unsigned char se8_font4[] = {0x2, 0x30, 0x2, 0x31, 0x2, 0x2e, 0x2, 0x2f, 0xff, 0xff};  //saved data exists
+d758 1
+a758 1
+		case 0:		Draw16SpecialFont(2,98,35,se16_font1);
+d906 1
+a906 2
+	unsigned char se16_font1[] = {f16_S, f16_O, f16_U, f16_N, f16_D, 0x9e, f16_S, f16_E, f16_L, f16_E, f16_C, f16_T, 0xff};	//Sound Select
+//	unsigned char se16_font1[] = {0x1, 0x6f, 0x1, 0x70, 0x1, 0x7c, 0x2, 0x34, 0xff, 0xff};	//Sound Select
+d913 1
+a913 1
+#if ENGLISH || CHINA
+d915 2
+d1090 3
+a1092 3
+	unsigned char se16_font1[] = {f16_M, f16_A, f16_R, f16_I, f16_O, 0xff};			//Mario
+	unsigned char s88_fontHI[] = {0x1, 0x71, 0x1, 0xae, 0x2, 0x1b, 0xff, 0xff};  //HISCORE
+	unsigned char s88_fontMY[] = {0x1, 0xd, 0x1, 0x2, 0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff};  //MYSCORE
+@
+
+
+1.2
+log
+@added #if CHINA for select menu screens.
+@
+text
+@d103 3
+a105 1
+		} else if ((contOr->trigger & CONT_L) || (contOr->trigger & CONT_R)) {
+d110 1
+d244 1
+d246 3
+d930 1
+d932 3
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d28 5
+d47 6
+d66 5
+d78 3
+d82 1
+d103 4
+d230 1
+a230 1
+	unsigned char star_num[4];
+d241 1
+a241 1
+			I_itochar(starNum,star_num);
+d265 8
+d287 2
+d302 1
+a302 1
+#if ENGLISH
+d317 9
+d333 1
+d357 10
+d407 1
+a407 1
+#if ENGLISH
+d418 9
+d434 1
+d457 8
+d476 1
+a476 1
+#if ENGLISH
+d568 1
+a568 1
+#if ENGLISH
+d579 9
+d595 1
+a595 1
+
+d615 3
+d624 5
+a628 1
+#if ENGLISH
+d630 1
+d687 3
+d691 1
+d729 29
+d838 1
+a838 1
+#if ENGLISH
+d849 9
+d865 1
+d886 3
+d895 1
+a895 1
+#if ENGLISH
+d919 1
+a919 1
+	unsigned char chara_num[20];
+d923 1
+a923 1
+	I_itochar(BuGetExtraStars(player),chara_num);
+d932 1
+a932 1
+	unsigned char chara_num[20];
+d934 4
+d940 2
+d950 8
+d971 2
+a972 1
+		DrawS88Font(25+posx,posy ,s88_Coin);
+d974 1
+a974 1
+		DrawS88Font(25+posx+16,posy ,chara_num);
+d976 1
+a976 1
+			DrawS88Font(posx+70,posy,s88_star);
+d978 8
+d989 1
+a989 1
+#if ENGLISH
+d995 6
+d1016 20
+d1055 1
+d1065 6
+d1083 1
+a1083 1
+#if ENGLISH
+d1093 49
+d1144 1
+a1144 1
+#if ENGLISH
+d1184 1
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

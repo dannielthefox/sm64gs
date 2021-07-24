@@ -1,0 +1,772 @@
+head	1.4;
+access;
+symbols
+	iQue_20031010:1.4
+	iQue_release_master_1_0:1.4
+	iQue_08_21_03:1.4
+	iQue_beta_1_0:1.4
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.4
+date	2003.03.09.01.27.41;	author tong;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.12.20.01.47.50;	author tong;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.12.19.23.38.05;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.01;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@incorporated iQue's texture, modified encoding for 8bit font glyph.
+@
+text
+@/***************************************************************************************************
+					Draw 16 bit , 8 bit font Function
+
+						Programed by Iwamoto Daiki
+
+							Junuary 30 1996
+****************************************************************************************************/
+
+/*=================================================================================================
+										Matrix
+
+===================================================================================================*/
+
+/**************************************************************************************************
+		I Matrix Enter
+***************************************************************************************************/
+extern void iwa_LoadImatrix(void)
+{
+
+	Mtx*  matrix; 
+
+	if ( (matrix = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL ) {rmonpf(("AllocDynamic error in message!!\n"));  return;}
+
+	(*matrix).m[0][0] = 0x00010000; (*matrix).m[1][0] = 0x00000000; (*matrix).m[2][0] = 0x00000000; (*matrix).m[3][0] = 0x00000000;
+	(*matrix).m[0][1] = 0x00000000; (*matrix).m[1][1] = 0x00010000; (*matrix).m[2][1] = 0x00000000; (*matrix).m[3][1] = 0x00000000;
+	(*matrix).m[0][2] = 0x00000001; (*matrix).m[1][2] = 0x00000000; (*matrix).m[2][2] = 0x00000000; (*matrix).m[3][2] = 0x00000000;
+	(*matrix).m[0][3] = 0x00000000; (*matrix).m[1][3] = 0x00000001; (*matrix).m[2][3] = 0x00000000; (*matrix).m[3][3] = 0x00000000;
+
+
+	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_LOAD|G_MTX_MODELVIEW|G_MTX_NOPUSH);
+	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_LOAD|G_MTX_PROJECTION|G_MTX_NOPUSH);
+
+
+}
+/**************************************************************************************************
+		Translate
+***************************************************************************************************/
+extern void iTranslate(char code,float posx,float posy,float posz)
+{
+	
+	Mtx*  matrix; 
+
+	if ( (matrix = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL ) {rmonpf(("AllocDynamic error in message!!\n"));  return;}
+
+	guTranslate(matrix,posx,posy,posz);
+
+	if (code ==   PUSH)	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+	if (code == NOPUSH)	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+
+}
+/**************************************************************************************************
+		Rotate
+***************************************************************************************************/
+extern void iRotate(char code,float angle,float posx,float posy,float posz)
+{
+
+	Mtx*  matrix; 
+
+	if ( (matrix = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL ) {rmonpf(("AllocDynamic error in message!!\n"));  return;}
+
+	guRotate(matrix,angle,posx,posy,posz);
+
+	if (code ==   PUSH)	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+	if (code == NOPUSH)	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+
+}
+/**************************************************************************************************
+		Scale
+***************************************************************************************************/
+extern void iScale(char code,float scalex,float scaley,float scalez)
+{
+	
+	Mtx*  matrix; 
+
+	if ( (matrix = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL ) {rmonpf(("AllocDynamic error in message!!\n"));  return;}
+
+	guScale(matrix,scalex,scaley,scalez);
+
+	if (code ==   PUSH)	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+	if (code == NOPUSH)	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_NOPUSH);
+
+}
+
+
+/*=================================================================================================
+							Set Projection Matrix
+
+===================================================================================================*/
+
+
+/**************************************************************************************************/
+/*							MakeSelectProjection
+/**************************************************************************************************/
+extern void MakeSelectProjection(void) 
+{
+	Mtx *projection;
+	if ( (projection = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL) {rmonpf(("AllocDynamic error in drawfont!!\n"));  return; }
+	iwa_LoadImatrix();
+	guOrtho(projection,0.,320.,0.,240.,-10., 10., 1.0);
+	gSPPerspNormalize(graphPtr++, 0xffff);
+	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (projection)),G_MTX_PROJECTION|G_MTX_MUL|G_MTX_NOPUSH);
+
+}
+
+
+/*=================================================================================================
+							8 bit Font 
+
+===================================================================================================*/
+
+/***************************************************************************************************
+			8 Bit Image Defrost
+****************************************************************************************************/
+#if CHINA
+static unsigned char* ImageDefrost(unsigned char *tex)
+{
+
+	int i, j;
+	unsigned char mask = 0x80;
+	unsigned char* image_data;
+	unsigned char b1, b2;
+
+	if ( (image_data = (unsigned char *) AllocDynamic(sizeof(char)*64) ) == NULL ) {rmonpf(("AllocDynamic error in defrost!!\n"));  return(NULL);}
+
+	for (i=0; i<16; i++) {
+	    for (j=0; j<8; j++) {
+	        b1 = (tex[i] & (mask>>j)) >> (7-j)!=0 ? 0xf0 : 0x00;
+                j++;
+	        b2 = (tex[i] & (mask>>j)) >> (7-j)!=0 ? 0x0f : 0x00;
+		image_data[i*4+j/2] = b1 | b2;
+        osSyncPrintf("%x, ", image_data[i*4+j/2]);
+	    }
+	osSyncPrintf("\n");
+	}
+
+	return(image_data);
+}
+#else
+static unsigned char* ImageDefrost(unsigned short *tex,short sizex,short sizey)
+{
+
+	int i;
+	unsigned short co;
+	unsigned char* image_data;
+	short co2 = 0;
+
+	if ( (image_data = (unsigned char *) AllocDynamic(sizeof(char)*sizex*sizey) ) == NULL ) {rmonpf(("AllocDynamic error in defrost!!\n"));  return(NULL);}
+
+	for (i=0; i<(sizex*sizey/16); i++) {
+		co = 0x8000;
+		while (co != 0) {
+			if ((tex[i] & co) != 0) image_data[co2] = 0xff;
+			else					image_data[co2] = 0x00;
+			co = co/2;
+			co2++;
+		}
+	}
+
+
+
+	return(image_data);
+}
+#endif
+/***************************************************************************************************
+			Draw 8bit Font Texture
+****************************************************************************************************/
+#if CHINA
+extern void DrawMessageTexture(unsigned short num)
+{
+
+	unsigned char **texture = (unsigned char**)SegmentToVirtual(MessTexDataPtr); 
+	unsigned char *tex = (unsigned char*)SegmentToVirtual(texture[num]); 
+//	unsigned char *tex = (unsigned char*)SegmentToVirtual(texture[0] + 64*num); 
+//        osSyncPrintf("SegmentToVirtual(MessTexDataPtr): %x -> %x\n", MessTexDataPtr, texture);
+//        osSyncPrintf("SegmentToVirtual(texture[0]): %x -> %x\n", texture[0], SegmentToVirtual(texture[0]));
+//        osSyncPrintf("SegmentToVirtual(texture[0]+64*%d): %x -> %x\n", num, texture[0]+64*num, tex);
+
+	gDPPipeSync(graphPtr++);
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_IA, G_IM_SIZ_16b, 1, K0_TO_PHYS((u32)tex));
+	gSPDisplayList(graphPtr++, RCP_mess_font_main);	
+
+}
+
+extern void DrawMessageTexture_zh(unsigned short num)
+{
+	unsigned char **texture = (unsigned char**)SegmentToVirtual(MessTexDataPtr); 
+	unsigned char *tex = (unsigned char*)SegmentToVirtual(texture[num]); 
+        unsigned char* tex_data;
+
+	tex_data = ImageDefrost(tex);
+
+	gDPPipeSync(graphPtr++);
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_IA, G_IM_SIZ_16b, 1, K0_TO_PHYS((u32)tex_data));
+	gSPDisplayList(graphPtr++, RCP_mess_font_main);	
+
+}
+
+#else
+
+extern void DrawMessageTexture(unsigned char num)
+{
+#if ENGLISH
+        unsigned char **texture = (unsigned char**)SegmentToVirtual(MessTexDataPtr);
+        unsigned char *tex = (unsigned char*)SegmentToVirtual(texture[num]);
+
+        gDPPipeSync(graphPtr++);
+        gDPSetTextureImage(graphPtr++,G_IM_FMT_IA, G_IM_SIZ_16b, 1, K0_TO_PHYS((u32)tex));
+        gSPDisplayList(graphPtr++, RCP_mess_font_main);
+#else
+        unsigned short **texture = (unsigned short**)SegmentToVirtual(MessTexDataPtr);
+        unsigned short *tex = (unsigned short*)SegmentToVirtual(texture[num]);
+        unsigned char* tex_data;
+
+        tex_data = ImageDefrost(tex,8,16);
+
+        gDPPipeSync(graphPtr++);
+        gDPSetTextureImage(graphPtr++,G_IM_FMT_IA, G_IM_SIZ_8b, 1, K0_TO_PHYS((u32)tex_data));
+        gSPDisplayList(graphPtr++, RCP_mess_font_main);
+
+#endif
+}
+
+#endif
+
+/********************************************************************************/
+/*	Draw 8 bit Font .	  														*/
+/********************************************************************************/
+
+#if ENGLISH
+
+/***************************************************************************************************
+			Draw String Font 			
+****************************************************************************************************/
+static void Draw8bitStrings(char code)
+{
+	char i;
+	unsigned char str[][5] = {
+		{ 03,    0x37,0x2b,0x28, },   //code 0 -->the
+		{ 03,    0x3c,0x32,0x38, },   //code 1 -->you
+	};
+
+	for (i=0; i<str[code][0]; i++) {
+		DrawMessageTexture(str[code][i+1]);
+		iTranslate(NOPUSH,dot_tbl[str[code][i+1]],0,0);
+	}
+
+}
+
+/********************************************************************************/
+/*	Draw 8 bit Font .	  														*/
+/********************************************************************************/
+extern void Draw8bitFont(short posx,short posy, unsigned char* font) 
+{
+	char daku_flag = 0;
+	int i = 0;
+	unsigned char line = 1;
+
+
+	iTranslate(PUSH,posx,posy,0);
+
+	while (font[i] != 0xff) {
+
+		switch (font[i]) {
+			case 0xf0: daku_flag = 1; break;
+			case 0xf1: daku_flag = 2; break;
+			case 0xfe: gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+					   iTranslate(PUSH,posx,posy-line*16,0);
+					   line++;
+					   break;
+
+			case 0x6e: 	iTranslate(PUSH,-2,-5,0);
+						DrawMessageTexture(0xf1);
+						gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+						break;
+
+/*space*2 */case 0xd0: iTranslate(NOPUSH,dot_tbl[0x9e]*2,0,0);
+						break;
+/* the */	case 0xd1: Draw8bitStrings(0);
+						break;
+/* you */	case 0xd2: Draw8bitStrings(1);
+						break;
+
+			case 0x9e: iTranslate(NOPUSH,dot_tbl[0x9e],0,0);
+						break;
+
+			default  :	DrawMessageTexture(font[i]);
+
+						if (daku_flag != 0) {					// DAKUTEN
+							iTranslate(PUSH,5,5,0);
+							DrawMessageTexture(0xf0 + (daku_flag-1));
+							gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+							daku_flag = 0;
+						}
+						iTranslate(NOPUSH,dot_tbl[font[i]],0,0);
+						break;
+		}
+
+		i++;
+	}
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+
+#elif CHINA
+
+static void Draw8bitStrings(char code)
+{
+        char i;
+        unsigned char str[][5] = {
+                { 03,    0x37,0x2b,0x28, },   //code 0 -->the
+                { 03,    0x3c,0x32,0x38, },   //code 1 -->you
+        };
+
+        for (i=0; i<str[code][0]; i++) {
+                DrawMessageTexture(str[code][i+1]);
+                iTranslate(NOPUSH,dot_tbl[str[code][i+1]],0,0);
+        }
+
+}
+
+extern void Draw8bitFont(short posx,short posy, unsigned char* font) 
+{
+	char daku_flag = 0;
+	int i = 0, idx = 0;
+	unsigned char line = 1, b1, b2;
+
+
+	iTranslate(PUSH,posx,posy,0);
+
+        while (font[i]!=0xff || font[i+1]!=0xff)
+        {
+            b1 = font[i];
+            b2 = font[i+1];
+            idx = ((unsigned short)b1)<<8 | b2 ;
+
+            switch (idx) {
+                case 0xfffe:  // new line
+                    gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+		    iTranslate(PUSH,posx,posy-line*18,0);
+		    line++;
+		    break;
+                case 0xfffd:  // 2 space
+                    iTranslate(NOPUSH,32,0,0);
+                    break;
+
+//TODO: English letters, remove eventually
+                case 0xfff0: daku_flag = 1; break;
+                case 0xfff1: daku_flag = 2; break;
+                case 0xff6e: iTranslate(PUSH,-2,-5,0);
+                             DrawMessageTexture(0xf1);
+                             gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+                             break;
+/*space*2 */    case 0xffd0: iTranslate(NOPUSH,dot_tbl[0x9e]*2,0,0);
+                             break;
+/* the */       case 0xffd1: Draw8bitStrings(0);
+                             break;
+/* you */       case 0xffd2: Draw8bitStrings(1);
+                             break;
+                case 0xff9e: iTranslate(NOPUSH,dot_tbl[0x9e],0,0);
+                             break;
+                default:
+                    if (idx>255)
+                    {
+                        idx = 2 * (idx-255) - 1 + 255;
+                                
+                        DrawMessageTexture_zh(idx);
+			iTranslate(NOPUSH, 8, 0, 0);
+                        DrawMessageTexture_zh(idx+1);
+			iTranslate(NOPUSH, 8, 0, 0);
+                     } else {  //TODO: english letters
+                        DrawMessageTexture(idx);
+                        if (daku_flag != 0) {
+  // DAKUTEN
+                            iTranslate(PUSH,5,5,0);
+                            DrawMessageTexture(0xf0 + (daku_flag-1));
+                            gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+                            daku_flag = 0;
+                        }
+                        iTranslate(NOPUSH,dot_tbl[idx],0,0);
+                     }
+                     break;
+            }
+            i += 2;
+        }
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+
+
+#else
+extern void Draw8bitFont(short posx,short posy, unsigned char* font) 
+{
+	char daku_flag = 0;
+	int i = 0;
+	unsigned char line = 1;
+
+
+	iTranslate(PUSH,posx,posy,0);
+
+	while (font[i] != 0xff) {
+
+		switch (font[i]) {
+			case 0xf0: daku_flag = 1; break;
+			case 0xf1: daku_flag = 2; break;
+			case 0xfe: gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+					   iTranslate(PUSH,posx,posy-line*18,0);
+					   line++;
+					   break;
+
+			case 0x6e: 	iTranslate(PUSH,-2,-5,0);
+						DrawMessageTexture(0xf1);
+						gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+						break;
+
+			case 0x9e: iTranslate(NOPUSH,5,0,0); break;
+						break;
+
+			default  :	DrawMessageTexture(font[i]);
+
+						if (daku_flag != 0) {					// DAKUTEN
+							iTranslate(PUSH,5,5,0);
+							DrawMessageTexture(0xf0 + (daku_flag-1));
+							gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+							daku_flag = 0;
+						}
+						iTranslate(NOPUSH,10,0,0);
+		}
+
+		i++;
+	}
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+#endif
+
+
+/*=================================================================================================
+							16 bit Font 
+
+===================================================================================================*/
+
+/********************************************************************************/
+/*	Draw 16 bits Font .	  														*/
+/********************************************************************************/
+#if CHINA
+extern void Draw16bitFont(char code,short posx,short posy, unsigned char* font)
+{
+
+        int i = 0;
+        unsigned short **texture  = (unsigned short**)SegmentToVirtual(Se_scenePtr);
+        unsigned short **texture2 = (unsigned short**)SegmentToVirtual(texDataPtr);
+        unsigned int posix = posx;
+        unsigned int posiy = posy;
+        unsigned int oft = 0;
+
+        while(font[i] != 0xff) {
+                switch (font[i]) {
+                        //case 0x9e: posix += 8; oft+=8; break;
+                        case 0xfe: posiy += 16; posix -= oft; break;
+
+                        default: 
+                            gDPPipeSync(graphPtr++);
+                            gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, texture2[font[i]]);
+                            //gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, texture2[0x19]);
+                            gSPDisplayList(graphPtr++, RCP_tfont2_main);
+                            gSPTextureRectangle(graphPtr++,( posix << 2), (posiy <<2), (posix+16 << 2), (posiy+16 << 2), 0, (0 << 5), (0 << 5), (1 << 10), (1 << 10)  );
+                            if (font[i] < 0x3a) {
+                                posix += 12;
+                                oft += 12;
+                            } else {
+                                posix += 16;
+                                oft += 16;
+                            }
+                }
+                i++;
+        }
+
+
+}
+
+#else
+extern void Draw16bitFont(char code,short posx,short posy, unsigned char* font) 
+{
+
+	int i = 0;
+	unsigned short **texture  = (unsigned short**)SegmentToVirtual(Se_scenePtr); 
+	unsigned short **texture2 = (unsigned short**)SegmentToVirtual(texDataPtr); 
+	unsigned int posix = posx;
+	unsigned int posiy = posy;
+	unsigned int oft;
+
+	if (code == 1) oft = 16;
+	else		   oft = 12;
+
+	while(font[i] != 0xff) {
+		switch (font[i]) {
+			case 0x9e: posix += 8; break;
+
+			default: gDPPipeSync(graphPtr++);
+					if (code == 1)	gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, texture[font[i]]);
+					if (code == 2)	gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, texture2[font[i]]);
+					gSPDisplayList(graphPtr++, RCP_tfont2_main);	
+					gSPTextureRectangle(graphPtr++,( posix << 2), (posiy << 2), (posix+16 << 2), (posiy+16 << 2), 0,
+									 (0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+					posix += oft;
+		}
+		i++;
+	}
+
+
+}
+#endif
+/*=================================================================================================
+							8*8 bit Font 
+
+===================================================================================================*/
+/********************************************************************************/
+/*	Draw 8 bit 8*8 Font .  														*/
+/********************************************************************************/
+/*
+#if CHINA
+extern void DrawS88Font(short posx,short posy, unsigned char* font) 
+{
+	char daku_flag = 0;
+	int i = 0;
+	unsigned int posix = posx;
+	unsigned int posiy = posy;
+	unsigned char **texture  = (unsigned char**)SegmentToVirtual(s88fontPtr); 
+
+	while(font[i] != 0xff) {
+		switch (font[i]) {
+			case 0x40: daku_flag = 1; break;
+			case 0x41: daku_flag = 2; break;
+			case 0x9e: posix += 4; break;
+
+			default  : g_Tani_LoadTextureImage2(graphPtr++, texture[font[i]],G_IM_FMT_IA , G_IM_SIZ_8b, 8, 8,0, 7);
+					   gSPTextureRectangle(graphPtr++,( posix << 2), (posiy << 2), (posix+8 << 2), (posiy+8 << 2), 0,
+						 								(0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+
+						if (daku_flag != 0) {					// DAKUTEN
+						   g_Tani_LoadTextureImage2(graphPtr++, texture[0x40 + (daku_flag-1)],G_IM_FMT_IA , G_IM_SIZ_8b, 8, 8,0, 7);
+						   gSPTextureRectangle(graphPtr++,( (posix+6) << 2), ((posiy-7) << 2), ((posix+6)+8 << 2), ((posiy-7)+8 << 2), 0,
+						 								(0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+							daku_flag = 0;
+						}
+						posix += dot_tbl[font[i]];
+		}
+
+		i++;
+	}
+
+
+}
+
+#else
+*/
+extern void DrawS88Font(short posx,short posy, unsigned char* font) 
+{
+	char daku_flag = 0;
+	int i = 0;
+	unsigned int posix = posx;
+	unsigned int posiy = posy;
+	unsigned char **texture  = (unsigned char**)SegmentToVirtual(s88fontPtr); 
+
+	while(font[i] != 0xff) {
+		switch (font[i]) {
+			case 0xf0: daku_flag = 1; break;
+			case 0xf1: daku_flag = 2; break;
+			case 0x9e: posix += 4; break;
+
+			default  : g_Tani_LoadTextureImage2(graphPtr++, texture[font[i]],G_IM_FMT_IA , G_IM_SIZ_8b, 8, 8,0, 7);
+					   gSPTextureRectangle(graphPtr++,( posix << 2), (posiy << 2), (posix+8 << 2), (posiy+8 << 2), 0,
+						 								(0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+
+						if (daku_flag != 0) {					// DAKUTEN
+						   g_Tani_LoadTextureImage2(graphPtr++, texture[0xf0 + (daku_flag-1)],G_IM_FMT_IA , G_IM_SIZ_8b, 8, 8,0, 7);
+						   gSPTextureRectangle(graphPtr++,( (posix+6) << 2), ((posiy-7) << 2), ((posix+6)+8 << 2), ((posiy-7)+8 << 2), 0,
+						 								(0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+							daku_flag = 0;
+						}
+#if ENGLISH 
+						posix += dot_tbl[font[i]];
+#else
+						posix += 9;
+#endif
+		}
+
+		i++;
+	}
+
+
+}
+//#endif
+
+
+/********************************************************************************/
+/*	Draw 8 bit 8*8 Font 16bit Color.  											*/
+/********************************************************************************/
+static void DrawS88ColFont(short posx,short posy, unsigned char* font) 
+{
+
+	int i = 0;
+	unsigned short **texture  = (unsigned short**)SegmentToVirtual(s88ColfontPtr); 
+	unsigned int posix = posx;
+	unsigned int posiy = posy;
+
+	gDPSetTile(graphPtr++, G_IM_FMT_RGBA,G_IM_SIZ_16b, 0, 0, 7, 0,  0,0,0, 0,0,0);
+    g_Tani_SetUpTileDescrip(graphPtr++, G_IM_FMT_RGBA,G_IM_SIZ_16b, 8, 8,  0, 0, G_TX_CLAMP|G_TX_NOMIRROR, 3, G_TX_NOLOD, G_TX_CLAMP|G_TX_NOMIRROR, 3, G_TX_NOLOD);
+
+	while(font[i] != 0xff) {
+	
+	switch (font[i]) {
+		case 0x9e :	posix += 4; break;
+
+		default :
+					gDPPipeSync(graphPtr++);
+					g_Tani_LoadTextureImage2(graphPtr++, texture[font[i]],G_IM_FMT_RGBA , G_IM_SIZ_16b, 8, 8,0, 7);
+					gSPTextureRectangle(graphPtr++,(posix<< 2), (posiy<< 2), (posix+8 << 2), (posiy+8 << 2), 0,
+						 								(0 << 5), (0 << 5),	 (1 << 10), (1 << 10)  );
+					posix += 7;
+					break;
+	}
+	i++;
+	}
+
+
+}
+
+
+@
+
+
+1.3
+log
+@seperated DrawMessageTexture for CHINA and ENGLISH build
+@
+text
+@d114 25
+d163 1
+d184 14
+d367 1
+a367 1
+                        DrawMessageTexture(idx);
+d369 1
+a369 1
+                        DrawMessageTexture(idx+1);
+d461 2
+a462 2
+                        case 0x9e: posix += 8; oft+=8; break;
+                        case 0xfe: posiy += 10; posix -= oft; break;
+d467 1
+d474 2
+a475 2
+                                posix += 10;
+                                oft += 10;
+@
+
+
+1.2
+log
+@added font drawing routines for 8x8, 16x16 Chinese font glyphs
+@
+text
+@d141 1
+a144 9
+#if ENGLISH
+	unsigned char **texture = (unsigned char**)SegmentToVirtual(MessTexDataPtr); 
+	unsigned char *tex = (unsigned char*)SegmentToVirtual(texture[num]); 
+
+	gDPPipeSync(graphPtr++);
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_IA, G_IM_SIZ_16b, 1, K0_TO_PHYS((u32)tex));
+	gSPDisplayList(graphPtr++, RCP_mess_font_main);	
+
+#elif CHINA
+d156 2
+a158 3
+	unsigned short **texture = (unsigned short**)SegmentToVirtual(MessTexDataPtr); 
+	unsigned short *tex = (unsigned short*)SegmentToVirtual(texture[num]); 
+	unsigned char* tex_data;
+d160 5
+a164 1
+	tex_data = ImageDefrost(tex,8,16);
+d166 13
+a178 3
+	gDPPipeSync(graphPtr++);
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_IA, G_IM_SIZ_8b, 1, K0_TO_PHYS((u32)tex_data));
+	gSPDisplayList(graphPtr++, RCP_mess_font_main);	
+d182 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d141 1
+a141 1
+extern void DrawMessageTexture(unsigned char num)
+d152 11
+d258 86
+d401 36
+d467 1
+d475 37
+d536 1
+a536 1
+#if ENGLISH
+d548 1
+a548 1
+
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

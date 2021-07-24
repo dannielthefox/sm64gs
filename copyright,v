@@ -1,0 +1,111 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.04.59;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.04.59;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@
+
+MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER M
+ARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MA
+RIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MAR
+IO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARI
+O 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO
+ 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 
+64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 6
+4  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64
+  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64 
+ SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  
+SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  S
+UPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SU
+PER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUP
+ER MARIO 64  SUP                                                                                 R MARIO 64  SUPE
+R MARIO 64  SUPE                                                                                  MARIO 64  SUPER
+ MARIO 64  SUPER                   TITLE OF THIS WORK : SUPER MARIO 64                           MARIO 64  SUPER 
+MARIO 64  SUPER                                                                                  ARIO 64  SUPER M
+ARIO 64  SUPER M                   NAME OF THE AUTHOR : NINTENDO CO., LTD                        RIO 64  SUPER MA
+RIO 64  SUPER MA                                                                                 IO 64  SUPER MAR
+IO 64  SUPER MAR           YEAR IN WHICH CREATION OF THIS GAME WAS COMPLETED : 1996              O 64  SUPER MARI
+O 64  SUPER MARI                                                                                  64  SUPER MARIO
+ 64  SUPER MARIO                                                                                 64  SUPER MARIO 
+64  SUPER MARIO             COPYRIGHT 1996 NINTENDO CO., LTD.  ALL RIGHTS RESERVED               4  SUPER MARIO 6
+4  SUPER MARIO 6                                                                                   SUPER MARIO 64
+  SUPER MARIO 64         PERIOD OF CREATION :                                                     SUPER MARIO 64 
+ SUPER MARIO 64             ORIGINAL PROGRAM : SEPTEMBER 7, 1994 --- MAY 20, 1996                SUPER MARIO 64  
+SUPER MARIO 64              VERSION UP (1.0) : JULY 15, 1996 --- JULY 29, 1996                   UPER MARIO 64  S
+UPER MARIO 64  S            VERSION UP (2.0) : JULY 15, 1996 --- JULY 29, 1996                   PER MARIO 64  SU
+PER MARIO 64  SU                                                                                 ER MARIO 64  SUP
+ER MARIO 64  SUP                                                                                 R MARIO 64  SUPE
+R MARIO 64  SUPE                       PROGRAMMER : YASUNARI NISHIDA                              MARIO 64  SUPER
+ MARIO 64  SUPER                                    YOSHINORI TANIMOTO                           MARIO 64  SUPER 
+MARIO 64  SUPER                                     HAJIME YAJIMA                                ARIO 64  SUPER M
+ARIO 64  SUPER M                                    DAIKI IWAMOTO                                RIO 64  SUPER MA
+RIO 64  SUPER MA                                    TOSHIO IWAWAKI                               IO 64  SUPER MAR
+IO 64  SUPER MAR                                    TAKUMI KAWAGOE                               O 64  SUPER MARI
+O 64  SUPER MARI                                    GILES GODDARD                                 64  SUPER MARIO
+ 64  SUPER MARIO                                    YOJI INAGAKI                                 64  SUPER MARIO 
+64  SUPER MARIO                                     HIDEAKI SHIMIZU                              4  SUPER MARIO 6
+4  SUPER MARIO 6                                    HIROHITO YOSHIMOTO                             SUPER MARIO 64
+  SUPER MARIO 64                                    HIROTO YADA                                   SUPER MARIO 64 
+ SUPER MARIO 64                                                                                  SUPER MARIO 64  
+SUPER MARIO 64                                                                                   UPER MARIO 64  S
+UPER MARIO 64  S                             VERSION 2.00                                        PER MARIO 64  SU
+PER MARIO 64  SU                                                                                 ER MARIO 64  SUP
+ER MARIO 64  SUP                                                                                 R MARIO 64  SUPE
+R MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER
+ MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER 
+MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER M
+ARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MA
+RIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MAR
+IO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARI
+O 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO
+ 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 
+64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 6
+4  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64
+  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64 
+ SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  
+SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  S
+UPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SU
+PER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUP
+ER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPER MARIO 64  SUPE
+
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

@@ -1,0 +1,452 @@
+head	1.3;
+access;
+symbols
+	iQue_20031010:1.3
+	iQue_release_master_1_0:1.3
+	iQue_08_21_03:1.2
+	iQue_beta_1_0:1.2;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2003.09.09.19.42.08;	author wheeler;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.03.09.01.27.41;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.03.09.00.10.49;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Fix "Time" texture
+@
+text
+@/***************************************************************************************************
+					Ultra64 Mario Damege Gauge
+
+					Programed by Iwamoto Daiki
+***************************************************************************************************/
+#include "headers.h"
+#include "include/iwa_select.h"
+
+#define COINPOS		168	
+#define STARPOS		242	
+#define GAUGEY		209	
+
+#define TIMEPOSX		170	
+#define TIMEPOSY		185	
+
+#define degree(x) 182.04444 * (x)
+
+/*----- Meter Struct -----*/
+typedef struct {
+	char	flag;
+	short	posx;
+	short	posy;
+	float	size;
+} MEter;
+
+MEter meter = {0,140,166,1};
+
+extern void iwa_LoadImatrix(void);
+extern Gfx RCP_damegemeter_base[];
+extern Gfx RCP_damegemeter_pow_on[];
+extern Gfx RCP_damegemeter_pow_off[];
+
+extern unsigned char MeterDataPtr[];
+
+static short be_dameter;
+static count = 0;
+static unsigned short offt = 0;
+static short len = 10;
+
+/***************************************************************************************************
+			Copy 16 bit
+****************************************************************************************************/
+extern void Copy16BitTexture(unsigned int posx,unsigned int posy, unsigned short* tex)
+{
+
+	gDPPipeSync(graphPtr++);
+	gDPSetTextureImage(graphPtr++,G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, tex);
+	gSPDisplayList(graphPtr++, RCP_tfont_main);	
+
+	gSPTextureRectangle(graphPtr++,( posx << 2), (posy << 2), (posx+15 << 2), (posy+15 << 2), 0,
+						 (0 << 5), (0 << 5),	 (4 << 10), (1 << 10)  );
+
+}
+/***************************************************************************************************
+			Copy 88 (16bit)
+****************************************************************************************************/
+extern void Copy88Texture(unsigned int posx,unsigned int posy, unsigned short* tex)
+{
+
+	gDPSetTile(graphPtr++, G_IM_FMT_RGBA,G_IM_SIZ_16b, 0, 0, 7, 0,  0,0,0, 0,0,0);
+
+    g_Tani_SetUpTileDescrip(graphPtr++, G_IM_FMT_RGBA,G_IM_SIZ_16b, 8, 8,  0, 0, G_TX_CLAMP|G_TX_NOMIRROR, 3, G_TX_NOLOD, G_TX_CLAMP|G_TX_NOMIRROR, 3, G_TX_NOLOD);
+	gDPPipeSync(graphPtr++);
+	g_Tani_LoadTextureImage2(graphPtr++, tex ,G_IM_FMT_RGBA , G_IM_SIZ_16b, 8, 8,0, 7);
+
+	gSPTextureRectangle(graphPtr++,( posx << 2), (posy << 2), (posx+7 << 2), (posy+7 << 2), 0,
+						 (0 << 5), (0 << 5),	 (4 << 10), (1 << 10)  );
+
+
+}
+/*==================================================================================================*/
+/***************************************************************************************************
+			Load Texture Image
+****************************************************************************************************/
+static void LoadGaugeTexture(short txtchar)
+{
+	unsigned short** texture = (unsigned short **)SegmentToVirtual(MeterDataPtr); 
+
+	gDPPipeSync(graphPtr++);
+	g_Tani_LoadTextureImage2(graphPtr++,texture[txtchar-1], G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 32, 0, 7);
+	gSP1Triangle(graphPtr++, 0, 1, 2, 0);
+	gSP1Triangle(graphPtr++, 0, 2, 3, 0);
+
+}
+/***************************************************************************************************
+			Draw Damege Gage
+****************************************************************************************************/
+static void DrawDamegeGage(short mario_damege)
+{
+	Mtx*  matrix; 
+
+	if ( (matrix = (Mtx *) AllocDynamic(sizeof(Mtx)) ) == NULL ) { rmonpf(("AllocDynamic error in message!!\n")); return;}
+
+	guTranslate(matrix,meter.posx,meter.posy,0);
+	gSPMatrix(graphPtr++,K0_TO_PHYS((u32) (matrix++)), G_MTX_MODELVIEW|G_MTX_MUL|G_MTX_PUSH);
+
+	gSPDisplayList(graphPtr++, RCP_damegemeter_base);	
+
+	if (mario_damege != 0) {
+		gSPDisplayList(graphPtr++, RCP_damegemeter_pow_on);	
+		LoadGaugeTexture(mario_damege);
+		gSPDisplayList(graphPtr++, RCP_damegemeter_pow_off);	
+	}
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+/***************************************************************************************************
+			Gage Open
+****************************************************************************************************/
+static void GaugeOpen(void)
+{
+	short flag = playerMeter.flags;	
+
+	if ((flag & 0x8000) == 0) {
+			
+		if (count == FRAMENUM*1.5) meter.flag = 2;
+	}
+	else count = 0;
+}
+/***************************************************************************************************
+			Gage Up
+****************************************************************************************************/
+static void GaugeUp(void)
+{
+	short speed;
+
+	speed = 5;
+	if (meter.posy > 180) speed = 3;
+	if (meter.posy > 190) speed = 2;
+	if (meter.posy > 195) speed = 1;
+
+	meter.posy += speed;
+
+	if (meter.posy > 200) {
+		meter.posy = 200;
+		meter.flag = 4;
+	}
+}
+/***************************************************************************************************
+			Gage Close
+****************************************************************************************************/
+static void GaugeClose(void)
+{
+
+	meter.posy += 20;
+
+	if (meter.posy > 300) {
+		meter.flag = 0;
+		count = 0;
+	}
+
+
+}
+/***************************************************************************************************
+			Damege Gauge Event
+****************************************************************************************************/
+static void DamegeStateCheck(short mario_damege)
+{
+
+	if (mario_damege < 8 && be_dameter == 8 && meter.flag == 0) {
+		 meter.flag = 1;
+		 meter.posy = 166;
+	}
+
+	if (mario_damege == 8 && be_dameter == 7) count = 0;
+	if (mario_damege == 8 && count > FRAMENUM*1.5 ) meter.flag = 3;
+
+	be_dameter = mario_damege;
+
+	if (camPlayerInfo[0].status & PS_TYPE_SWIM) {    //under water
+		if (meter.flag == 0 || meter.flag == 1) {
+			 meter.flag = 2;
+			 meter.posy = 166;
+		}
+		count = 0; 
+	}
+
+}
+/***************************************************************************************************
+			Damege Gauge Event
+****************************************************************************************************/
+static void DamegeGaugeEvent(void)
+{
+	short mario_damege = playerMeter.power;
+
+
+	if (meter.flag != 3) DamegeStateCheck(mario_damege);
+
+	if (meter.flag == 0) return;
+
+
+	switch (meter.flag) {
+		case 1:	GaugeOpen(); break;
+		case 2:	GaugeUp(); break;
+		case 3:	GaugeClose(); break;
+		default: break;
+
+	}
+
+
+	DrawDamegeGage(mario_damege);
+
+	count ++;
+}
+
+
+/*==================================================================================================*/
+
+/***************************************************************************************************
+			Player life
+****************************************************************************************************/
+static void PlayerLifeEvent(void)
+{
+
+	dmprintf(22,GAUGEY,",");   // player num
+	dmprintf(38,GAUGEY,"*");   
+	dprintf(54,GAUGEY,"%d",playerMeter.life );   
+}
+
+/***************************************************************************************************
+			Coin Number
+****************************************************************************************************/
+static void CoinNumBerEvent(void)
+{
+
+	dmprintf(COINPOS   ,GAUGEY,"+");  // coin num
+	dmprintf(COINPOS+16,GAUGEY,"*");  
+	 dprintf(COINPOS+30 ,GAUGEY,"%d",playerMeter.coin );  
+
+}
+/***************************************************************************************************
+			Star Number
+****************************************************************************************************/
+static void StarNumBerEvent(void)
+{
+	char st_flag = 0;
+
+	if (getStar_flag == 1 && (frameCounter & 0x000000008)) return;
+
+	if (playerMeter.star < 100) st_flag = 1;
+
+	dmprintf(STARPOS,GAUGEY,"-");  // star num
+	if (st_flag == 1) {dmprintf(STARPOS+16,GAUGEY,"*");  }
+	dprintf(STARPOS+16+14*st_flag,GAUGEY,"%d",playerMeter.star );  
+
+
+
+}
+
+/***************************************************************************************************
+			Key Number
+****************************************************************************************************/
+static void KeyNumBerEvent(void)
+{
+	short i;
+
+	for (i=0; i<playerMeter.key; i++) {
+		dmprintf(220+i*16,142,"/");  
+	}
+}
+/***************************************************************************************************
+			TIMER Event
+****************************************************************************************************/
+static void TimerEvent(void)
+{
+	unsigned short **texture  = (unsigned short**)SegmentToVirtual(texDataPtr); 
+	unsigned short time = playerMeter.timer;
+	unsigned short min;
+	unsigned short sec;
+	unsigned short dec;
+#if CHINA
+	unsigned char str[] = {0xc0, 0x00};  // "TIME"
+#endif
+	
+	min = (unsigned short) (time/1800);
+	sec = (unsigned short) ((time - min*1800)/30);
+	dec = (unsigned short) ((time - min*1800 - sec*30))/3;
+
+#if CHINA
+	dcprintf(TIMEPOSX     ,TIMEPOSY, str);
+#else
+	dmprintf(TIMEPOSX     ,TIMEPOSY,"TIME");
+#endif
+	dprintf(TIMEPOSX+59  ,TIMEPOSY,"%0d",(int)min);
+	dprintf(TIMEPOSX+79  ,TIMEPOSY,"%02d",(int)sec);
+	dprintf(TIMEPOSX+113 ,TIMEPOSY,"%d",(int)dec);
+
+	gSPDisplayList(graphPtr++, RCP_tfont_on);	
+	Copy16BitTexture(TIMEPOSX+69 ,32, texture[0x38]);
+	Copy16BitTexture(TIMEPOSX+104,32, texture[0x39]);
+	gSPDisplayList(graphPtr++, RCP_tfont_off);	
+
+
+}
+/*==================================================================================================*/
+
+/*==================================================================================================*/
+/*			Camera Icon Event																		*/
+/*==================================================================================================*/
+
+#define CAMERA_ICON		0
+#define MARIO_ICON		1
+#define JUGEM_ICON		2
+#define STOP_ICON		3
+#define UP_ICON			4
+#define DOWN_ICON		5
+
+static short camIconFlag = 0;
+
+/***************************************************************************************************
+			Camera Icon Set
+****************************************************************************************************/
+extern void CameraIconSet(short flag)
+{
+	camIconFlag = flag;
+
+}
+/***************************************************************************************************
+			Gauge Event
+****************************************************************************************************/
+extern void CameraIconEvent(void)
+{
+	unsigned short **texture  = (unsigned short**)SegmentToVirtual(camIconPtr); 
+	unsigned int posix = 266;
+	unsigned int posiy = 205;
+
+	if (camIconFlag == 0) return;
+
+	gSPDisplayList(graphPtr++, RCP_tfont_on);	
+
+	Copy16BitTexture(posix,posiy,texture[CAMERA_ICON]);
+
+	switch (camIconFlag & 0x0007) { 
+		case CAMICON_MARIO: Copy16BitTexture(posix+16,posiy,texture[MARIO_ICON]);
+				   			break;
+		case CAMICON_JUGEM: Copy16BitTexture(posix+16,posiy,texture[JUGEM_ICON]);
+				   			break;
+		case CAMICON_STOP: 	Copy16BitTexture(posix+16,posiy,texture[STOP_ICON]);
+				   			break;
+	}
+
+
+	switch (camIconFlag & 0x0018) { 
+		case CAMICON_LONG:	Copy88Texture(posix+4,posiy+16,texture[DOWN_ICON]);
+							break;
+		case CAMICON_UP:	Copy88Texture(posix+4,posiy-8,texture[UP_ICON]);
+							break;
+	}
+
+	gSPDisplayList(graphPtr++, RCP_tfont_off);	
+
+
+}
+
+
+/*==================================================================================================*/
+
+/***************************************************************************************************
+			Gauge Event
+****************************************************************************************************/
+extern void MeterGaugeEvent(void)
+{
+	short flags = playerMeter.flags;
+
+	if (flags == 0) {
+		meter.flag = 0;
+		be_dameter = 8;
+		count = 0;
+	}
+	else {
+		MakeSelectProjection(); 
+
+		if (snSceneInfo != NULL && snSceneInfo->camera->mode == CAM_CANNON)	{
+			CannonSightEvent();
+		}
+
+		if (flags & METER_LIFE) PlayerLifeEvent();
+		if (flags & METER_COIN) CoinNumBerEvent();
+		if (flags & METER_STAR) StarNumBerEvent();
+		if (flags & METER_KEY) KeyNumBerEvent();
+		if (flags & METER_POWER) {
+			DamegeGaugeEvent();
+			CameraIconEvent();
+		}
+		if (flags & METER_TIMER) TimerEvent();
+	}
+
+}
+
+
+
+@
+
+
+1.2
+log
+@incorporated iQue's texture, modified encoding for 8bit font glyph.
+@
+text
+@d273 1
+a273 1
+	unsigned short str[1] = {0xc0};  // "TIME"
+@
+
+
+1.1
+log
+@more source code from Nintendo.
+@
+text
+@d272 3
+d280 3
+d284 1
+@
+

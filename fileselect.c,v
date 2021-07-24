@@ -1,0 +1,1168 @@
+head	1.2;
+access;
+symbols
+	iQue_20031010:1.2
+	iQue_release_master_1_0:1.2
+	iQue_08_21_03:1.2
+	iQue_beta_1_0:1.2
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2002.12.19.23.42.40;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@added #if CHINA for menus items and pause screens
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+						File Select Stage Strategy & main
+
+			Copyright 1995 Nintendo co., ltd.  All rights reserved
+
+							December 28, 1995
+ ********************************************************************************/
+
+#include "headers.h"
+#include "include/iwa_select.h"
+
+#define state_flag stw_work0
+#define counter    stw_work1
+#define str_x      stw_work2
+#define str_y      stw_work3
+#define str_z      stw_work4
+#define str_scale  stw_work5
+#define bu_mode    s[stw_work6].d
+#define SCALE		6.0
+
+
+static StrategyRecord* buttonData[32];
+
+static char  selectNo =  -1;
+#if CHINA
+static char  pageNo = 0;
+#endif
+static char  Floor = 1;
+static unsigned char alpha_value = 0;    // Font Alpha Value
+
+static float cursol_pos[2] = {0,0};
+static short cursol_flag = 0;
+static short cursol_ptr[2] = {-10000,-10000};
+
+extern unsigned long e_button1[];
+extern unsigned long e_itest2[];
+
+static char  click_file = -1;
+static char  click_flag = 0;
+static char  click_mess = 0;
+static unsigned char  click_alpha = 0;
+static short  click_counter = 0;
+static char sound_flag = 0;					// 0->STEREO  1->MONORAL  2->HEADPHON
+
+static unsigned char blink_alpha[2];
+static char yesNo_flag = 0;				//1--> Yes  2--> No
+static char fileFlow_flag = 0;
+static char goTogame = 0;
+
+static char score_flag = 0;		// MYSCORE HISCORE ChangeFlag
+
+/*==============================================================================*/
+/*	Button Strategy.															*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	stop.														*/
+/********************************************************************************/
+extern void s_istop_init()
+{
+
+	execstp->s[stw_animeangleY].d = 0x8000;
+	execstp->s[str_scale].f = 9;
+}
+extern void s_istop_main()
+{
+	s_set_scale(9.0);
+
+}
+
+/*------------------------------------------------------------------------------*/
+/*	Button1.																	*/
+/*------------------------------------------------------------------------------*/
+/********************************************************************************/
+/*	Button Click Check.														*/
+/********************************************************************************/
+static char ButtonClickCheck(short posx,short posy,float offt)
+{
+	float ans = 52.4213;
+	float orthoX = ((160.*(float)(posx))/(ans*offt));
+	float orthoY = ((120.*(float)(posy))/((ans*3/4)*offt));
+	short maxX = orthoX + 25;
+	short minX = orthoX - 25;
+	short maxY = orthoY + 21;
+	short minY = orthoY - 21;
+
+//	rmonpf(("x %f\n",  orthoX));
+//	rmonpf(("y %f\n\n",orthoY));
+	
+	if ((cursol_ptr[0]<maxX && cursol_ptr[0]>minX) && (cursol_ptr[1]<maxY && cursol_ptr[1]>minY)) {
+		return(1);
+	} 
+
+	return(0);
+}
+/********************************************************************************/
+/*	Button Click Event 1.			(end is 16 Frame)							*/
+/********************************************************************************/
+static void ClickButtonEvent1(StrategyRecord* execstp)
+{
+
+/*-------------- Angle Y-----------------------*/
+	if ((execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleY].d) += 0x800; 
+
+/*-------------- Angle X-----------------------*/
+	if ((execstp->s[counter].d) < 0x8) 									  (execstp->s[stw_animeangleX].d) += 0x800;
+	if ((execstp->s[counter].d) >= 0x8 && (execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleX].d) -= 0x800;
+
+
+/*-------------- Move -----------------------*/
+	execstp->s[stw_skeletonX].f -= (execstp->s[str_x].f/16.);
+
+	execstp->s[stw_skeletonY].f -= (execstp->s[str_y].f/16.);
+
+	if (execstp->s[stw_worldZ].f < (execstp->s[str_z].f + 17800.0)) {
+		execstp->s[stw_skeletonZ].f += 1112.5;
+	}
+
+
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 16) ) {
+		execstp->s[stw_skeletonX].f = 0;
+		execstp->s[stw_skeletonY].f = 0;
+		execstp->s[state_flag].d = 2;
+		execstp->s[counter].d = 0;
+	}
+
+}
+/****************************************************************************************************/
+/*	Button Click Cancel 1.			(end is 16 Frame)							                    */
+/***************************************************************************************************/
+static void ClickButtonCancel1(StrategyRecord* execstp)
+{
+
+
+/*-------------- Angle Y-----------------------*/
+	if ((execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleY].d) -= 0x800; 
+
+/*-------------- Angle X-----------------------*/
+	if ((execstp->s[counter].d) < 0x8) 									  (execstp->s[stw_animeangleX].d) -= 0x800;
+	if ((execstp->s[counter].d) >= 0x8 && (execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleX].d) += 0x800;
+
+
+/*-------------- Move -----------------------*/
+	execstp->s[stw_skeletonX].f += execstp->s[str_x].f/16.;
+
+	execstp->s[stw_skeletonY].f += execstp->s[str_y].f/16.;
+
+	if (execstp->s[stw_worldZ].f > execstp->s[str_z].f) {
+		execstp->s[stw_skeletonZ].f -= 1112.5;
+	}
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 16) ) {
+		execstp->s[stw_skeletonX].f = execstp->s[str_x].f;
+		execstp->s[stw_skeletonY].f = execstp->s[str_y].f;
+		execstp->s[state_flag].d = 0;
+		execstp->s[counter].d = 0;
+	}
+
+}
+
+
+/********************************************************************************/
+/*	Button Click Event 2.			(end is 16 Frame)							*/
+/********************************************************************************/
+static void ClickButtonEvent2(StrategyRecord* execstp)
+{
+
+/*-------------- Angle Y-----------------------*/
+	if ((execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleY].d) += 0x800; 
+
+/*-------------- Angle X-----------------------*/
+	if ((execstp->s[counter].d) < 0x8) 									  (execstp->s[stw_animeangleX].d) += 0x800;
+	if ((execstp->s[counter].d) >= 0x8 && (execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleX].d) -= 0x800;
+
+
+/*-------------- Move -----------------------*/
+	execstp->s[stw_skeletonX].f -= (execstp->s[str_x].f/16.);
+	execstp->s[stw_skeletonY].f -= (execstp->s[str_y].f/16.);
+
+	execstp->s[stw_skeletonZ].f -= 116.25;		// oya tono kyori 1860
+
+
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 16) ) {
+		execstp->s[stw_skeletonX].f = 0;
+		execstp->s[stw_skeletonY].f = 0;
+		execstp->s[state_flag].d = 2;
+		execstp->s[counter].d = 0;
+	}
+
+}
+/****************************************************************************************************/
+/*	Button Click Cancel 2.														                    */
+/***************************************************************************************************/
+static void ClickButtonCancel2(StrategyRecord* execstp)
+{
+
+
+/*-------------- Angle Y-----------------------*/
+	if ((execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleY].d) -= 0x800; 
+
+/*-------------- Angle X-----------------------*/
+	if ((execstp->s[counter].d) < 0x8) 									  (execstp->s[stw_animeangleX].d) -= 0x800;
+	if ((execstp->s[counter].d) >= 0x8 && (execstp->s[counter].d) < 0x10) (execstp->s[stw_animeangleX].d) += 0x800;
+
+
+/*-------------- Move -----------------------*/
+	execstp->s[stw_skeletonX].f += (execstp->s[str_x].f/16.);
+	execstp->s[stw_skeletonY].f += (execstp->s[str_y].f/16.);
+
+	if (execstp->s[stw_worldZ].f > execstp->s[str_z].f) {
+		execstp->s[stw_skeletonZ].f += 116.25;  //1860
+	}
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 16) ) {
+		execstp->s[stw_skeletonX].f = execstp->s[str_x].f;
+		execstp->s[stw_skeletonY].f = execstp->s[str_y].f;
+		execstp->s[state_flag].d = 0;
+		execstp->s[counter].d = 0;
+	}
+
+}
+
+/****************************************************************************************************/
+/*	Button Push Event.														                    */
+/***************************************************************************************************/
+static void PushButtonEvent(StrategyRecord* execstp)
+{
+	if (Floor == 1) {	
+		if (execstp->s[counter].d <  4) execstp->s[stw_skeletonZ].f -= 20;
+		if (execstp->s[counter].d >= 4) execstp->s[stw_skeletonZ].f += 20;
+	} else {
+		if (execstp->s[counter].d <  4) execstp->s[stw_skeletonZ].f += 20;
+		if (execstp->s[counter].d >= 4) execstp->s[stw_skeletonZ].f -= 20;
+	}
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 8) ) {
+		execstp->s[state_flag].d = 0;
+		execstp->s[counter].d = 0;
+	}
+
+
+}
+/****************************************************************************************************/
+/*	Button Zoom Up Event.														                    */
+/***************************************************************************************************/
+static void ButtonZoomUpEvent(StrategyRecord* execstp)
+{
+	execstp->s[str_scale].f += 0.0022;
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 10) ) {
+		execstp->s[state_flag].d = 0;
+		execstp->s[counter].d = 0;
+	}
+
+}
+/****************************************************************************************************/
+/*	Button Zoom Down Event.														                    */
+/***************************************************************************************************/
+static void ButtonZoomDownEvent(StrategyRecord* execstp)
+{
+	execstp->s[str_scale].f -= 0.0022;
+
+	(execstp->s[counter].d)++;
+
+	if ((execstp->s[counter].d == 10) ) {
+		execstp->s[state_flag].d = 0;
+		execstp->s[counter].d = 0;
+	}
+
+}
+/********************************************************************************/
+/*	Button1 Initaraize .														*/
+/********************************************************************************/
+extern void s_button_init()
+{
+	execstp->s[str_x].f = execstp->s[stw_skeletonX].f;
+	execstp->s[str_y].f = execstp->s[stw_skeletonY].f;
+
+}
+/********************************************************************************/
+/*	Button1 main .														        */
+/********************************************************************************/
+extern void s_buttonMove()
+{
+
+	switch (execstp->s[state_flag].d) {
+		case 0: execstp->s[str_z].f = execstp->s[stw_worldZ].f;
+				break;
+
+		case 1: if (Floor == 1) ClickButtonEvent1(execstp);
+				if (Floor == 2) ClickButtonEvent2(execstp);
+				alpha_value = 0;
+				cursol_flag = 4;
+				break;
+
+		case 2: break;
+
+		case 3: if (Floor == 1) ClickButtonCancel1(execstp);
+				if (Floor == 2) ClickButtonCancel2(execstp);
+				alpha_value = 0;
+				cursol_flag = 4;
+				break;
+
+		case 4:	PushButtonEvent(execstp);
+				cursol_flag = 4;
+				break;
+		case 5:	ButtonZoomUpEvent(execstp);
+				cursol_flag = 4;
+				break;
+		case 6:	ButtonZoomDownEvent(execstp);
+				cursol_flag = 4;
+				break;
+	}
+
+/*	if ( obj_timer == 10 ){
+		rmonpf(("%d,%f,%f,%f\n",execstp->s[stw_flag].d,obj_worldX,obj_worldY,obj_worldZ ));
+
+	}
+*/
+
+	s_set_scale(execstp->s[str_scale].f);
+
+}
+
+
+/*------------------------------------------------------------------------------*/
+/*	FileSelect.																	*/
+/*------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------*/
+/*	File Score Scene															*/
+/*------------------------------------------------------------------------------*/
+/********************************************************************************/
+/*	Watch Score															        */
+/********************************************************************************/
+static void WatchFileScore(StrategyRecord* buttonPtr,char back_scene) 
+{
+	
+	 if (buttonPtr->s[state_flag].d == 2) {
+		if (cursol_flag == 2) {
+			Na_FixSeFlagEntry(NA_SYS_ZOOM_OUT);
+			SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+			buttonPtr->s[state_flag].d = 3;
+		}
+	}
+
+ 	if (buttonPtr->s[state_flag].d == 0) {
+		selectNo = back_scene;
+		if (Floor == 2) Floor = 1;
+	}
+}
+
+/********************************************************************************/
+/*	File Select Score Initalize											        */
+/********************************************************************************/
+static void ScoreScene_init(StrategyRecord* execstp) 
+{
+
+	if (BuIsActive(0) == 1) buttonData[ 7] = s_makeobj_relative(execstp,S_bg01,e_button1,  6400/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	else					buttonData[ 7] = s_makeobj_relative(execstp,S_bg07,e_button1,  6400/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[ 7]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(1) == 1) buttonData[ 8] = s_makeobj_relative(execstp,S_bg01,e_button1, -1500/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[ 8] = s_makeobj_relative(execstp,S_bg07,e_button1, -1500/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[ 8]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(2) == 1) buttonData[ 9] = s_makeobj_relative(execstp,S_bg01,e_button1,  6400/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[ 9] = s_makeobj_relative(execstp,S_bg07,e_button1,  6400/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[ 9]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(3) == 1) buttonData[10] = s_makeobj_relative(execstp,S_bg01,e_button1, -1500/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[10] = s_makeobj_relative(execstp,S_bg07,e_button1, -1500/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[10]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[11] = s_makeobj_relative(execstp,S_bg04,e_button1 , 6400/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[11]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[12] = s_makeobj_relative(execstp,S_bg03,e_button1,    0/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[12]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[13] = s_makeobj_relative(execstp,S_bg02,e_button1, -6400/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[13]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+
+}
+/********************************************************************************/
+/*	FileSelct Score														        */
+/********************************************************************************/
+static void FileScoreScene(StrategyRecord* buttonPtr) 
+{
+	int i;
+
+	if (buttonPtr->s[state_flag].d == 2) {
+		for(i=7; i<14; i++) {
+			short posx = (short)buttonData[i]->s[stw_worldX].f;
+			short posy = (short)buttonData[i]->s[stw_worldY].f;
+
+			if(ButtonClickCheck(posx,posy,22.) == 1 && click_counter > 30) {
+				if (i==11 || i==12 || i==13) {
+					Na_FixSeFlagEntry(NA_SYS_CLICK);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+					buttonData[i]->s[state_flag].d = 4; 
+					selectNo = i;
+				}
+				else if (click_counter > 30){
+					if (BuIsActive(i-7) == 1 ) {
+						Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+						SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+						buttonData[i]->s[state_flag].d = 1;
+						selectNo = i;
+					}
+					else  {
+						Na_FixSeFlagEntry(NA_SYS_BUZZER);
+						SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+						buttonData[i]->s[state_flag].d = 4; 
+						if (click_counter > 30) {click_flag = 1; click_counter = 0;}
+					}
+				}
+				Floor = 2;
+				break;
+			}
+		}
+	}
+
+
+}
+/*------------------------------------------------------------------------------*/
+/*	File Copy Scene Scene														*/
+/*------------------------------------------------------------------------------*/
+
+/********************************************************************************/
+/*	File Select Copy Initalize											        */
+/********************************************************************************/
+static void CopyScene_init(StrategyRecord* execstp) 
+{
+
+	if (BuIsActive(0) == 1) buttonData[14] = s_makeobj_relative(execstp,S_bg01,e_button1,  6400/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	else					buttonData[14] = s_makeobj_relative(execstp,S_bg07,e_button1,  6400/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[14]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(1) == 1) buttonData[15] = s_makeobj_relative(execstp,S_bg01,e_button1, -1500/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	else					buttonData[15] = s_makeobj_relative(execstp,S_bg07,e_button1, -1500/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[15]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(2) == 1) buttonData[16] = s_makeobj_relative(execstp,S_bg01,e_button1,  6400/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	else					buttonData[16] = s_makeobj_relative(execstp,S_bg07,e_button1,  6400/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[16]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(3) == 1) buttonData[17] = s_makeobj_relative(execstp,S_bg01,e_button1, -1500/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	else					buttonData[17] = s_makeobj_relative(execstp,S_bg07,e_button1, -1500/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[17]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[18] = s_makeobj_relative(execstp,S_bg04,e_button1,  6400/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[18]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[19] = s_makeobj_relative(execstp,S_bg05,e_button1,    0/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[19]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[20] = s_makeobj_relative(execstp,S_bg02,e_button1, -6400/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[20]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+
+}
+/********************************************************************************/
+/*	File Copy Event														        */
+/********************************************************************************/
+static void FileCopyButtonEvent(StrategyRecord* buttonPtr,int buNo) 
+{
+	switch (buttonPtr->bu_mode) {
+
+		case 0:	if (fileFlow_flag == 1) return;
+
+				if (BuIsActive(buNo-14) == 1) {
+					Na_FixSeFlagEntry(NA_SYS_CLICK);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+
+					buttonData[buNo]->s[state_flag].d = 5;
+					click_file = (buNo-14);
+					buttonPtr->bu_mode = 1;
+					click_flag = 1;
+					click_counter = 0;
+				}
+				else {
+					Na_FixSeFlagEntry(NA_SYS_BUZZER);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+					buttonData[buNo]->s[state_flag].d = 4;
+					if (click_counter > 20) {click_flag = 1; click_counter = 0;}
+				}
+				break;
+
+		 case 1:  
+				buttonData[buNo]->s[state_flag].d = 4;
+				if (BuIsActive(buNo-14) == 0) {
+					Na_FixSeFlagEntry(NA_SE2_SET);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+					buttonPtr->bu_mode = 2;
+					click_flag = 1;
+					click_counter = 0;
+					BuCopyStorage(click_file,buNo-14);   					//Main Copy Function
+					buttonData[buNo]->map.shape = stageShapes[S_bg06];  	//Change Shape 
+					buttonData[buNo-14]->map.shape = stageShapes[S_bg06];  	//Change Shape 
+				}
+				else {
+					if (buNo == (click_file+14)) {
+						Na_FixSeFlagEntry(NA_SYS_BUZZER);
+						SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+						buttonData[click_file+14]->s[state_flag].d = 6;
+						buttonPtr->bu_mode = 0;
+						click_flag = 1;
+						return;
+					}
+
+					if (click_counter > 20) {click_flag = 1; click_counter = 0;}
+				}
+				break;
+
+	}
+
+}
+/********************************************************************************/
+/*	File Copy Scene														        */
+/********************************************************************************/
+static void FileCopyScene(StrategyRecord* buttonPtr) 
+{
+	int i;
+
+	if (buttonPtr->s[state_flag].d == 2) {
+		for(i=14; i<21; i++) {
+			short posx = (short)buttonData[i]->s[stw_worldX].f;
+			short posy = (short)buttonData[i]->s[stw_worldY].f;
+
+			if(ButtonClickCheck(posx,posy,22.) == 1) {
+				if (i==18 || i==19 || i==20){
+					if (buttonPtr->bu_mode == 0) {
+						Na_FixSeFlagEntry(NA_SYS_CLICK);
+						SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+						buttonData[i]->s[state_flag].d = 4; 
+						selectNo = i;
+					}
+				}
+				else {
+					 if (buttonData[i]->s[state_flag].d == 0 && click_counter > 30) 
+							 {FileCopyButtonEvent(buttonPtr,i);}
+				}
+				Floor = 2;
+				break;
+			}
+		}
+
+		if (buttonPtr->bu_mode == 2) {
+				if (click_counter > 30) {
+					buttonPtr->bu_mode = 0;
+					buttonData[click_file+14]->s[state_flag].d = 6;
+				}
+		}
+
+	}
+
+//	rmonpf(("z->%f,scale->%f\n",buttonData[14]->s[stw_worldZ].f,buttonData[14]->s[str_scale].f));
+
+}
+/*------------------------------------------------------------------------------*/
+/*	File Remove Score Scene														*/
+/*------------------------------------------------------------------------------*/
+
+/********************************************************************************/
+/*	File Remove Select Initalize										        */
+/********************************************************************************/
+static void RemoveScene_init(StrategyRecord* execstp) 
+{
+
+	if (BuIsActive(0) == 1) buttonData[21] = s_makeobj_relative(execstp,S_bg01,e_button1,  6400/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[21] = s_makeobj_relative(execstp,S_bg07,e_button1,  6400/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[21]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(1) == 1) buttonData[22] = s_makeobj_relative(execstp,S_bg01,e_button1, -1500/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[22] = s_makeobj_relative(execstp,S_bg07,e_button1, -1500/(SCALE*1.5), 2800/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[22]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(2) == 1) buttonData[23] = s_makeobj_relative(execstp,S_bg01,e_button1,  6400/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[23] = s_makeobj_relative(execstp,S_bg07,e_button1,  6400/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[23]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	if (BuIsActive(3) == 1) buttonData[24] = s_makeobj_relative(execstp,S_bg01,e_button1, -1500/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	else						 buttonData[24] = s_makeobj_relative(execstp,S_bg07,e_button1, -1500/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[24]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[25] = s_makeobj_relative(execstp,S_bg04,e_button1,  6400/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[25]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[26] = s_makeobj_relative(execstp,S_bg05,e_button1,     0/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[26]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[27] = s_makeobj_relative(execstp,S_bg03,e_button1, -6400/(SCALE*1.5),-3500/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[27]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+
+}
+/********************************************************************************/
+/*	File Remove Event													        */
+/********************************************************************************/
+static void FileRemoveButtonEvent(StrategyRecord* buttonPtr,int buNo) 
+{
+	switch (buttonPtr->bu_mode) {
+
+		case 0:	if (BuIsActive(buNo-21) == 1) {
+					Na_FixSeFlagEntry(NA_SYS_CLICK);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+					buttonData[buNo]->s[state_flag].d = 5;
+					click_file = (buNo-21);
+					buttonPtr->bu_mode = 1;
+					click_flag = 1;
+					click_counter = 0;
+				}
+				else {
+					Na_FixSeFlagEntry(NA_SYS_BUZZER);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+					buttonData[buNo]->s[state_flag].d = 4;
+					if (click_counter > 20) {click_flag = 1; click_counter = 0;}
+				}
+				break;
+
+		 case 1:				  
+				if (buNo == (click_file+21)) {
+					Na_FixSeFlagEntry(NA_SYS_CLICK);
+					SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+					buttonData[click_file+21]->s[state_flag].d = 6;
+					buttonPtr->bu_mode = 0;
+					click_flag = 1;
+				}
+				break;
+	}
+
+
+
+}
+/********************************************************************************/
+/*	FileSelct Remove														        */
+/********************************************************************************/
+static void FileRemoveScene(StrategyRecord* buttonPtr) 
+{
+	int i;
+
+	if (buttonPtr->s[state_flag].d == 2) {
+		for(i=21; i<28; i++) {
+			short posx = (short)buttonData[i]->s[stw_worldX].f;
+			short posy = (short)buttonData[i]->s[stw_worldY].f;
+
+			if(ButtonClickCheck(posx,posy,22.) == 1) {
+				if (i==25 || i==26 || i==27){
+					if (buttonPtr->bu_mode == 0) {
+						Na_FixSeFlagEntry(NA_SYS_CLICK);
+						SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+						buttonData[i]->s[state_flag].d = 4; 
+						selectNo = i;
+					}
+				}
+				else	 if( click_counter > 30) FileRemoveButtonEvent(buttonPtr,i);
+				Floor = 2;
+				break;
+			}
+		}
+
+		if (buttonPtr->bu_mode == 2) {
+				if (click_counter > 30) {
+					buttonPtr->bu_mode = 0;
+					buttonData[click_file+21]->s[state_flag].d = 6;
+				}
+		}
+
+	}
+
+}
+
+
+
+
+
+
+
+/*------------------------------------------------------------------------------*/
+/*	Sound Select Scene														*/
+/*------------------------------------------------------------------------------*/
+
+/********************************************************************************/
+/*	Sound Select Scene Initalize										        */
+/********************************************************************************/
+static void SoundScene_init(StrategyRecord* execstp) 
+{
+
+	buttonData[29] = s_makeobj_relative(execstp,S_bg10,e_button1,  4800/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[29]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[30] = s_makeobj_relative(execstp,S_bg10,e_button1,     0/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[30]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+	buttonData[31] = s_makeobj_relative(execstp,S_bg10,e_button1, -4800/(SCALE*1.5),    0/(SCALE*1.5), -100,0,0x8000,0);
+	buttonData[31]->s[str_scale].f = 1.0/(SCALE*1.5);
+
+
+	buttonData[29+sound_flag]->s[state_flag].d = 5;
+
+}
+/********************************************************************************/
+/*	Sound Selct Scene													        */
+/********************************************************************************/
+static void SoundSelectScene(StrategyRecord* buttonPtr) 
+{
+	int i;
+
+	if (buttonPtr->s[state_flag].d == 2) {
+		for(i=29; i<32; i++) {
+			short posx = (short)buttonData[i]->s[stw_worldX].f;
+			short posy = (short)buttonData[i]->s[stw_worldY].f;
+
+			if(ButtonClickCheck(posx,posy,22.) == 1) {
+				if (i==29 || i==30 || i==31){
+					if (buttonPtr->bu_mode == 0) {
+						Na_FixSeFlagEntry(NA_SYS_CLICK);
+						SendMotorEvent(5,80);		/* MOTOR 1997.6.3 */
+
+						buttonData[i]->s[state_flag].d = 4; 
+						selectNo = i;
+						sound_flag = (i - 29);
+						BuSetSoundMode(sound_flag);
+					}
+				}
+				Floor = 2;
+				break;
+			}
+		}
+
+
+	}
+
+}
+
+
+
+
+
+
+
+/*==============================================================================================*/
+
+/********************************************************************************/
+/*	Go To Game																    */
+/********************************************************************************/
+static void GoToGame(StrategyRecord* buttonPtr,int buNo) 
+{
+	
+	if (buttonPtr->s[state_flag].d == 2) {
+		goTogame = buNo;
+	}
+
+
+}
+/********************************************************************************/
+/*	Go To File Select														    */
+/********************************************************************************/
+static void GoToFileSelect(short buttonNo,StrategyRecord* clickPtr) 
+{
+	int i;
+
+	if (clickPtr->s[state_flag].d == 0 && buttonData[buttonNo]->s[state_flag].d == 2) {
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_OUT);
+		buttonData[buttonNo]->s[state_flag].d = 3;
+		Floor = 1;
+	}
+
+
+	if (buttonData[buttonNo]->s[state_flag].d == 0) {
+		selectNo = -1;
+		if (buttonNo ==  4) {for (i= 7; i<14; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo ==  5) {for (i=14; i<21; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo ==  6) {for (i=21; i<28; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 28) {for (i=29; i<32; i++) RemoveShape(buttonData[i]);}
+	}
+		
+
+}
+/********************************************************************************/
+/*	Go To File Score														    */
+/********************************************************************************/
+static void GoToFileScore(short buttonNo,StrategyRecord* clickPtr) 
+{
+	int i;
+
+	if (clickPtr->s[state_flag].d == 0 && buttonData[buttonNo]->s[state_flag].d == 2) {
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_OUT);
+		buttonData[buttonNo]->s[state_flag].d = 3;
+		Floor = 1;
+	}
+
+
+	if (buttonData[buttonNo]->s[state_flag].d == 0) {
+		if (buttonNo == 4) {for (i= 7; i<14; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 5) {for (i=14; i<21; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 6) {for (i=21; i<28; i++) RemoveShape(buttonData[i]);}
+		selectNo = 4;
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+		buttonData[4]->s[state_flag].d = 1;
+		ScoreScene_init (buttonData[4]);
+	}
+}
+/********************************************************************************/
+/*	Go To File Copy														    */
+/********************************************************************************/
+static void GoToFileCopy(short buttonNo,StrategyRecord* clickPtr) 
+{
+	int i;
+
+	if (clickPtr->s[state_flag].d == 0 && buttonData[buttonNo]->s[state_flag].d == 2) {
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_OUT);
+		buttonData[buttonNo]->s[state_flag].d = 3;
+		Floor = 1;
+	}
+
+
+	if (buttonData[buttonNo]->s[state_flag].d == 0) {
+		if (buttonNo == 4) {for (i= 7; i<14; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 5) {for (i=14; i<21; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 6) {for (i=21; i<28; i++) RemoveShape(buttonData[i]);}
+		selectNo = 5;
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+		buttonData[5]->s[state_flag].d = 1;
+		CopyScene_init (buttonData[5]);
+	}
+}
+/********************************************************************************/
+/*	Go To File Remove														    */
+/********************************************************************************/
+static void GoToFileRemove(short buttonNo,StrategyRecord* clickPtr) 
+{
+	int i;
+
+	if (clickPtr->s[state_flag].d == 0 && buttonData[buttonNo]->s[state_flag].d == 2) {
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_OUT);
+		buttonData[buttonNo]->s[state_flag].d = 3;
+		Floor = 1;
+	}
+
+
+	if (buttonData[buttonNo]->s[state_flag].d == 0) {
+		if (buttonNo == 4) {for (i= 7; i<14; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 5) {for (i=14; i<21; i++) RemoveShape(buttonData[i]);}
+		if (buttonNo == 6) {for (i=21; i<28; i++) RemoveShape(buttonData[i]);}
+		selectNo = 6;
+		Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+		buttonData[6]->s[state_flag].d = 1;
+		RemoveScene_init (buttonData[6]);
+	}
+}
+
+/*------------------------------------------------------------------------------*/
+/*	FileSelect.																	*/
+/*------------------------------------------------------------------------------*/
+/********************************************************************************/
+/*	FileSelct Init														        */
+/********************************************************************************/
+extern void s_fileSelect_init() {
+
+	
+
+	if (BuIsActive(0) == 1) buttonData[0] = s_makeobj_relative(execstp,S_bg06,e_button1,-6400,  2800,0,0,0,0);
+	else						 buttonData[0] = s_makeobj_relative(execstp,S_bg08,e_button1,-6400,  2800,0,0,0,0);
+	buttonData[0] ->s[str_scale].f = 1.0;
+
+	if (BuIsActive(1) == 1) buttonData[1] = s_makeobj_relative(execstp,S_bg06,e_button1, 1500,  2800,0,0,0,0);
+	else						 buttonData[1] = s_makeobj_relative(execstp,S_bg08,e_button1, 1500,  2800,0,0,0,0);
+	buttonData[1] ->s[str_scale].f = 1.0;
+
+	if (BuIsActive(2) == 1) buttonData[2] = s_makeobj_relative(execstp,S_bg06,e_button1,-6400,     0,0,0,0,0);
+	else						 buttonData[2] = s_makeobj_relative(execstp,S_bg08,e_button1,-6400,     0,0,0,0,0);
+	buttonData[2] ->s[str_scale].f = 1.0;
+
+	if (BuIsActive(3) == 1) buttonData[3] = s_makeobj_relative(execstp,S_bg06,e_button1, 1500,     0,0,0,0,0);
+	else						 buttonData[3] = s_makeobj_relative(execstp,S_bg08,e_button1, 1500,     0,0,0,0,0);
+	buttonData[3] ->s[str_scale].f = 1.0;
+
+
+
+	buttonData[4] = s_makeobj_relative(execstp,S_bg05,e_button1, -6400, -3500,0,0,0,0);
+	buttonData[4] ->s[str_scale].f = 1.0;
+
+	buttonData[5] = s_makeobj_relative(execstp,S_bg03,e_button1, -2134, -3500,0,0,0,0);
+	buttonData[5] ->s[str_scale].f = 1.0;
+
+	buttonData[6] = s_makeobj_relative(execstp,S_bg02,e_button1,  2134, -3500,0,0,0,0);
+	buttonData[6] ->s[str_scale].f = 1.0;
+
+	buttonData[28] = s_makeobj_relative(execstp,S_bg09,e_button1, 6400, -3500,0,0,0,0);
+	buttonData[28] ->s[str_scale].f = 1.0;
+
+	alpha_value = 0;
+
+}
+/********************************************************************************/
+/*	FileSelct Scene														        */
+/********************************************************************************/
+static void FileSelectScene(void) 
+{
+
+	char i;
+
+	/*---- Sound ----*/
+	if(ButtonClickCheck((short)buttonData[28]->s[stw_worldX].f,(short)buttonData[28]->s[stw_worldY].f,200.) == 1) {
+		buttonData[28]->s[state_flag].d = 1;
+		selectNo = 28;
+	}
+	else {
+		for(i=0; i<7; i++) {
+			short posx = (short)buttonData[i]->s[stw_worldX].f;
+			short posy = (short)buttonData[i]->s[stw_worldY].f;
+
+			if(ButtonClickCheck(posx,posy,200.) == 1) {
+				buttonData[i]->s[state_flag].d = 1;
+				selectNo = i;
+				break;
+			}
+		}
+	}
+
+	switch(selectNo) {  /*------------- select Initialize -------------------*/
+		case  0: Na_FixSeFlagEntry(NA_SYS_FILE_SELECT);
+				 SendMotorEvent(60,70);		/* MOTOR 1997.6.5 */
+				 SendMotorDecay(1);			/* MOTOR 1997.6.5 */
+				 break;
+
+		case  1: Na_FixSeFlagEntry(NA_SYS_FILE_SELECT);
+				 SendMotorEvent(60,70);		/* MOTOR 1997.6.5 */
+				 SendMotorDecay(1);			/* MOTOR 1997.6.5 */
+				 break;
+
+		case  2: Na_FixSeFlagEntry(NA_SYS_FILE_SELECT);
+				 SendMotorEvent(60,70);		/* MOTOR 1997.6.5 */
+				 SendMotorDecay(1);			/* MOTOR 1997.6.5 */
+				 break;
+
+		case  3: Na_FixSeFlagEntry(NA_SYS_FILE_SELECT);
+				 SendMotorEvent(60,70);		/* MOTOR 1997.6.5 */
+				 SendMotorDecay(1);			/* MOTOR 1997.6.5 */
+				 break;
+
+		case  4: Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+				 SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+				 ScoreScene_init(buttonData[4]);
+				 break;
+
+		case  5: Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+				 SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+				 CopyScene_init(buttonData[5]);
+				 break;
+
+		case  6: Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+				 SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+				 RemoveScene_init(buttonData[6]);
+				 break;
+
+		case 28: Na_FixSeFlagEntry(NA_SYS_ZOOM_IN);
+				 SendMotorEvent(5,80);		/* MOTOR 1997.6.5 */
+				 SoundScene_init(buttonData[28]);
+				 break;
+	}
+}
+
+
+
+/********************************************************************************/
+/*	FileSelct Stage														        */
+/********************************************************************************/
+extern void s_fileSelect() {
+
+	switch(selectNo) {
+		case -1: 	FileSelectScene(); break;
+		case  0:	GoToGame	   (buttonData[0],1); break;
+		case  1:	GoToGame   	   (buttonData[1],2); break;
+		case  2:	GoToGame   	   (buttonData[2],3); break;
+		case  3:	GoToGame	   (buttonData[3],4); break;
+		case  4:	FileScoreScene (buttonData[4]); break;
+		case  5:	FileCopyScene  (buttonData[5]); break;
+		case  6:	FileRemoveScene(buttonData[6]); break;
+
+		case  7:	WatchFileScore(buttonData[ 7],4); break;
+		case  8:	WatchFileScore(buttonData[ 8],4); break;
+		case  9:	WatchFileScore(buttonData[ 9],4); break;
+		case 10:	WatchFileScore(buttonData[10],4); break;
+		case 11:	GoToFileSelect(4,buttonData[11]); break;
+		case 12:	GoToFileCopy(4,buttonData[12]);   break;
+		case 13:	GoToFileRemove(4,buttonData[13]); break;
+
+		case 14:	break;
+		case 15:	break;
+		case 16:	break;
+		case 17:	break;
+		case 18:	GoToFileSelect(5,buttonData[18]); break;
+		case 19:	GoToFileScore(5,buttonData[19]); break;
+		case 20:	GoToFileRemove(5,buttonData[20]);break;
+
+		case 21:	break;
+		case 22:	break;
+		case 23:	break;
+		case 24:	break;
+		case 25:	GoToFileSelect(6,buttonData[25]);break;
+		case 26:	GoToFileScore(6,buttonData[26]); break;
+		case 27:	GoToFileCopy(6,buttonData[27]);  break;
+
+		case 28:	SoundSelectScene(buttonData[28]);  break;
+		case 29:	GoToFileSelect(28,buttonData[29]); break;
+		case 30:	GoToFileSelect(28,buttonData[30]); break;
+		case 31:	GoToFileSelect(28,buttonData[31]); break;
+	}
+
+	cursol_ptr[0] = -10000;
+	cursol_ptr[1] = -10000;
+
+//	dprintf(20,100,"select %d",selectNo);
+
+
+}
+
+/*------------------------------------------------------------------------------*/
+
+#include "selectmess.c"
+
+
+/*==============================================================================*/
+/*	File Select Init.															*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Select main Init.															*/
+/********************************************************************************/
+extern ulong
+SeSelectInitProcess(short code, long param)
+{
+	selectNo =  -1;
+	Floor = 1;
+	alpha_value = 0;    // Font Alpha Value
+
+	switch (activePlayerNo) {
+		case 1: cursol_pos[0]=-94.;
+				cursol_pos[1]= 46.;
+				break;
+		case 2: cursol_pos[0]= 24.;
+				cursol_pos[1]= 46.;
+				break;
+		case 3: cursol_pos[0]=-94.;
+				cursol_pos[1]=  5.;
+				break;
+		case 4: cursol_pos[0]= 24.;
+				cursol_pos[1]=  5.;
+				break;
+	}
+
+	cursol_ptr[0] = -10000;
+	cursol_ptr[1] = -10000;
+	cursol_flag = 0;
+
+	goTogame = 0;
+
+	click_file = -1;
+	click_flag = 0;
+	click_mess = 0;
+	click_alpha = 0;
+	click_counter = 0;
+
+	yesNo_flag = 0;
+
+	sound_flag = (char) BuGetSoundMode();
+
+}
+
+/*==============================================================================*/
+/*	File Select Main.															*/
+/*==============================================================================*/
+/********************************************************************************/
+/*	Select main process.															*/
+/********************************************************************************/
+extern ulong
+SeSelectProcess(short code, long param)
+{
+
+	SnExecuteStrategy();
+
+	return((ulong)goTogame);
+}
+
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d27 3
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

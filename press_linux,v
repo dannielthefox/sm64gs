@@ -1,0 +1,77 @@
+head	1.3;
+access;
+symbols
+	iQue_20031010:1.3
+	iQue_release_master_1_0:1.3
+	iQue_08_21_03:1.3
+	iQue_beta_1_0:1.3
+	LINUX_PORT:1.3;
+locks; strict;
+comment	@# @;
+expand	@b@;
+
+
+1.3
+date	2002.11.09.03.06.07;	author blythe;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.11.09.03.00.15;	author blythe;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.30.07.49.52;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@comment out old call to dataasm_linux
+@
+text
+@#! /bin/csh -f
+mips-linux-gcc -fno-pic -mcpu=4300 -nostdinc -I$ROOT/usr/include -I$ROOT/usr/include/PR -O -c -Dyj -S -o `basename $1.s` $1.c
+if ($status) then
+exit 1
+endif
+#./dataasm_linux $1 $2
+./mydataasm_linux $1 $2
+if($status)then
+exit 1
+endif
+./slienc_linux $1.bin
+if($status)then
+exit 1
+endif
+rm $1.bin
+rm `basename $1.s`
+       exit 0
+@
+
+
+1.2
+log
+@use mydatasm_linux
+@
+text
+@d6 1
+a6 1
+./dataasm_linux $1 $2
+@
+
+
+1.1
+log
+@linux build files.
+@
+text
+@d7 1
+@
+

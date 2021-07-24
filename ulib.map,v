@@ -1,0 +1,119 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	iQue_20031010:1.1.1.1
+	iQue_release_master_1_0:1.1.1.1
+	iQue_08_21_03:1.1.1.1
+	iQue_beta_1_0:1.1.1.1
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.04;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@		LINK EDITOR MEMORY MAP
+
+
+output		input		virtual
+section		section		address		size
+
+.MIPS.options                          0              28
+		.MIPS.options          0              28 *ld_internal*
+
+.reginfo                               0              18
+		.reginfo               0              18 *ld_internal*
+
+.text                                  0            a580
+		.text                  0            22c0 math.o
+		.text               22c0            1250 hierarchy.o
+		.text               3510            10d0 maplang.o
+		.text               45e0            1f30 seqlang.o
+		.text               6510            1550 bgcheck.o
+		.text               7a60            13a0 bgdecode.o
+		.text               8e00            1780 path.o
+
+.rodata                                0             2a0
+		.rodata                0              50 math.o
+		.rodata               50              90 seqlang.o
+		.rodata               e0              70 bgcheck.o
+		.rodata              150             140 bgdecode.o
+		.rodata              290              10 path.o
+
+.data                                  0            5b00
+		.data                  0              70 math.o
+		.data                 70            5810 mathtbl.o
+		.data               5880              90 maplang.o
+		.data               5910             110 seqlang.o
+		.data               5a20              e0 path.o
+
+.bss                                   0            3260
+		.bss                   0              10 math.o
+		.bss                  10             100 maplang.o
+		.bss                 110              90 seqlang.o
+		.bss                 1a0              60 bgcheck.o
+		.bss                 200            3050 bgdecode.o
+		.bss                3250              10 path.o
+
+.strtab                                0             b6f
+		.strtab                0             b6f *ld_internal*
+
+.symtab                                0             d60
+		.symtab                0             d60 *ld_internal*
+
+.mdebug                                0            b468
+		.mdebug                0            b468 *ld_internal*
+
+.rel.text                              0            3650
+		.rel.text              0             400 math.o
+		.rel.text            400             308 hierarchy.o
+		.rel.text            708             a20 maplang.o
+		.rel.text           1128            12e0 seqlang.o
+		.rel.text           2408             3b0 bgcheck.o
+		.rel.text           27b8             488 bgdecode.o
+		.rel.text           2c40             a10 path.o
+
+.rel.rodata                            0             208
+		.rel.rodata            0              28 math.o
+		.rel.rodata           28              90 seqlang.o
+		.rel.rodata           b8             150 bgdecode.o
+
+.rel.data                              0             4b8
+		.rel.data              0             108 maplang.o
+		.rel.data            108             1f0 seqlang.o
+		.rel.data            2f8             1c0 path.o
+
+.shstrtab                              0              73
+		.shstrtab              0              73 *ld_internal*
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@

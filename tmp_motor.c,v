@@ -1,0 +1,53 @@
+head	1.1;
+access;
+symbols
+	iQue_20031010:1.1
+	iQue_release_master_1_0:1.1
+	iQue_08_21_03:1.1
+	iQue_beta_1_0:1.1
+	LINUX_PORT:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.10.30.21.10.05;	author blythe;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@add osInitialize, osMotor compatibility functions for older .o's
+@
+text
+@#include <ultra64.h>
+#undef osMotorStart
+#undef osMotorStop
+
+s32
+osMotorStart(OSPfs *x) {
+	__osMotorAccess((x), MOTOR_START);
+}
+
+s32
+osMotorStop(OSPfs *x) {
+	__osMotorAccess((x), MOTOR_STOP);
+}
+
+static void
+__initialize(void) {
+	osInitialize();
+}
+
+#undef osInitialize
+
+void
+osInitialize(void) {
+	__initialize();
+}
+@

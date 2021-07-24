@@ -1,0 +1,1174 @@
+head	1.1;
+access;
+symbols
+	iQue_20031010:1.1
+	iQue_release_master_1_0:1.1
+	iQue_08_21_03:1.1
+	iQue_beta_1_0:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.12.10.02.34.26;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@new source code from nintendo.
+@
+text
+@/********************************************************************************
+						Ultra 64 MARIO Brothers
+
+							  game module
+
+			Copyright 1996 Nintendo co., ltd.  All rights reserved
+
+						   June 24, 1996
+ ********************************************************************************/
+
+#include "headers.h"
+#include "include/ending.h"
+
+
+#define GM_NORMAL		0
+#define	GM_GAMEOVER		1
+#define	GM_PAUSE		2
+#define	GM_FREEZE		3
+#define	GM_EXIT			4
+#define	GM_STILL		5
+
+#define	CHANGE_STAGE	1
+#define	CHANGE_SCENE	2
+#define	CHANGE_PORT		3
+
+#define	ANGLE180	0x8000
+
+MeterRecord	 playerMeter;					/* player meter record				*/
+PlayerRecord playerWorks[1];				/* player control work				*/
+PlayerPtr	 marioWorks = &playerWorks[0];	/* pointer to the mario works		*/
+
+static short		gameProcess;			/* game process number				*/
+static short		gameCounter;			/* allpurpose counter				*/
+static short		freezeCounter;			/* game freezing counter			*/
+static FreezeProc	freezeProcedure;		/* pointer to the freezeing proce	*/
+
+
+static EntrantRecord playerEntry;			/* player entry work				*/
+static short		 gameExitCode;			/* game routine exit code			*/
+
+static short		fadeoutMode;			/* scene fade mode					*/
+static short		fadeoutCount;			/* scene fade counter				*/
+static short		fadeoutPort;			/* scene fade trip port number		*/ 
+static ulong		fadeoutInfo;			/* scene fade aux information		*/ 
+
+
+static short		currentCourse = 0;
+static short		messageNo;
+static char			stopWatchSw;
+static char			middlePointSw = 0;
+
+char mesgCastle;
+
+static void ExecuteGame(short *counter);
+
+
+
+
+
+/********************************************************************************/
+/*																				*/
+/*	Control stop watch.															*/
+/*																				*/
+/********************************************************************************/
+extern ushort
+GmStopWatch(int mode)
+{
+	switch (mode) {
+		case 0:	setflag(playerMeter.flags, METER_TIMER);
+				stopWatchSw		  = FALSE;
+				playerMeter.timer = 0;
+				break;
+
+		case 1: stopWatchSw = TRUE;
+				break;
+
+		case 2: stopWatchSw = FALSE;
+				break;
+
+		case 3: clrflag(playerMeter.flags, METER_TIMER);
+				stopWatchSw		  = FALSE;
+				playerMeter.timer = 0;
+				break;
+	}
+	return(playerMeter.timer);
+}
+
+
+
+
+
+
+/********************************************************************************/
+/*	Check pause request.														*/
+/********************************************************************************/
+static int
+CheckPauseRequest(void)
+{
+	int DispMesg = (GetMessageNo() >= 0);
+	int demoMode = ((marioWorks->status & PS_TYPE_DEMO) != 0);
+
+	if (!(demoMode || DispMesg || wipeControl.active || fadeoutMode)) {
+		if (cont1p->trigger & CONT_START)  return(TRUE);
+	}
+	return(FALSE);
+}
+/********************************************************************************/
+/*	Change game process.														*/
+/********************************************************************************/
+static void
+ChangeProcess(short proc)
+{
+	gameProcess = proc;
+	gameCounter = 0;
+}
+/********************************************************************************/
+/*	Change game process.														*/
+/********************************************************************************/
+static void
+ChangeExitMode(int code)
+{
+	gameProcess  = GM_EXIT;
+	gameCounter  = 0;
+	gameExitCode = code;
+}
+/********************************************************************************/
+/*	Exit game mode.																*/
+/********************************************************************************/
+extern void
+PL_ExitGameMode(int code, int color)
+{
+	if (color != 0)  color = 255;
+
+	AudStopMusic(AudFadeOutTime(16+8));
+	SnStartFader(WIPE_FADE_OUT, 16, color, color, color);
+//	FreezeGame(15, NULL);
+	FreezeGame(30, NULL);
+	ChangeExitMode(code);
+}
+/********************************************************************************/
+/*	Check player's reset request.												*/
+/********************************************************************************/
+static void
+CheckReset(void)
+{
+#if DEVELOP
+	if (!wipeControl.active && (cont1p->status == (CONT_BACK | CONT_XL | CONT_XR | CONT_START)) && (cont1p->trigger & CONT_START)) {
+		MessageEnforcedDestroy();
+		if (sysDebugFlag	)  PL_ExitGameMode(PL_RETURN_SELECT, 1);
+						 else  PL_ExitGameMode(PL_RETURN_TITLE , 0);
+	}
+#endif
+}
+/********************************************************************************/
+/*																				*/
+/*	Display message.															*/
+/*																				*/
+/********************************************************************************/
+extern void
+PL_DisplayMessage(int mesgno)
+{
+	int condition;
+	int message = snSceneInfo->message[mesgno];
+
+	switch (message) {
+		case 129: condition = BuGetItemFlag() & BU_ITEM_BLUESW;						break;
+		case 130: condition = BuGetItemFlag() & BU_ITEM_GREENSW;					break;
+		case 131: condition = BuGetItemFlag() & BU_ITEM_REDSW;						break;
+		case 255: condition = 1;													break;
+		 default: condition = BuGetStarFlag(activePlayerNo-1, activeCourseNo-1);	break;
+	}
+	if (condition == 0) {
+		FreezeGame(-1,NULL);
+		CallMessage(message);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *		scene chnage rotuines
+ *
+ */
+
+/********************************************************************************/
+/*	Move player to front of door.												*/
+/********************************************************************************/
+static void
+MoveToFrontDoor(ActorPtr actor, ulong auxinfo)
+{
+	if (auxinfo & 2)  actor->angle[_AY] += ANGLE180;
+
+	actor->position[_AX] += 300.0f * sin(actor->angle[_AY]);
+	actor->position[_AZ] += 300.0f * cos(actor->angle[_AY]);
+}
+/********************************************************************************/
+/*	Change to special cap.														*/
+/********************************************************************************/
+static void
+ChangeSpecialCap(PlayerPtr player)
+{
+	int index = activeCourseNo - 20;
+
+	switch (index) {
+		case 0: setflag(player->flags, PL_FLAG_HEADCAP|PL_FLAG_METALCAP);  player->special =  600;		break;
+		case 1: setflag(player->flags, PL_FLAG_HEADCAP|PL_FLAG_WINGCAP );  player->special = 1200;		break;
+		case 2: setflag(player->flags, PL_FLAG_HEADCAP|PL_FLAG_GHOSTCAP);  player->special =  600;		break;
+	}
+}
+/********************************************************************************/
+/*	Changle port.																*/
+/********************************************************************************/
+static void
+ChangeStatus(PlayerPtr player, int type, ulong auxinfo)
+{
+	switch (type) {
+		case SN_TRIP_DOOR		: PL_ChangePlayerStatus(player, PS_TRIPDOOR  , auxinfo);		break;
+		case SN_TRIP_STAR		: PL_ChangePlayerStatus(player, PS_WAITING   ,		 0);		break; 
+		case SN_TRIP_CHIMNEY	: PL_ChangePlayerStatus(player, PS_CHIMNEY   ,		 0);		break;
+		case SN_WARP_POINT		: PL_ChangePlayerStatus(player, PS_WARPOUT   ,		 0);		break;
+		case SN_ENTER_WAITING	: PL_ChangePlayerStatus(player, PS_WAITING   ,		 0);		break;
+		case SN_ENTER_LANDING	: PL_ChangePlayerStatus(player, PS_LANDENTER ,		 0);		break;
+		case SN_ENTER_FALLING	: PL_ChangePlayerStatus(player, PS_JBACKDOWN ,		 0);		break;
+		case SN_ENTER_ROLLING	: PL_ChangePlayerStatus(player, PS_ROLLJUMP  ,		 0);		break;
+		case SN_ENTER_DOWNING	: PL_ChangePlayerStatus(player, PS_DOWNLOSER ,		 0);		break;
+		case SN_ENTER_PICTURE	: PL_ChangePlayerStatus(player, PS_ROLLJUMP  ,		 0);		break;
+		case SN_ENTER_FLIGHT	: PL_ChangePlayerStatus(player, PS_FLIGHT    ,		 2);		break;
+		case SN_ENTER_SWIMMING	: PL_ChangePlayerStatus(player, PS_SWIMNWAIT ,		 1);		break;
+		case SN_ENTER_WINNER	: PL_ChangePlayerStatus(player, PS_ENTWINNER ,		 0);		break;
+		case SN_ENTER_LOSER		: PL_ChangePlayerStatus(player, PS_ENTLOSER  ,		 0);		break;
+		case SN_ENTER_LANDWINNER: PL_ChangePlayerStatus(player, PS_LNDWINNER ,		 0);		break;
+		case SN_ENTER_LANDLOSER	: PL_ChangePlayerStatus(player, PS_LANDLOSER ,		 0);		break;
+		case SN_ENTER_PUSHOUT	: PL_ChangePlayerStatus(player, PS_PUSHOUT   ,		 0);		break;
+		case SN_ENTER_PUSHDOWN	: PL_ChangePlayerStatus(player, PS_PUSHDOWN  ,		 0);		break;
+	}
+	ChangeSpecialCap(player);
+}
+/********************************************************************************/
+/*	Changle port.																*/
+/********************************************************************************/
+static void
+ChangePort(void)
+{
+	PortPtr port = SnGetPortPtr(playerEntry.port);
+	int		type = SnGetPortType(port->stratp);
+
+
+	if (marioWorks->status != PS_INACTIVE) {
+
+		starringActor[0].position[_AX] = (short)port->stratp->s[stw_worldX].f;
+		starringActor[0].position[_AY] = (short)port->stratp->s[stw_worldY].f;
+		starringActor[0].position[_AZ] = (short)port->stratp->s[stw_worldZ].f;
+
+		starringActor[0].angle[_AX] = 0;
+		starringActor[0].angle[_AY] = port->stratp->s[stw_angleY].d;
+		starringActor[0].angle[_AZ] = 0;
+
+		if (type == SN_TRIP_DOOR)  MoveToFrontDoor(&starringActor[0], playerEntry.auxinfo);
+
+		if (playerEntry.type == CHANGE_STAGE || playerEntry.type == CHANGE_SCENE) {
+			starringActor[0].sceneNo = playerEntry.scene;
+			SnEnterPlayer();
+		}
+		InitPlayer();
+		ChangeStatus(marioWorks, type, playerEntry.auxinfo);
+		marioWorks->collide = port->stratp;
+		marioWorks->couple  = port->stratp;
+	}
+	InitGameCamera(snSceneInfo->camera);
+	playerEntry.type = 0;
+	fadeoutMode		 = 0;
+
+	switch (type) {
+		case SN_TRIP_CHIMNEY   : SnStartFader(WIPE_STAR_WIN_OPEN  , 16,  0,  0,  0);	break;
+		case SN_TRIP_DOOR	   : SnStartFader(WIPE_CIRCLE_WIN_OPEN, 16,  0,  0,  0);	break;
+		case SN_WARP_POINT	   : SnStartFader(WIPE_FADE_IN		  , 20,255,255,255);	break;
+		case SN_ENTER_PICTURE  : SnStartFader(WIPE_FADE_IN		  , 26,255,255,255);	break;
+		case SN_ENTER_ROLLING  : SnStartFader(WIPE_CIRCLE_WIN_OPEN, 16,  0,  0,  0);	break;
+		case SN_ENTER_STAFFROLL: SnStartFader(WIPE_FADE_IN		  , 16,  0,  0,  0);	break;
+		default				   : SnStartFader(WIPE_STAR_WIN_OPEN  , 16,  0,  0,  0);	break;
+	}
+	if (autoDemoPtr == NULL) {
+		AudPlayMusic(snSceneInfo->audmode, snSceneInfo->musicno, 0);
+		if (marioWorks->flags &  PL_FLAG_METALCAP				  )  AudPlaySpecialMusic(NA_METAL_BGM );
+		if (marioWorks->flags & (PL_FLAG_GHOSTCAP|PL_FLAG_WINGCAP))  AudPlaySpecialMusic(NA_MUTEKI_BGM);
+
+		if (activeStageNo == 9 && AudGetPlayingMusic() != NA_RACE_BGM && stopWatchSw) {
+			Na_MusicStart(NA_MUS_HANDLE, NA_RACE_BGM, 0);
+		}
+		if (playerEntry.stage == 6 && playerEntry.scene == 1 && (playerEntry.port == 31 || playerEntry.port == 32)) {
+			Na_FixSeFlagEntry(NA_SYS_RETURN_CASTLE);
+		}
+		if (playerEntry.stage == 16 && playerEntry.scene == 1) {
+			if (playerEntry.port == 7 || playerEntry.port == 10 || playerEntry.port == 20 || playerEntry.port == 30) {
+				Na_FixSeFlagEntry(NA_SYS_RETURN_CASTLE);
+			}
+		}
+	}
+}
+/********************************************************************************/
+/*	Changle scene.																*/
+/********************************************************************************/
+static void
+ChangeScene(void)
+{
+	if (playerEntry.type != 0) {
+		if (playerEntry.type == CHANGE_SCENE) {
+			GmHideTimer();
+			SnExitPlayer();
+			SnOpenScene(playerEntry.scene);
+		}
+		ChangePort();
+	}
+}
+/********************************************************************************/
+/*	Changle stage.																*/
+/********************************************************************************/
+static void
+ChangeStage(void)
+{
+	activeStageNo = playerEntry.stage;
+	GmHideTimer();
+	SnOpenScene(playerEntry.scene);
+	ChangePort();
+}
+/********************************************************************************/
+/*	Changle ending stage.														*/
+/********************************************************************************/
+static void
+ChangeEndingStage(void)
+{
+	ulong status;
+
+
+	switch (playerEntry.port) {
+		case PORT_START_ENDING: status = PS_ENTENDING;	break;
+		case PORT_STAFF_ROLL  : status = PS_STAFFROLL;	break;
+		case PORT_FIN_ENDING  : status = PS_FINGAME;	break;
+	}
+	activeStageNo = playerEntry.stage;
+	SnOpenScene(playerEntry.scene);
+
+	SetSVector(starringActor[0].position, snEndingScene->posx, snEndingScene->posy, snEndingScene->posz);
+	SetSVector(starringActor[0].angle, 0, snEndingScene->angle << 8, 0);
+
+	starringActor[0].sceneNo = playerEntry.scene;
+	SnEnterPlayer();
+	InitPlayer();
+	PL_ChangePlayerStatus(marioWorks, status, 0);
+	InitGameCamera(snSceneInfo->camera);
+	playerEntry.type = 0;
+	fadeoutMode		 = 0;
+
+	SnStartFader(WIPE_FADE_IN, 20, 0, 0, 0);
+	if (snEndingScene == NULL || snEndingScene == endingSceneList)  AudPlayMusic(snSceneInfo->audmode, snSceneInfo->musicno, 0);
+}
+/********************************************************************************/
+/*	Do scene connecttion.														*/
+/********************************************************************************/
+static void
+CheckSceneConnection(void)
+{
+	short		panning;
+	BGCheckData	*plane;
+
+	if (activeStageNo == 6 && BuGetTotalStars(activePlayerNo-1) >= 70)  return;
+
+	if((plane = marioWorks->grPlane) != NULL) {
+		int number = plane->BGattr - 27;
+
+		if (0 <= number && number <= 3 && snSceneInfo->connect != NULL) {
+			ConnectPtr connect = &snSceneInfo->connect[number];
+
+			if (connect->flags) {
+				marioWorks->position[_AX]			 += (float)connect->offset[_AX];
+				marioWorks->position[_AY]			 += (float)connect->offset[_AY];
+				marioWorks->position[_AZ]			 += (float)connect->offset[_AZ];
+				marioWorks->strategy->s[stw_worldX].f = marioWorks->position[_AX];
+				marioWorks->strategy->s[stw_worldY].f = marioWorks->position[_AY];
+				marioWorks->strategy->s[stw_worldZ].f = marioWorks->position[_AZ];
+
+				panning = marioWorks->sceneinf->camera->panning;
+				SnChangeScene(connect->scene);
+				marioWorks->sceneinf = snSceneInfo;
+				Crou_camBlockofs((float)connect->offset[_AX], (float)connect->offset[_AY], (float)connect->offset[_AZ]);
+				marioWorks->sceneinf->camera->panning = panning;	/* for BUG */
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *		Stage exit rotuines
+ *
+ */
+
+/********************************************************************************/
+/*	Set player entrant record.													*/
+/********************************************************************************/
+static int
+CheckSameMusic(short portno)
+{
+	PortPtr port   = SnGetPortPtr(portno);
+	short   stage  = port->stage & 0x7f;
+	short	scene  = port->scene;
+	short	result = TRUE;
+
+	if (stage == 9 && stage == activeStageNo && scene == activeSceneNo) {
+		short music = AudGetPlayingMusic();
+
+		if (music == NA_NOKO_SLIP_BGM || music == NA_MUTEKI_BGM)  result = FALSE;
+	}
+	else {
+		ushort	mode   = stageScenes[scene].audmode;
+		ushort	music  = stageScenes[scene].musicno;
+
+		result = (stage == activeStageNo && mode == snSceneInfo->audmode && music == snSceneInfo->musicno);
+		if (AudGetPlayingMusic() != music)  result = FALSE;
+	}
+	return(result);
+}
+/********************************************************************************/
+/*	Set player entrant record.													*/
+/********************************************************************************/
+static void
+SetPlayerEntrant(short stage, short scene, short port, ulong auxinfo)
+{
+	if		(port  >= PORT_START_ENDING	  )  playerEntry.type = CHANGE_STAGE;
+	else if	(stage != activeStageNo		  )  playerEntry.type = CHANGE_STAGE;
+	else if (scene != snSceneInfo->sceneNo)  playerEntry.type = CHANGE_SCENE;
+	else									 playerEntry.type = CHANGE_PORT;
+
+	playerEntry.stage	= stage;
+	playerEntry.scene	= scene;
+	playerEntry.port	= port;
+	playerEntry.auxinfo = auxinfo;
+}
+/********************************************************************************/
+/*	Check BG change scene.														*/
+/********************************************************************************/
+static BGPortPtr
+GetBGPortPointer(void)
+{
+	BGPortPtr portpt = NULL;
+	int		  portno = marioWorks->grPlane->BGattr - 211;
+
+
+	if (0 <= portno && portno <= 44) {
+		if ((portno < 42) || ((marioWorks->position[_AY] - marioWorks->grLevel) < 80.0f)) {
+			portpt = &snSceneInfo->bgport[portno];
+		}
+	}
+	return(portpt);
+}
+/********************************************************************************/
+/*	Check BG change scene.														*/
+/********************************************************************************/
+static void
+CheckBGPort(void)
+{
+	BGPortRecord bgport, *portptr;
+
+	if (snSceneInfo->bgport != NULL && marioWorks->grPlane != NULL) {
+		if ((portptr = GetBGPortPointer()) != NULL) {
+			if (marioWorks->status & PS_TYPE_DEMO) {
+				AudPictWaveSound();
+			}
+			else if (portptr->flags) {
+				bgport = *portptr;
+				if (!(bgport.stage & 0x80))  middlePointSw = BuGetMidPoint(&bgport);
+				SetPlayerEntrant(bgport.stage & 0x7f, bgport.scene, bgport.port, 0);
+				BuSetMidPoint(&bgport);
+				SnDelayFader(WIPE_FADE_OUT, 30,  255,255,255, 45);
+				FreezeGame(74, ExecuteGame);
+				PL_ChangePlayerStatus(marioWorks, PS_FREEZE, 0);
+				MapDisable(&marioWorks->strategy->map);
+				Na_FixSeFlagEntry(NA_SE2_SET);
+				AudStopMusic(AudFadeOutTime(50));
+				SendMotorEvent(80,70);		/* MOTOR 1997.5.27 */
+				SendMotorDecay(1);			/* MOTOR 1997.5.30 */
+			}
+		}
+	}
+}
+/********************************************************************************/
+/*																				*/
+/*	Exit player with screen fade out.											*/
+/*																				*/
+/********************************************************************************/
+extern int
+PL_StartFadeout(PlayerPtr player, int mode)
+{
+	int audioFadeout = TRUE;
+
+	if (fadeoutMode == 0) {
+		player->invincible = -1;		/* player invincible */
+		fadeoutInfo		   =  0;
+		fadeoutMode		   = mode;
+
+		switch (mode) {
+			case PL_FADE_RESTART:
+			case PL_FADE_GOTITLE:	fadeoutCount  = 20;
+									fadeoutPort   = PORT_GAME_CLEAR;
+									ramSaveCourse = 0;
+									audioFadeout  = FALSE;
+									SnStartFader(WIPE_STAR_WIN_CLOSE, 20, 0, 0, 0);
+									break;
+
+			case PL_FADE_GAMEEND:	fadeoutCount  = 60;
+									fadeoutPort   = PORT_GAME_CLEAR;
+									audioFadeout  = FALSE;
+									ramSaveCourse = 0;
+									SnStartFader(WIPE_FADE_OUT, 60, 0, 0, 0);
+									break;
+
+			case PL_FADE_WINNING:	fadeoutCount  = 32;
+									fadeoutPort   = PORT_GAME_CLEAR;
+									ramSaveCourse = 0;
+									SnStartFader(WIPE_MARIO_WIN_CLOSE, 32, 0, 0, 0);
+									break;
+
+			case PL_FADE_LOSING :	if (player->nlifes == 0)  fadeoutMode = PL_FADE_GAMEOVR;
+									fadeoutCount = 48;
+									fadeoutPort  = PORT_GAME_OVER;
+									SnStartFader(WIPE_KOPA_WIN_CLOSE, 48, 0, 0, 0);
+									Na_FixSeFlagEntry(NA_SYS_KUPPA_LAUGH);
+									break;
+
+			case PL_FADE_FALLING:	fadeoutPort = PORT_COURSE_OUT;
+									if (SnGetPortPtr(fadeoutPort) == NULL) {
+										if (player->nlifes == 0)  fadeoutMode = PL_FADE_GAMEOVR;
+															else  fadeoutPort = PORT_GAME_OVER;
+									}
+									fadeoutCount = 20;
+									SnStartFader(WIPE_CIRCLE_WIN_CLOSE, 20, 0, 0, 0);
+									break;
+
+			case PL_FADE_VIEWROOF:	fadeoutCount = 30;
+									fadeoutPort  = PORT_VIEW_ROOF;
+									SnStartFader(WIPE_FADE_OUT, 30, 255, 255, 255);
+									Na_FixSeFlagEntry(NA_SE2_SET);
+									break;
+
+			case PL_FADE_TRIPKAGO:	fadeoutCount = 30;
+									fadeoutPort  = SnGetPortNumber(player->couple);
+									SnStartFader(WIPE_FADE_OUT, 30, 255, 255, 255);
+									break;
+
+			case PL_FADE_WARPIN:	fadeoutCount = 20;
+									fadeoutPort  = SnGetPortNumber(player->couple);
+									audioFadeout = !CheckSameMusic(fadeoutPort);
+									SnStartFader(WIPE_FADE_OUT, 20, 255, 255, 255);
+									break;
+
+			case PL_FADE_TRIPDOOR:	fadeoutCount = 20;
+									fadeoutInfo  = player->auxinfo;
+									fadeoutPort  = SnGetPortNumber(player->couple);
+									audioFadeout = !CheckSameMusic(fadeoutPort);
+									SnStartFader(WIPE_CIRCLE_WIN_CLOSE, 20, 0, 0, 0);
+									break;
+
+			case PL_FADE_TRIPTUBE:	fadeoutCount = 20;
+									fadeoutPort  = SnGetPortNumber(player->couple);
+									audioFadeout = !CheckSameMusic(fadeoutPort);
+									SnStartFader(WIPE_STAR_WIN_CLOSE, 20, 0, 0, 0);
+									break;
+
+			case PL_FADE_ENDING:	fadeoutCount = 30;
+									SnStartFader(WIPE_FADE_OUT, 30, 0, 0, 0);
+									break;
+
+			case PL_FADE_STAFFROLL:	if (snEndingScene == endingSceneList) {
+										fadeoutCount = 60;
+										SnStartFader(WIPE_FADE_OUT, 60,0,0,0);
+									} else {
+										fadeoutCount = 20;
+//										SnStartFader(WIPE_FADE_OUT, 20, 0, 64, 56);
+										SnStartFader(WIPE_FADE_OUT, 20, 0,  0,  0);
+									}
+									audioFadeout = FALSE;
+									break;
+		}
+		if (audioFadeout && autoDemoPtr == NULL) {
+			AudStopMusic(AudFadeOutTime(fadeoutCount*3/2));
+		}
+	}
+	return(fadeoutCount);
+}
+/********************************************************************************/
+/*	Check game fade out.														*/
+/********************************************************************************/
+static void
+CheckGameFadeout(void)
+{
+	PortPtr port;
+	int		portno;
+
+	if (fadeoutMode != 0) {
+		if (--fadeoutCount == 0) {
+			MessageEnforcedDestroy();
+
+			if (sysDebugFlag && (fadeoutMode & 0x10)) {
+				ChangeExitMode(PL_RETURN_SELECT);
+			}
+			else if (autoDemoPtr != NULL) {
+				if (fadeoutMode == PL_FADE_RESTART)  ChangeExitMode(PL_RETURN_LOGO );
+											   else  ChangeExitMode(PL_RETURN_TITLE);
+			}
+			else {
+				switch (fadeoutMode) {
+					case PL_FADE_GAMEOVR:
+							BuRestoreBackUp();
+							ChangeExitMode(PL_GAME_OVER);
+							break;
+
+					case PL_FADE_GAMEEND:
+							ChangeExitMode(PL_GAME_CLEAR);
+							Na_Enddemo_UnlockSe();
+							break;
+
+					case PL_FADE_GOTITLE:
+							ChangeExitMode(PL_RETURN_TITLE);
+							break;
+
+					case PL_FADE_ENDING:
+							snEndingScene = endingSceneList;
+							SetPlayerEntrant(snEndingScene->stage, snEndingScene->scene, PORT_START_ENDING, 0);
+							break;
+
+					case PL_FADE_STAFFROLL:
+							Na_Ending_LockSe();
+							snEndingScene++;
+							activeLevelNo = snEndingScene->info & 0x07;
+							portno = (snEndingScene[1].stage == 0) ? PORT_FIN_ENDING : PORT_STAFF_ROLL;
+							SetPlayerEntrant(snEndingScene->stage, snEndingScene->scene, portno, 0);
+							break;
+
+					default:
+							port = SnGetPortPtr(fadeoutPort);
+							SetPlayerEntrant(port->stage & 0x7f, port->scene, port->port, fadeoutInfo);
+							BuSetMidPoint((BGPortPtr)port);
+
+							if (playerEntry.type != CHANGE_STAGE) {
+								FreezeGame(2, NULL);
+							}
+							break;
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *		Game rotuines
+ *
+ */
+
+/********************************************************************************/
+/*	Set player meter.															*/
+/********************************************************************************/
+static void
+SetPlayerMeter(void)
+{
+	if (snEndingScene == NULL) {
+		short power = (marioWorks->npowers > 0) ? marioWorks->npowers >> 8 : 0;
+
+		if (1 <= activeCourseNo)  setflag(playerMeter.flags, METER_COIN);
+							else  clrflag(playerMeter.flags, METER_COIN);
+
+		if (playerMeter.coin < marioWorks->ncoins) {
+			if (frameCounter & 1) {
+				ulong sound = (marioWorks->status & (PS_TYPE_SWIM|PS_TYPE_SINK)) ? NA_SE2_COIN+NA_IN_WATER : NA_SE2_COIN+NA_IN_OUTDOOR;
+
+				playerMeter.coin += 1;
+				AudStartSound(marioWorks->strategy, sound);
+			}
+		}
+		if (marioWorks->nlifes > 100)  marioWorks->nlifes = 100;	/* for sefty	*/
+		if (marioWorks->ncoins > 999)  marioWorks->ncoins = 999;	/* for sefty	*/	/* JPBUG	*/
+		if (playerMeter.coin   > 999)  playerMeter.coin   = 999;	/* for sefty	*/	/* JPBUG	*/
+
+		playerMeter.star  = marioWorks->nstars;
+		playerMeter.life  = marioWorks->nlifes;
+		playerMeter.key   = marioWorks->nkeys;
+
+		if (power > playerMeter.power)  Na_FixSeFlagEntry(NA_SYS_RECOVER);
+		playerMeter.power = power;
+
+		if (marioWorks->damage  > 0)  setflag(playerMeter.flags, METER_DAMAGE);
+								else  clrflag(playerMeter.flags, METER_DAMAGE);
+	}
+}
+/********************************************************************************/
+/*	execute game for freeze process.											*/
+/********************************************************************************/
+static void
+ExecuteGame(short *counter)
+{
+	SnExecuteStrategy();
+	SetPlayerMeter();
+	if (snSceneInfo != NULL)  CtrlGameCamera(snSceneInfo->camera);
+}
+/********************************************************************************/
+/*	Game normal process.														*/
+/********************************************************************************/
+static int
+NormalProcess(void)
+{
+	if (autoDemoPtr != NULL) {
+		SnDisplayDemoMessage();
+
+		if (cont1p->trigger & CONT_EXIT) {
+			PL_StartFadeout(marioWorks, (activeStageNo == 27) ? PL_FADE_RESTART : PL_FADE_GOTITLE);
+		}
+		else if (!wipeControl.active && !fadeoutMode && (cont1p->trigger & CONT_START)) {
+			PL_StartFadeout(marioWorks, PL_FADE_GOTITLE);
+		}		
+	}
+	ChangeScene();
+	CheckSceneConnection();
+
+	if (stopWatchSw && playerMeter.timer < 10*60*30-1)  playerMeter.timer += 1;
+
+	SnExecuteStrategy();
+	SetPlayerMeter();
+	if (snSceneInfo != NULL)  CtrlGameCamera(snSceneInfo->camera);
+
+	CheckBGPort();
+	CheckGameFadeout();
+
+	if (gameProcess == GM_NORMAL) {
+		if (playerEntry.type == CHANGE_STAGE) {
+			ChangeProcess(GM_EXIT);
+		}
+		else if (freezeCounter != 0) {
+			ChangeProcess(GM_FREEZE);
+		}
+		else if (CheckPauseRequest()) {
+			AudStartMute(AUD_MUTE_PAUSE);
+			ResetMotorPack();
+			setflag(gameCameraControl, CAM_FLAG_PAUSE);
+			ChangeProcess(GM_PAUSE );
+		}
+	}
+	return(0);
+}
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *		Game pause rotuines
+ *
+ */
+/********************************************************************************/
+/*	Game pause process.															*/
+/********************************************************************************/
+static int
+PauseProcess(void)
+{
+#if DEVELOP
+	if ((cont1p->trigger & CONT_START) && (cont1p->status & CONT_XB))  ChangeProcess(GM_STILL);
+#endif
+
+	if (mesgEvent == 0) {
+		CallSelectMessage(1);
+	}
+	else if (mesgEvent == 1) {
+		AudEndMute(AUD_MUTE_PAUSE);
+		clrflag(gameCameraControl, CAM_FLAG_PAUSE);
+		ChangeProcess(GM_NORMAL);
+	}
+	else {
+		if (sysDebugFlag) {
+			PL_ExitGameMode(PL_RETURN_SELECT, 1);
+		} else {
+			SetPlayerEntrant(6, 1, 31, 0);
+			PL_ExitGameMode(0, 0);
+			ramSaveCourse = 0;
+		}
+		clrflag(gameCameraControl, CAM_FLAG_PAUSE);
+	}
+	return(0);
+}
+/********************************************************************************/
+/*	Game still process.															*/
+/********************************************************************************/
+static int
+StillProcess(void)
+{
+	if (cont1p->trigger & CONT_DOWN) {
+		clrflag(gameCameraControl, CAM_FLAG_PAUSE);
+		NormalProcess();
+	}
+	else if (cont1p->trigger & CONT_START) {
+		clrflag(gameCameraControl, CAM_FLAG_PAUSE);
+		AudEndMute(AUD_MUTE_PAUSE);
+		ChangeProcess(GM_NORMAL);
+	}
+	else {
+		setflag(gameCameraControl, CAM_FLAG_PAUSE);
+	}
+	return(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *		Game freeze rotuines
+ *
+ */
+
+/********************************************************************************/
+/*	Change process mode.														*/
+/********************************************************************************/
+extern void
+FreezeGame(short count, FreezeProc proc)
+{
+	freezeCounter   = count;
+	freezeProcedure = proc;
+}
+/********************************************************************************/
+/*	Game freeze process.														*/
+/********************************************************************************/
+static int
+FreezeProcess(void)
+{
+	if		(freezeProcedure == (void *)-1)  CtrlGameCamera(snSceneInfo->camera);
+	else if (freezeProcedure != 	  NULL)  freezeProcedure(&freezeCounter);
+
+	if (freezeCounter > 0)  freezeCounter -= 1;
+
+	if (freezeCounter == 0) {
+		freezeProcedure = NULL;
+		ChangeProcess(GM_NORMAL);
+	}
+	return(0);
+}
+/********************************************************************************/
+/*	Game exit process.															*/
+/********************************************************************************/
+static int
+ExitProcess(void)
+{
+	if (freezeProcedure != NULL)  freezeProcedure(&freezeCounter);
+
+	if (--freezeCounter == -1) {
+		playerMeter.flags = 0;
+		freezeCounter     = 0;
+		freezeProcedure   = NULL;
+
+		if (playerEntry.type)  return(playerEntry.stage	);
+						 else  return(gameExitCode		);
+	}
+	return(0);
+}
+/********************************************************************************/
+/*	Freeze player process.														*/
+/********************************************************************************/
+static int
+FreezePlayerProcess(void)
+{
+	if (--freezeCounter == -1) {
+		playerMeter.flags = 0;
+
+		if (playerEntry.type)  return(playerEntry.stage	);
+						 else  return(gameExitCode		);
+	}
+	return(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*===============================================================================
+ *
+ *
+ *		Game main rotuines
+ *
+ */
+
+/********************************************************************************/
+/*	Game main process.															*/
+/********************************************************************************/
+static ulong
+PlayGame(void)
+{
+	int result;
+
+	switch (gameProcess) {
+		case GM_NORMAL	: result = NormalProcess();		break;
+		case GM_PAUSE	: result = PauseProcess();		break;
+		case GM_FREEZE	: result = FreezeProcess();		break;
+		case GM_EXIT	: result = ExitProcess();		break;
+		case GM_STILL	: result = StillProcess();		break;
+	}
+#if DEBUGSW
+	if (gameProcess != GM_EXIT) CheckReset();
+#endif
+	if (result) {
+		AudResetMute();
+		AudUnlockSound();
+	}
+	return(result);
+}
+/********************************************************************************/
+/*	Game stage initialize process.												*/
+/********************************************************************************/
+static ulong
+InitGame(void)
+{
+	int whitein = FALSE;
+
+	ChangeProcess(GM_NORMAL);
+	fadeoutMode		  = 0;
+	freezeCounter	  = 0;
+	gameExitCode	  = 0;
+	playerMeter.flags = (snEndingScene == NULL) ? METER_ALL - METER_TIMER : 0;
+	stopWatchSw		  = 0;
+
+	if (playerEntry.type != 0) {
+		if (playerEntry.port >= PORT_START_ENDING)  ChangeEndingStage();
+											  else  ChangeStage();
+	}
+	else {
+		if (starringActor[0].sceneNo >= 0) {
+			SnEnterPlayer();
+			InitPlayer();
+		}
+		if (snSceneInfo != NULL) {
+			InitGameCamera(snSceneInfo->camera);
+			if (autoDemoPtr != NULL) {
+				PL_ChangePlayerStatus(marioWorks, PS_WAITING, 0);
+			}
+			else if (!sysDebugFlag && marioWorks->status != PS_INACTIVE) {
+				if (BuIsActive(activePlayerNo-1)) {
+					PL_ChangePlayerStatus(marioWorks, PS_WAITING, 0);
+				} else {
+					PL_ChangePlayerStatus(marioWorks, PS_CAMDEMO, 0);
+					whitein = TRUE;
+				}
+			}
+		}
+		if (whitein)  SnStartFader(WIPE_FADE_IN		 , 90, 255, 255, 255);
+				else  SnStartFader(WIPE_STAR_WIN_OPEN, 16, 255, 255, 255);
+
+		if (autoDemoPtr == NULL)  AudPlayMusic(snSceneInfo->audmode, snSceneInfo->musicno, 0);
+	}
+	if (autoDemoPtr == NULL)  ResetMotorPack();
+
+//	SnExecuteStrategy();
+	if (marioWorks->status == PS_CAMDEMO)  Na_Opening_LockSe();
+	return(TRUE);
+}
+/********************************************************************************/
+/*	Game main process.															*/
+/********************************************************************************/
+extern ulong
+GameProcess(short code, long param)
+{
+	ulong result = 0;
+
+	switch (code) {
+		case 0: result = InitGame();	break;
+		case 1: result = PlayGame();	break;
+	}
+	return(result);
+}
+/********************************************************************************/
+/*	Game initialize process.													*/
+/********************************************************************************/
+extern ulong
+GameInitialize(short code, long param)
+{
+	playerEntry.type = 0;
+	fadeoutMode		 = 0;
+	mesgCastle		 = !BuIsActive(activePlayerNo-1);
+	activeStageNo	 = param;
+	activeCourseNo	 = 0;
+	ramSaveCourse	 = 0;
+	snEndingScene	 = NULL;
+	buYosshiJump	 = 0;
+
+	InitPlayerWorks();
+	BuClearRamStorage();
+	BuRestoreHat();
+	InitCamera_1st();
+	iwa_StratInit();
+
+	return(param);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/********************************************************************************/
+/*	Check course start menu.													*/
+/********************************************************************************/
+extern ulong
+CheckCourseMenu(short code, long param)
+{
+	int middlePoint = middlePointSw;
+
+
+	middlePointSw  = 0;
+	activeStageNo  = param;
+	activeCourseNo = BuGetCourseNumber(param);
+
+	if (autoDemoPtr	!= NULL || snEndingScene != NULL || activeCourseNo == 0)  return(FALSE);
+
+	if (activeStageNo != 30 && activeStageNo != 33 && activeStageNo != 34) {
+		marioWorks->ncoins = 0;
+		playerMeter.coin   = 0;
+		BuSetStartingStar();
+	}
+	if (ramSaveCourse != activeCourseNo) {
+		ramSaveCourse = activeCourseNo;
+		InitCourse();
+		BuClearRamStorage();
+	}
+	if ((activeCourseNo > 15) || middlePoint)  return(FALSE);
+	if (sysDebugFlag && !sysProcessMeter	)  return(FALSE);
+
+
+#if 0
+	if (ramSaveCourse == activeCourseNo) {
+		/* Restore RAM save data */
+		return(FALSE);
+	} else {
+		ramSaveCourse = activeCourseNo;
+		InitCourse();
+		BuClearRamStorage();
+
+		if (activeCourseNo > 15)  return(FALSE);
+		if (sysDebugFlag && !sysProcessMeter)  return(FALSE);
+	}
+#endif
+	return(TRUE);
+}
+/********************************************************************************/
+/*	Check course start menu.													*/
+/********************************************************************************/
+extern ulong
+GameTheEnd(short code, long param)
+{
+	Na_FixSeFlagEntry(NA_SYS_END_MESSAGE);
+	return(1);
+}
+@

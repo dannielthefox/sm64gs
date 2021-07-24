@@ -1,0 +1,1260 @@
+head	1.12;
+access;
+symbols
+	iQue_20031010:1.12
+	iQue_release_master_1_0:1.12
+	iQue_08_21_03:1.9
+	iQue_beta_1_0:1.6
+	LINUX_PORT:1.1.1.1
+	start:1.1.1.1
+	Nintendo:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.12
+date	2003.09.10.21.18.17;	author wheeler;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2003.09.09.21.28.59;	author wheeler;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2003.09.08.23.49.08;	author wheeler;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2003.08.15.22.20.22;	author wheeler;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.08.15.21.04.35;	author wheeler;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.08.15.20.12.13;	author wheeler;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.06.12.00.15.27;	author tong;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.05.05.23.06.50;	author tong;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.03.09.01.27.41;	author tong;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.12.20.01.46.36;	author tong;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.12.19.23.42.40;	author tong;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.10.18.00.05.03;	author tong;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.10.18.00.05.03;	author tong;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.12
+log
+@Adjust alignment of pause menu message.
+Make message.o build dependent on pausemess.c and endingmess.c
+@
+text
+@/***************************************************************************************************
+			Pause & Save Message Function
+									programed by Iwamoto Daiki		[1996 April 22]
+****************************************************************************************************/
+
+extern Gfx  RCP_redcoin1[];
+extern Gfx  RCP_redcoin2[];
+extern Gfx  RCP_redcoin3[];
+extern Gfx  RCP_redcoin4[];
+
+#define EXTSTAR		90
+#define COINSTAR	91
+
+char redcoin_num;
+static char cam_crs = 1;
+char select_starNo = 1;
+
+/*=================================================================================================
+			Pause Scene Event
+
+
+
+===================================================================================================*/
+/***************************************************************************************************
+			Stage Inintialize
+****************************************************************************************************/
+extern void iwaStageInit(void)
+{
+	redcoin_num = 0;
+
+
+}
+/***************************************************************************************************
+			Course Pause Init
+****************************************************************************************************/
+static void CoursePauseInit(void)
+{
+	if (SpecialMode(SM_CHECK) == SM_SPECIAL) {
+		cam_crs = 1;
+	}
+	else cam_crs = 2;
+
+}
+/***************************************************************************************************
+			Pause Back Ground
+****************************************************************************************************/
+static void DrawPauseBack(void)
+{
+
+	iTranslate(PUSH, 0, 240 ,0);
+
+	iScale(NOPUSH,2.6 , 3.4 ,1.);
+
+	gDPSetEnvColor(graphPtr++,0,0,0,110);
+	gSPDisplayList(graphPtr++, RCP_Mess_window);	
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+/***************************************************************************************************
+			Draw Red Coin
+****************************************************************************************************/
+static void DrawRedCoin(short posx,short posy)
+{
+	ulong counter = frameCounter;
+
+	iTranslate(PUSH,posx,posy,0);
+	iScale(NOPUSH,0.2,0.2,1);
+
+	gDPSetRenderMode(graphPtr++,G_RM_TEX_EDGE,G_RM_TEX_EDGE2);
+
+	switch (counter & 0x06) {
+		case 0x00: gSPDisplayList(graphPtr++, RCP_redcoin1);	break;
+		case 0x02: gSPDisplayList(graphPtr++, RCP_redcoin2);	break;
+		case 0x04: gSPDisplayList(graphPtr++, RCP_redcoin3);	break;
+		case 0x06: gSPDisplayList(graphPtr++, RCP_redcoin4);	break;
+	}
+
+    gDPSetRenderMode(graphPtr++,G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+
+/***************************************************************************************************
+			Draw Red Coin
+****************************************************************************************************/
+static void DrawRedCoinNumber(void)
+{
+
+	char i;
+
+	for (i=0; i<redcoin_num; i++) {
+		DrawRedCoin(290 - i*20,16);
+
+	}
+
+}
+/***************************************************************************************************
+			Pause Scene Event
+****************************************************************************************************/
+static void DrawPauseScene(void)
+{
+
+#if ENGLISH
+	unsigned char se8_Course[] = {f8_C, f8_O, f8_U, f8_R, f8_S, f8_E, 0xff};						//Course 
+	unsigned char se8_hiscore[]= {f8_M, f8_Y, 0x9e, f8_S, f8_C, f8_O, f8_R, f8_E, 0xff,};			//myscore
+#elif CHINA
+	unsigned char se8_Course[] = {0x1, 0x4, 0x1, 0x5, 0xff, 0xff,};						//Course 
+	unsigned char se8_hiscore[]= {0x1, 0x0, 0x1, 0x1, 0x1, 0x2, 0x1, 0x3, 0xff, 0xff,};			//myscore
+#else
+	unsigned char se8_Course[] = {0x79, 0x9f, 0x7c, 0xff};						//Course 
+	unsigned char se8_hiscore[]= {0x8e, 0x71, 0x7c, 0x79, 0x70, 0xff,};			//myscore
+#endif
+#if CHINA
+	unsigned char se8_star[]   = {0x00, 0xfa, 0xff, 0x9e, 0xff, 0xff,};									//star
+	unsigned char se8_nostar[]  = {0x00, 0xfd, 0xff, 0x9e, 0xff, 0xff,};								//star
+#else
+	unsigned char se8_star[]   = {0xfa, 0xff,};									//star
+	unsigned char se8_nostar[]  = {0xfd, 0xff,};								//star
+#endif
+	unsigned char Number[8];
+	unsigned char 	 **crs  = (unsigned char**)(SegmentToVirtual(crsNamePtr));
+	unsigned char *crsname;
+	unsigned char **starnamep = (unsigned char**)(SegmentToVirtual(starnamePtr));
+	unsigned char *starname;
+	unsigned char courseNo = activeCourseNo -1;
+	unsigned char get_starFlag = BuGetStarFlag(activePlayerNo-1,activeCourseNo-1);
+
+
+/*---------------16 Bit Font----------------------------------*/
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+
+	if (courseNo < 15) {
+		DrawMyScore(activePlayerNo-1,courseNo,    178,  103);
+		DrawCourseStar(activePlayerNo-1,courseNo, 118,  103);
+	}
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+/*---------------8 Bit Font----------------------------------*/
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+
+	if (courseNo<15 && BuGetCourseStars(activePlayerNo-1,courseNo)!=0) Draw8bitFont( 42,121,se8_hiscore);
+
+	crsname  = (unsigned char* )(SegmentToVirtual(crs[courseNo]));
+
+	if (courseNo < 15) {
+		Draw8bitFont(63,157,se8_Course);	//Course No
+		I_itochar((activeCourseNo-1)+1,Number);
+#if ENGLISH || CHINA
+		Draw8bitFont(93+7,157,Number);
+#else
+		Draw8bitFont(93,157,Number);
+#endif
+		starname  = (unsigned char* )(SegmentToVirtual(starnamep[(activeCourseNo-1)*6 + select_starNo-1]));
+		if (get_starFlag & (0x01<<(select_starNo-1)) )
+                    Draw8bitFont( 98,140,se8_star);
+		else
+                    Draw8bitFont( 98,140,se8_nostar);
+		Draw8bitFont(112,140,starname);
+#if CHINA
+		Draw8bitFont(117,157,(crsname+3*2));
+#else
+		Draw8bitFont(117,157,(crsname+3));
+#endif
+
+	}
+	else {
+#if CHINA
+		Draw8bitFont(117-23,157,(crsname+3*2));
+#else
+		Draw8bitFont(117-23,157,(crsname+3));
+#endif
+	}
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+}
+/***************************************************************************************************
+			Camera Change Cursor Event
+****************************************************************************************************/
+static void DrawCameraChange(short posx,short posy,char* cursor,short space)
+{
+#if ENGLISH
+	unsigned char se8_MARIOCAM[]= 	{f8_L, f8_A, f8_K, f8_I, f8_T, f8_U, 0x9e, 0xe4, 0x9e, f8_M, f8_A, f8_R, f8_I, f8_O, 0xff};	//jugem<->mario 
+	unsigned char  se8_STOPCAM[]= 	{f8_L, f8_A, f8_K, f8_I, f8_T, f8_U, 0x9e, 0xe4, 0x9e, f8_S, f8_T, f8_O, f8_P, 0xff};	//jugem<->stop 
+	unsigned char  se8_OSUSUME1[]= {0xe1,  f8_N, f8_O, f8_R, f8_M, f8_A, f8_L, 0xe3, 0xe1, f8_U, f8_P, 0x9f, f8_C, f8_L, f8_O, f8_S, f8_E, 0xe3,0xff};	//ossume
+	unsigned char  se8_OSUSUME2[]= {0xe1,  f8_N, f8_O, f8_R, f8_M, f8_A, f8_L, 0xe3, 0xe1,  f8_F, f8_I, f8_X, f8_E, f8_D, 0xe3, 0xff};						//ossume 
+#elif CHINA
+	unsigned char se8_MARIOCAM[]= 	{0xff, 0xff};	//jugem<->mario 
+	unsigned char  se8_STOPCAM[]= 	{0xff, 0xff};	//jugem<->stop 
+	unsigned char  se8_OSUSUME1[]= {0x1, 0x11, 0x1, 0x12, 0x1, 0x13, 0x1, 0x14, 0xff, 0xff,};	//up-close
+	unsigned char  se8_OSUSUME2[]= {0x1, 0x15, 0x1, 0xe, 0x1, 0x13, 0x1, 0x14, 0xff, 0xff,};	//fixed angle 
+#else
+	unsigned char se8_MARIOCAM[]= 	{0xf0, k8_si, sk8_yu,  0xf0, k8_ke, k8_mu,  0xe4, k8_ma, k8_ri,   k8_o,   0xff};	//jugem<->mario 
+	unsigned char  se8_STOPCAM[]= 	{0xf0, k8_si, sk8_yu,  0xf0, k8_ke, k8_mu,  0xe4, k8_su, k8_to, sk8_tu, 0xf1, k8_hu, 0xff};	//jugem<->stop 
+	unsigned char  se8_OSUSUME1[]= {0xe1,  h8_o,  h8_su, h8_su, h8_me,  0xe2, k8_ri,  k8_a, k8_ru,   0xe3, 0xff};	//ossume
+	unsigned char  se8_OSUSUME2[]= {0xe1,  h8_o,  h8_su, h8_su, h8_me,  0xe2, h8_to, h8_ma, h8_ru,   0xe3, 0xff};	//ossume 
+#endif
+
+
+
+	ContCursorEvent(2,cursor,1,2);
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+
+#if ENGLISH 
+	Draw8bitFont(posx+14 , posy+2 ,se8_MARIOCAM);
+	Draw8bitFont(posx+3  , posy-13,se8_OSUSUME1);
+	Draw8bitFont(posx+124, posy+2 ,se8_STOPCAM);
+	Draw8bitFont(posx+119, posy-13,se8_OSUSUME2);
+#elif CHINA
+	Draw8bitFont(posx+14  , posy+2,se8_OSUSUME1);
+	Draw8bitFont(posx+124, posy+2,se8_OSUSUME2);
+#else
+	Draw8bitFont(posx+14 , posy+2 ,se8_MARIOCAM);
+	Draw8bitFont(posx+4  , posy-13,se8_OSUSUME1);
+	Draw8bitFont(posx+124, posy+2 ,se8_STOPCAM);
+	Draw8bitFont(posx+116, posy-13,se8_OSUSUME2);
+#endif
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+
+#if ENGLISH || CHINA
+	iTranslate(PUSH, posx+((*cursor-1)*space), posy+2,0);
+#else
+	iTranslate(PUSH, posx+((*cursor-1)*space), posy,0);
+#endif
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+	switch (*cursor) {
+		case 1:	SpecialMode(SM_SPECIAL);
+				break;
+
+		case 2: SpecialMode(SM_STOP);
+				break;
+	}
+}
+/***************************************************************************************************
+			Pause Scene Cursor Event
+****************************************************************************************************/
+static void DrawContinue(short posx,short posy,char* cursor,short space)
+{
+#if ENGLISH
+	unsigned char se8_TUDUKU[]= 	{f8_C, f8_O, f8_N, f8_T, f8_I, f8_N, f8_U, f8_E, 0xff};						//Continue 
+	unsigned char se8_YAMERU[]= 	{f8_E, f8_X, f8_I, f8_T, 0x9e, f8_C, f8_O, f8_U, f8_R, f8_S, f8_E, 0xff};	//Course 
+	unsigned char se8_CAMTITLE[]= 	{f8_S, f8_E, f8_T, 0x9e, f8_C, f8_A, f8_M, f8_E, f8_R, f8_A, 0x9e, f8_A, f8_N, f8_G, f8_L, f8_E, 0x9e, f8_W, f8_I, f8_T, f8_H, 0x9e, f8_R, 0xff};	//Camera Angle With R 
+#elif CHINA
+	unsigned char se8_TUDUKU[]= 	{0x1, 0x8, 0x1, 0x9, 0xff, 0xff,};						//Continue 
+	unsigned char se8_YAMERU[]= 	{0x1, 0x6, 0x1, 0x7, 0xff, 0xff,};	//Exit Course 
+	unsigned char se8_CAMTITLE[]= 	{0x1, 0xa, 0x1, 0xb, 0x00, 0x58, 0x1, 0xc, 0x1, 0xd, 0x1, 0xe, 0x1, 0xf, 0x1, 0x10, 0xff, 0xff,};	//Camera Angle With R 
+#else
+	unsigned char se8_TUDUKU[]= 	{0x51, 0xf0, 0x51, 0x48, 0x52, 0x9e, 0x8e, 0x97, 0x74, 0x4c, 0x68, 0xf4,  0xff};	//Course 
+	unsigned char se8_YAMERU[]= 	{0x79, 0x9f, 0x7c, 0x45, 0x66, 0xf0, 0x52, 0x68, 0xf4, 0xff};	//Course 
+	unsigned char se8_CAMTITLE[]= 	{f8_R,  0xf0, k8_ho, k8_ta,  k8_n, h8_no, k8_ka, k8_me,  k8_ra,  h8_ki, h8_ri, h8_ka, h8_e,   0xff};	//title 
+#endif
+
+	ContCursorEvent(1,cursor,1,3);
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+	Draw8bitFont(posx+10,posy-2  ,se8_TUDUKU);
+#if CHINA
+	Draw8bitFont(posx+10,posy-20 ,se8_YAMERU);
+#else
+	Draw8bitFont(posx+10,posy-17 ,se8_YAMERU);
+#endif
+
+	if (*cursor != 3) { 
+#if CHINA
+		Draw8bitFont(posx+10,posy-38 ,se8_CAMTITLE);
+#else
+		Draw8bitFont(posx+10,posy-33 ,se8_CAMTITLE);
+#endif
+		gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+#if ENGLISH || CHINA
+		iTranslate(PUSH, posx-4, posy+2 - ((*cursor-1)*space)-4,0);
+#else
+		iTranslate(PUSH, posx, posy - ((*cursor-1)*space)-4,0);
+#endif
+		gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+		gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+		gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+	}
+
+	if (*cursor == 3) {		
+		DrawCameraChange(posx-42,posy-42,&cam_crs,110);  
+	}
+
+}
+
+
+
+
+
+
+
+/*==================================================================================================*/
+/*			Select Room Pause Scene
+/*
+/*==================================================================================================*/
+/***************************************************************************************************
+			Pause Back Ground
+****************************************************************************************************/
+static void DrawScoreWin(short px,short py)
+{
+
+	iTranslate(PUSH, px-78, py-32 ,0);
+	iScale(NOPUSH,1.2 , 0.8 ,1.);
+	gDPSetEnvColor(graphPtr++,0,0,0,105);
+	gSPDisplayList(graphPtr++, RCP_Mess_window);	
+
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+
+	iTranslate(PUSH, px+6  , py-28,0);
+	iRotate(NOPUSH,  90,0,0,1);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+
+	iTranslate(PUSH, px-9  , py-101,0);
+	iRotate(NOPUSH, 270,0,0,1);
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+
+}
+/***************************************************************************************************
+			Pause Scene Event
+****************************************************************************************************/
+static void SelectRoomPauseInit(void)
+{
+	unsigned char courseNo;
+
+	if (BuGetLastCourseNo() == 0) {	courseNo = 0; }
+	else { 
+		courseNo = BuGetLastCourseNo()-1; 
+		if (courseNo > 14) courseNo = 15;		   
+	}
+
+	cursor_no = courseNo;
+
+}
+/***************************************************************************************************
+			Pause Scene Event
+****************************************************************************************************/
+static void DrawOutOfPauseScene(void)
+{
+#if CHINA
+	unsigned char se16_PAUSE[] = {0x86, 0x87, 0x8a, 0x8b, 0x8e, 0x8f, 0xfe, 0x88, 0x89, 0x8c, 0x8d, 0x90, 0x91, 0xff};		//PAUSE
+#else
+	unsigned char se16_PAUSE[] = {f16_P, f16_A, f16_U, f16_S, f16_E, 0xff};		//PAUSE
+#endif
+
+/*---------------16 Bit Font----------------------------------*/
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+#if CHINA
+	Draw16bitFont(2,  113   ,  81,se16_PAUSE);
+#else
+	Draw16bitFont(2,  123   ,  81,se16_PAUSE);
+#endif
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+}
+/***************************************************************************************************
+			Pause Scene Score Event
+****************************************************************************************************/
+#if CHINA
+static void DrawScoreStar(short px,short py,short player,short courseNo)
+{
+
+        short i = 0;
+        unsigned char star[60];
+        unsigned char pa_star[]    = {0x00, 0xfa, 0xff, 0xff};
+        unsigned char get_starFlag = BuGetStarFlag(player,courseNo);
+        unsigned short getStarNum = BuGetCourseStars(player,courseNo);
+        unsigned short star_num = 0;
+        short ceposx;
+
+        if (get_starFlag & (0x01<<6))   {
+                getStarNum--;
+                Draw8bitFont(px+89,py-5,pa_star);
+        }
+
+        while (i != getStarNum) {
+                if (get_starFlag & (0x01 << star_num) ) {
+                        star[4*star_num] = 0x00;   //STAR
+                        star[4*star_num+1] = 0xfa;   //STAR
+                        i++;
+                }
+                else {
+                        star[4*star_num] = 0x00;  //NOSTAR
+                        star[4*star_num+1] = 0xfd;  //NOSTAR
+                }
+                star[4*star_num+2] = 0xff;
+                star[4*star_num+3] = 0x9e;
+                star_num++;
+        }
+
+        if (getStarNum == star_num && getStarNum != 6) {
+                star[4*star_num] = 0xff;  //NOSTAR
+                star[4*star_num+1] = 0xd0;  //NOSTAR
+                star[4*star_num+2] = 0xff;
+                star[4*star_num+3] = 0x9e;
+                star_num++;
+        }
+
+        star[4*star_num] = 0xff;
+        star[4*star_num+1] = 0xff;
+
+        Draw8bitFont(px+14,py+13,star);
+}
+#else
+static void DrawScoreStar(short px,short py,short player,short courseNo)
+{
+
+	short i = 0;
+	unsigned char star[30];
+	unsigned char pa_star[]    = {0xfa, 0xff};		
+	unsigned char get_starFlag = BuGetStarFlag(player,courseNo);
+	unsigned short getStarNum = BuGetCourseStars(player,courseNo);
+	unsigned short star_num = 0;
+	short ceposx;
+
+	if (get_starFlag & (0x01<<6)) 	{
+		getStarNum--;
+		Draw8bitFont(px+89,py-5,pa_star);
+	}
+
+	while (i != getStarNum) {
+		if (get_starFlag & (0x01 << star_num) ) {
+			star[2*star_num] = 0xfa;   //STAR
+			i++;
+		}
+		else {
+			star[2*star_num] = 0xfd;  //NOSTAR
+		}
+		star[2*star_num+1] = 0x9e;
+		star_num++;
+	}
+
+	if (getStarNum == star_num && getStarNum != 6) {
+		star[2*star_num] = 0xfd;  //NOSTAR
+		star[2*star_num+1] = 0x9e;
+		star_num++;
+	}
+
+	star[2*star_num] = 0xff;
+
+	Draw8bitFont(px+14,py+13,star);
+	
+
+}
+#endif
+/***************************************************************************************************
+			Pause Scene Score Event
+****************************************************************************************************/
+static void DrawPauseScore(short px,short py)
+{
+	unsigned char **crsnamep  = (unsigned char**)(SegmentToVirtual(crsNamePtr));
+#if CHINA
+	unsigned char ps_coin[] = {0x00, 0xf9, 0x00, 0xfb, 0xff, 0xff};
+#else
+	unsigned char ps_coin[] = {0xf9, 0xfb,0xff};
+#endif
+	unsigned char* 	coursename;
+	unsigned char courseNo;
+	unsigned char Number[8];
+	short be_cursor = cursor_no;
+	
+	ContCursorEvent(1,&cursor_no,-1,16);
+	if (cursor_no == 16) cursor_no = 0;
+	if (cursor_no == -1) cursor_no = 15;
+
+	if (cursor_no != 15) {
+	while (BuGetCourseStars(activePlayerNo-1,cursor_no)==0) {
+			if (cursor_no >= be_cursor) cursor_no++;
+			else					   cursor_no--;
+			if (cursor_no == 15 || cursor_no == -1) { cursor_no = 15; break; }
+	}
+	}
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+
+
+	if (cursor_no < 15) {
+		coursename  = (unsigned char* )(SegmentToVirtual(crsnamep[cursor_no]));
+
+		DrawScoreStar(px,py,activePlayerNo-1,cursor_no);
+
+		Draw8bitFont(px+34,py-5,ps_coin);
+		I_itochar(BuGetNumCoins(activePlayerNo-1,cursor_no),Number);
+		Draw8bitFont(px+54,py-5,Number);
+	}
+	else {
+#if CHINA
+		unsigned char s88_Star[] = { 0x00, 0xfa, 0x00, 0xfb, 0xff, 0xff,};
+#else
+		unsigned char s88_Star[] = { 0xfa, 0xfb, 0xff,};
+#endif
+		coursename  = (unsigned char* )(SegmentToVirtual(crsnamep[25]));
+
+		Draw8bitFont(px+40,py+13 ,s88_Star);
+		I_itochar(BuGetExtraStars(activePlayerNo-1),Number);
+		Draw8bitFont(px+60,py+13 ,Number);
+	}
+
+
+	Draw8bitFont(px-9,py+30,coursename);
+
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+
+
+}
+/***************************************************************************************************
+			Pause Scene Event
+****************************************************************************************************/
+extern short PauseSceneEvent(void)
+{
+	short ret_num;
+	char curs;
+
+	switch(message_flag) {
+		case 0: cursor_no = 1;
+				font_alpha = 0;
+				FreezeGame(-1,NULL);								
+				Na_FixSeFlagEntry(NA_SYS_PAUSE_ON);	//Sound ON
+				if (activeCourseNo>=1 && activeCourseNo<=25) {     CoursePauseInit(); message_flag = 1; }
+				else					 					 { SelectRoomPauseInit(); message_flag = 2; }
+				break;
+
+		case 1:	DrawPauseBack();					//Normal Pause
+				DrawPauseScene();
+				DrawRedCoinNumber();
+				if (playerWorks[0].status & PS_TYPE_QUIT) DrawContinue(99,93,&cursor_no,15);
+				if (contOr->trigger & CONT_A || contOr->trigger & CONT_START) {
+					FreezeGame(0,NULL);						//Window Close!
+					Na_FixSeFlagEntry(NA_SYS_PAUSE_OFF);	//Sound ON
+					message_flag = 0;
+					selectNo = -1;
+					if (cursor_no == 2) ret_num = cursor_no;
+					else				ret_num = 1;
+					return(ret_num);
+				}
+				break;
+
+		case 2:	DrawPauseBack();				//Out Of Course Pause
+				DrawOutOfPauseScene();
+//				if (BuGetCourseStars(activePlayerNo-1,cursor_no)!=0 || cursor_no==15) {
+					DrawScoreWin(160,143);
+					DrawPauseScore(104,60);
+//				}
+				if (contOr->trigger & CONT_A || contOr->trigger & CONT_START) {
+					FreezeGame(0,NULL);						//Window Close!
+					Na_FixSeFlagEntry(NA_SYS_PAUSE_OFF);	//Sound ON
+					selectNo = -1;
+					message_flag = 0;
+					return(1);
+				}
+				break;
+	}
+
+
+	if (font_alpha <250) font_alpha += 25; 
+
+	return(NULL);
+
+
+
+}
+/*=================================================================================================
+			Save Scene Event
+
+
+
+===================================================================================================*/
+
+#define DEMO_FRAME	100
+
+static char save_flag = 0;
+static int saveScene_counter = 0;
+static int coin_counter = 0;
+char getStar_flag = 0;
+/***************************************************************************************************
+			Coin Count Demo
+****************************************************************************************************/
+static void SpecialDemo(char code)
+{
+
+#if ENGLISH
+	unsigned char se16_HISCORE[] = {f16_H ,f16_I , 0x9e, f16_S ,f16_C ,f16_O ,f16_R ,f16_E ,0xff};
+#elif CHINA
+	unsigned char se16_HISCORE[] = {0x6a, 0x6b, 0x6e, 0x6f, 0x72, 0x73, 0xfe, 0x6c, 0x6d, 0x70, 0x71, 0x74, 0x75, 0xff};
+#else
+	unsigned char se16_HISCORE[] = {f16_H ,f16_I , f16_S ,f16_C ,f16_O ,f16_R ,f16_E ,0xff};
+#endif
+#if CHINA
+	unsigned char se16_CONGRATULATIONS[] = {0x3a, 0x3b, 0x3e, 0x3f, 0x42, 0x43, 0xfe, 0x3c, 0x3d, 0x40, 0x41, 0x44, 0x45, 0xff};
+#else
+	unsigned char se16_CONGRATULATIONS[] = {f16_C ,f16_O ,f16_N ,f16_G ,f16_R ,f16_A ,f16_T ,f16_U ,f16_L ,f16_A ,f16_T ,f16_I ,f16_O ,f16_N ,f16_S ,0xff};
+#endif
+	unsigned char color = 200+sin(delta)*50;
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,color,color,color,255); 
+
+#if ENGLISH
+	if (code == 0) {Draw16bitFont(2, 109  , 36, se16_HISCORE);  }
+	else 		   {Draw16bitFont(2, 70   , 67, se16_CONGRATULATIONS);  }
+#elif CHINA
+	if (code == 0) {Draw16bitFont(2, 109  , 26, se16_HISCORE);  }
+	else 		   {Draw16bitFont(2, 100   , 62, se16_CONGRATULATIONS);  }
+#else
+	if (code == 0) {Draw16bitFont(2, 118  , 48, se16_HISCORE);  }
+	else 		   {Draw16bitFont(2, 70   , 67, se16_CONGRATULATIONS);  }
+#endif
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+}
+/***************************************************************************************************
+			Coin Count Demo
+****************************************************************************************************/
+static void CoinCountDemo(short posx, short posy)
+{
+	unsigned char coin_num[8];
+	unsigned char se16_coinnum1[] = {0x33, 0xff};		//coin num
+	unsigned char se16_coinnum2[] = {0x32, 0xff};		//coin num
+	
+
+	gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+	gDPSetEnvColor(graphPtr++,255,255,255,255); 
+	Draw16bitFont(2,posx,posy,se16_coinnum1);
+	Draw16bitFont(2,posx+16,posy,se16_coinnum2);
+
+#if CHINA
+	I_itochar_16(coin_counter,coin_num);
+#else
+	I_itochar(coin_counter,coin_num);
+#endif
+
+	Draw16bitFont(2,posx+32,posy,coin_num);
+	gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+	
+	if (coin_counter >= playerMeter.coin) {
+		save_flag = 1;
+		coin_counter = playerMeter.coin;
+		if (BuIsMyHiScore()) SpecialDemo(0);
+	}
+	else {
+		if (saveScene_counter & 0x01 || playerMeter.coin > 70) {
+			coin_counter++;
+			Na_FixSeFlagEntry(NA_SYS_COUNTUP);
+
+			if (coin_counter == 50 || coin_counter == 100 || coin_counter == 150) {
+				Na_FixSeFlagEntry(NA_SE2_ONEUP);
+				(marioWorks->nlifes)++;
+			}
+
+		}
+		if (coin_counter == playerMeter.coin && BuIsMyHiScore()) Na_FixSeFlagEntry(NA_SYS_HIGH_SCORE);
+	}
+
+}
+/***************************************************************************************************
+			Coin Count Demo
+****************************************************************************************************/
+static void StarGetEffect(int mode ,unsigned char code)
+{
+
+	/* getStar_flag == 1 ... Star Tenmetu */
+
+	if (coin_counter == playerMeter.coin && (BuGetStartingStar() & code )==0 && getStar_flag == 0 ) {
+			Na_HiScoreBgm();
+			getStar_flag = mode;
+	}
+
+}
+/***************************************************************************************************
+			Draw Save Scene 
+****************************************************************************************************/
+static void DrawSaveDemo(void)
+{
+
+#if ENGLISH
+	unsigned char se8_Course[]= {f8_C, f8_O, f8_U, f8_R, f8_S, f8_E, 0xff};	//Course 
+	unsigned char se8_Catch[] = {f8_C, f8_A, f8_T, f8_C, f8_H, 0xff};	//Catch! 
+	unsigned char se8_Clear[] = {f8_C, f8_L, f8_E, f8_A, f8_R, 0xff};	//Clear! 
+#elif CHINA
+	unsigned char se8_Course[]= {0x1, 0x4, 0x1, 0x5, 0xff, 0xff};	//Course 
+	unsigned char se8_Catch[] = {0x1, 0x45, 0x1, 0x46, 0xff, 0xff};	//Catch! 
+	unsigned char se8_Clear[] = {0x1, 0x47, 0x1, 0x1f, 0xff, 0xff};	//Clear! 
+#else
+	unsigned char se8_Course[]= {0x79, 0x9f, 0x7c, 0xff};	//Course 
+	unsigned char se8_Catch[] = {k8_ki, sk8_ya, sk8_tu, k8_ti,f8_bik,0xff};	//Catch! 
+	unsigned char se8_Clear[] = {k8_ku,  k8_ri,   k8_a, f8_bik,0xff};	//Clear! 
+#endif
+	unsigned char se16_Star[]= 	{0x35, 0xff};	//Star 
+	unsigned char **starnamep = (unsigned char**)(SegmentToVirtual(starnamePtr));
+	unsigned char **crsnamep  = (unsigned char**)(SegmentToVirtual(crsNamePtr));
+	unsigned char  *starname;
+	unsigned char Number[8];
+
+
+	if (BuGetLastCourseNo() <= 15) { 
+
+		CoinCountDemo(118,103);
+		StarGetEffect(1,(0x01<<(BuGetLastStarNo()-1)));
+
+
+		if (BuGetLastStarNo() == 7) {
+			starname  = (unsigned char* )(SegmentToVirtual(starnamep[COINSTAR]));
+		}
+		else {
+			starname  = (unsigned char* )(SegmentToVirtual(starnamep[(BuGetLastCourseNo()-1)*6+(BuGetLastStarNo()-1)]));
+		}
+
+/*------- 8 bit COURSE NO -----------*/
+		gSPDisplayList(graphPtr++, RCP_mess_font_on);
+
+		I_itochar(BuGetLastCourseNo(),Number);
+		gDPSetEnvColor(graphPtr++,0,0,0,font_alpha); 
+#if ENGLISH || CHINA
+		Draw8bitFont(65,165,se8_Course);
+		Draw8bitFont(95+9,165,Number);
+		gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+		Draw8bitFont(63,167,se8_Course);
+		Draw8bitFont(93+9,167,Number);
+#else
+		Draw8bitFont(65,165,se8_Course);
+		Draw8bitFont(95,165,Number);
+		gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+		Draw8bitFont(63,167,se8_Course);
+		Draw8bitFont(93,167,Number);
+#endif
+
+		gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+	}
+	else {
+
+		if (BuGetLastCourseNo()==16 || BuGetLastCourseNo()==17) {			//Koopa Clear
+			starname  = (unsigned char* )(SegmentToVirtual(crsnamep[BuGetLastCourseNo()-1]));
+
+#if ENGLISH || CHINA
+			gSPDisplayList(graphPtr++, RCP_mess_font_on);
+			gDPSetEnvColor(graphPtr++,0,0,0,font_alpha); 
+			Draw8bitFont(71,130,starname);
+			Draw8bitFont(81+MessageLength(starname),130,se8_Clear);
+			gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+			Draw8bitFont(69,132,starname );
+			Draw8bitFont(79+MessageLength(starname),132,se8_Clear);
+			gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#else
+			gSPDisplayList(graphPtr++, RCP_mess_font_on);
+			gDPSetEnvColor(graphPtr++,0,0,0,font_alpha); 
+			Draw8bitFont( 71,130,starname);
+			Draw8bitFont(205,130,se8_Clear);
+			gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+			Draw8bitFont( 69,132,starname );
+			Draw8bitFont(203,132,se8_Clear);
+			gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#endif
+
+			SpecialDemo(1);
+			CoinCountDemo(118,111);
+			StarGetEffect(2,0x00);
+			return;
+		}
+		else {
+			starname  = (unsigned char* )(SegmentToVirtual(starnamep[EXTSTAR]));
+			CoinCountDemo(118,103);
+			StarGetEffect(1,(0x01<<(BuGetLastStarNo()-1)));
+		}
+
+	}
+
+
+		gSPDisplayList(graphPtr++, RCP_tfont2_on);	
+		gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+		Draw16bitFont(2, 55,77,se16_Star);
+		gSPDisplayList(graphPtr++, RCP_tfont2_off);	
+
+/*------- 8 bit STAR NAME-----------*/
+#if ENGLISH || CHINA
+		gSPDisplayList(graphPtr++, RCP_mess_font_on);
+		gDPSetEnvColor(graphPtr++,0,0,0,font_alpha); 
+		Draw8bitFont(76,145,starname);
+//		Draw8bitFont(86+MessageLength(starname),145,se8_Catch);
+		gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+		Draw8bitFont(74,147,starname );
+//		Draw8bitFont(84+MessageLength(starname),147,se8_Catch);
+		gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#else
+		gSPDisplayList(graphPtr++, RCP_mess_font_on);
+		gDPSetEnvColor(graphPtr++,0,0,0,font_alpha); 
+		Draw8bitFont( 76,145,starname);
+		Draw8bitFont(220,145,se8_Catch);
+		gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+		Draw8bitFont( 74,147,starname );
+		Draw8bitFont(218,147,se8_Catch);
+		gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+#endif
+
+}
+/***************************************************************************************************
+			Save Scene Cursor Event
+****************************************************************************************************/
+static void SaveCheckContinue(short posx,short posy,char* cursor,short space)
+{
+#if ENGLISH
+	unsigned char se8_SaveTUDUKU[]= {f8_S, f8_A, f8_V, f8_E, 0x9e, 0xe5, 0x9e, f8_C, f8_O, f8_N, f8_T, f8_I, f8_N, f8_U, f8_E, 0xff};	//save site tudukeru 
+	unsigned char se8_SaveOWARU[]= 	{f8_S, f8_A, f8_V, f8_E, 0x9e, 0xe5, 0x9e, f8_Q, f8_U, f8_I, f8_T, 0xff};	//save site owaru 
+	unsigned char se8_SaveNASI[]= 	{f8_C, f8_O, f8_N, f8_T, f8_I, f8_N, f8_U, f8_E, 0x6f, 0x9e, f8_D, f8_O, f8_N, 0x3e, f8_T, 0x9e, f8_S, f8_A, f8_V, f8_E, 0xff};	//save sinaide owaru 
+#elif CHINA
+	unsigned char se8_SaveTUDUKU[]= {0x1, 0x2b, 0x1, 0x2c, 0x1, 0x42, 0x1, 0x8, 0x1, 0x9, 0xff, 0xff,};	//save site tudukeru 
+	unsigned char se8_SaveOWARU[]= 	{0x1, 0x2b, 0x1, 0x2c, 0x1, 0x42, 0x1, 0x6, 0x1, 0x7, 0xff, 0xff,};	//save site owaru 
+	unsigned char se8_SaveNASI[]= 	{0x1, 0x43, 0x1, 0x44, 0x1, 0x2b, 0x1, 0x2c, 0xff, 0xff,};	//save sinaide owaru 
+#else
+	unsigned char se8_SaveTUDUKU[]= 	{0x7d, 0x9f, 0xf0, 0x8b, 0x4b, 0x52, 0x51, 0xf0, 0x51, 0x48, 0x68, 0xf4,  0xff};	//save site tudukeru 
+	unsigned char se8_SaveOWARU[]= 	{0x7d, 0x9f, 0xf0, 0x8b, 0x4b, 0x52, 0x44, 0x6b, 0x68, 0xf4, 0xff};	//save site owaru 
+	unsigned char se8_SaveNASI[]= 	{0x7d, 0x9f, 0xf0, 0x8b, 0x4b, 0x54, 0x41, 0xf0, 0x52, 0x51, 0xf0, 0x51, 0x48, 0x68, 0xf4, 0xff};	//save sinaide owaru 
+#endif
+
+	ContCursorEvent(1,cursor,1,3);
+
+	gSPDisplayList(graphPtr++, RCP_mess_font_on);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+#if ENGLISH || CHINA
+	Draw8bitFont(posx+12,(posy)   ,se8_SaveTUDUKU);
+	Draw8bitFont(posx+12,(posy)-20,se8_SaveOWARU);
+	Draw8bitFont(posx+12,(posy)-40,se8_SaveNASI);
+#else
+	Draw8bitFont(posx+10,(posy+2)   ,se8_SaveTUDUKU);
+	Draw8bitFont(posx+10,(posy+2)-20,se8_SaveOWARU);
+	Draw8bitFont(posx+10,(posy+2)-40,se8_SaveNASI);
+#endif
+	gSPDisplayList(graphPtr++, RCP_mess_font_off);	
+
+
+	iTranslate(PUSH, posx, posy - ((*cursor-1)*space),0);
+	gDPSetEnvColor(graphPtr++,255,255,255,font_alpha); 
+	gSPDisplayList(graphPtr++, RCP_mess_cursor);	
+	gSPPopMatrix(graphPtr++,G_MTX_MODELVIEW);
+}
+/***************************************************************************************************
+			Save Scene Event
+****************************************************************************************************/
+extern short SaveSceneEvent(void)
+{
+	short ret_num;
+	char curs;
+
+
+	switch(message_flag) {
+		case 0: DrawSaveDemo();
+				if (saveScene_counter > DEMO_FRAME && save_flag == 1) {
+					message_flag = 1; 
+//					Na_FixSeFlagEntry(NA_SYS_PAUSE_ON);		//Sound ON
+					FreezeGame(-1,NULL);								
+					font_alpha = 0;
+					cursor_no = 1;
+				}
+				break;
+
+		case 1:	DrawPauseBack();						
+				DrawSaveDemo();
+				SaveCheckContinue(100,86,&cursor_no,20);
+				if (saveScene_counter > DEMO_FRAME+10 && (contOr->trigger & CONT_A || contOr->trigger & CONT_START)) {
+					FreezeGame(0,NULL);						//Window Close!
+					Na_FixSeFlagEntry(NA_SE2_SET);			//Sound ON
+					message_flag = 0;
+					selectNo = -1;
+					ret_num = cursor_no;
+					saveScene_counter = 0;
+					coin_counter = 0;
+					save_flag = 0;
+					getStar_flag = 0;
+					return(ret_num);
+				}
+				break;
+
+	}
+
+	if (font_alpha <250) font_alpha += 25; 
+	saveScene_counter ++;
+
+	return(0);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@
+
+
+1.11
+log
+@Draw camera text where the cursor is.
+@
+text
+@d165 1
+a165 1
+		Draw8bitFont(116,140,starname);
+@
+
+
+1.10
+log
+@Move "HI SCORE" up so it doesn't overlap course name.
+Bug 695
+@
+text
+@d219 2
+a220 2
+	Draw8bitFont(posx+3  , posy-13,se8_OSUSUME1);
+	Draw8bitFont(posx+119, posy-13,se8_OSUSUME2);
+@
+
+
+1.9
+log
+@"No star" is supposed to draw an empty star, not a space.
+@
+text
+@d629 1
+a629 1
+	if (code == 0) {Draw16bitFont(2, 109  , 36, se16_HISCORE);  }
+@
+
+
+1.8
+log
+@Fix wide spacing when there are gaps in the order of stars achieved.
+@
+text
+@d116 2
+a117 2
+	unsigned char se8_star[]   = {0x00, 0xfa, 0xff, 0xff,};									//star
+	unsigned char se8_nostar[]  = {0xff, 0xfd, 0xff, 0xff,};								//star
+d161 4
+a164 2
+		if (get_starFlag & (0x01<<(select_starNo-1)) )Draw8bitFont( 98,140,se8_star);
+		else										  Draw8bitFont( 98,140,se8_nostar);
+d406 2
+a407 2
+                        star[4*star_num] = 0xff;  //NOSTAR
+                        star[4*star_num+1] = 0xd0;  //NOSTAR
+@
+
+
+1.7
+log
+@Center "Congratulations" message.
+@
+text
+@d405 1
+a405 1
+                        star[4*star_num+1] = 0xfd;  //NOSTAR
+d414 1
+a414 1
+                star[4*star_num+1] = 0xfd;  //NOSTAR
+@
+
+
+1.6
+log
+@updated message files.
+@
+text
+@d623 1
+a623 1
+#if ENGLISH || CHINA
+d626 3
+@
+
+
+1.5
+log
+@updated 16bit font glyph integration
+@
+text
+@d704 2
+a705 2
+	unsigned char se8_Catch[] = {0x1, 0x44, 0x1, 0x45, 0xff, 0xff};	//Catch! 
+	unsigned char se8_Clear[] = {0x1, 0x46, 0x1, 0x1f, 0xff, 0xff};	//Clear! 
+d829 3
+a831 3
+	unsigned char se8_SaveTUDUKU[]= {0x1, 0x2b, 0x1, 0x2c, 0x1, 0x41, 0x1, 0x8, 0x1, 0x9, 0xff, 0xff};	//save site tudukeru 
+	unsigned char se8_SaveOWARU[]= 	{0x1, 0x2b, 0x1, 0x2c, 0x1, 0x41, 0x1, 0x6, 0x1, 0x7, 0xff, 0xff};	//save site owaru 
+	unsigned char se8_SaveNASI[]= 	{0x1, 0x42, 0x1, 0x43, 0x1, 0x2b, 0x1, 0x2c, 0xff, 0xff};	//save sinaide owaru 
+@
+
+
+1.4
+log
+@incorporated iQue's texture, modified encoding for 8bit font glyph.
+@
+text
+@d359 1
+a359 1
+	unsigned char se16_PAUSE[] = {0xa6, 0xa7, 0xaa, 0xab, 0xae, 0xaf, 0xfe, 0xa8, 0xa9, 0xac, 0xad, 0xb0, 0xb1, 0xff};		//PAUSE
+d609 1
+a609 1
+	unsigned char se16_HISCORE[] = {0xff, 0xff};
+d613 3
+d617 1
+@
+
+
+1.3
+log
+@fixed I_itochar function for English build.
+@
+text
+@d109 2
+a110 2
+	unsigned char se8_Course[] = {0x1, 0x59, 0x1, 0xf3, 0xff, 0xff, };						//Course 
+	unsigned char se8_hiscore[]= {0x1, 0xd, 0x1, 0x2, 0x2, 0x1a, 0x2, 0x1b, 0xff, 0xff,  };			//myscore
+d195 2
+a196 2
+	unsigned char  se8_OSUSUME1[]= {0x1, 0xe, 0x2, 0x1f, 0x2, 0x20, 0x1, 0xac, 0xff, 0xff,  };	//up-close
+	unsigned char  se8_OSUSUME2[]= {0x2, 0x21, 0x1, 0xe1, 0x2, 0x20, 0x1, 0xac, 0xff, 0xff, };	//fixed angle 
+d256 3
+a258 3
+	unsigned char se8_TUDUKU[]= 	{0x1, 0x8e, 0x1, 0x8f, 0xff, 0xff, };						//Continue 
+	unsigned char se8_YAMERU[]= 	{0x2, 0x1c, 0x1, 0x3f, 0xff, 0xff,  };	//Exit Course 
+	unsigned char se8_CAMTITLE[]= 	{0x00, 0x58, 0x2, 0x1d, 0x2, 0x1e, 0x1, 0xe1, 0x1, 0x81, 0x1, 0x73, 0xff, 0xff,  };	//Camera Angle With R 
+d358 3
+d362 1
+d368 3
+d372 1
+d699 3
+a701 3
+	unsigned char se8_Course[]= {0xff, 0xff};	//Course 
+	unsigned char se8_Catch[] = {0xff, 0xff};	//Catch! 
+	unsigned char se8_Clear[] = {0xff, 0xff};	//Clear! 
+d825 3
+a827 3
+	unsigned char se8_SaveTUDUKU[]= {0xff, 0xff};	//save site tudukeru 
+	unsigned char se8_SaveOWARU[]= 	{0xff, 0xff};	//save site owaru 
+	unsigned char se8_SaveNASI[]= 	{0xff, 0xff};	//save sinaide owaru 
+@
+
+
+1.2
+log
+@added #if CHINA for menus items and pause screens
+@
+text
+@d636 1
+d638 3
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d108 3
+d115 4
+d121 2
+a122 2
+
+	unsigned char Number[4];
+d148 1
+a148 1
+	if (courseNo<15 && BuGetCourseStars(activePlayerNo-1,courseNo)!=0) Draw8bitFont( 62,121,se8_hiscore);
+d155 1
+a155 1
+#if ENGLISH
+d164 3
+d168 1
+d172 3
+d176 1
+d192 5
+d211 1
+a211 1
+#if ENGLISH
+d216 3
+d229 1
+a229 1
+#if ENGLISH
+d255 4
+d270 3
+d274 1
+d277 3
+d281 1
+d284 1
+a284 1
+#if ENGLISH
+d372 46
+d458 1
+d465 3
+d469 1
+d472 1
+a472 1
+	unsigned char Number[4];
+d502 3
+d506 1
+d600 2
+d611 1
+a611 1
+#if ENGLISH
+d626 1
+a626 1
+	unsigned char coin_num[4];
+d636 1
+a636 1
+	I_itochar(coin_counter,coin_num);
+d686 4
+d699 1
+a699 1
+	unsigned char Number[4];
+d720 1
+a720 1
+#if ENGLISH
+d742 1
+a742 1
+#if ENGLISH
+d782 1
+a782 1
+#if ENGLISH
+d812 4
+d826 1
+a826 1
+#if ENGLISH
+@
+
+
+1.1.1.1
+log
+@SuperMario64 source/object code from Nintendo.
+@
+text
+@@
